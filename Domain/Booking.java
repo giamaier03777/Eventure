@@ -1,4 +1,7 @@
+package Domain;
+
 public class Booking {
+    private int id;
     private ActivitySchedule schedule;
     private String customerName;
     private int numberOfPeople;
@@ -9,6 +12,14 @@ public class Booking {
         this.numberOfPeople = numberOfPeople;
 
         this.schedule.reduceCapacity(numberOfPeople);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public ActivitySchedule getSchedule() {

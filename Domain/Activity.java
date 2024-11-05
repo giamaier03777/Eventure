@@ -1,21 +1,14 @@
+package Domain;
+
 public class Activity extends ReviewableEntity {
     private String description;
     private int capacity;
 
 
-    public Activity(int id, String activityName, int capacity, String location, String description) {
-        super(id, activityName, location);
+    public Activity(int id, String activityName, int capacity, String location, EventType eventType, String description) {
+        super(id, activityName,eventType, location);
         this.capacity = capacity;
-        this.location = location;
         this.description = description;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
     }
 
     public String getDescription() {

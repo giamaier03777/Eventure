@@ -1,9 +1,13 @@
+package Domain;
+
+import Domain.Event;
+
 public class Ticket{
     private Event event;
     private User owner;
     private String participantName;
 
-    public Ticket(Event event, Usert owner, String participantName){
+    public Ticket(Event event, User owner, String participantName){
         this.event = event;
         this.owner = owner;
         this.participantName = participantName;

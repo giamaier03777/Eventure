@@ -1,7 +1,19 @@
+package Domain;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class ActivitySchedule {
+    private int id;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     private Activity activity;
     private LocalDate date;
     private LocalTime startTime;

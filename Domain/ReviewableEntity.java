@@ -1,3 +1,5 @@
+package Domain;
+
 public abstract class ReviewableEntity {
     private int id;
     private String name;

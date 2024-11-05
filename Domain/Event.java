@@ -1,12 +1,15 @@
+package Domain;
+
+import java.time.LocalDateTime;
+
 public class Event extends ReviewableEntity {
     private int currentSize;
     private int capacity;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    public Event(int id, String eventName, String location, int capacity, int currentSize, LocalDateTime startDate, LocalDateTime endDate) {
-        super(id, eventName, location);
-        this.location = location;
+    public Event(int id, String eventName, String location, int capacity, EventType eventType, int currentSize, LocalDateTime startDate, LocalDateTime endDate) {
+        super(id, eventName, eventType, location);
         this.capacity = capacity;
         this.currentSize = currentSize;
         this.startDate = startDate;
@@ -35,5 +38,13 @@ public class Event extends ReviewableEntity {
 
     public void setEndDate(LocalDateTime endDate) {
         this.endDate = endDate;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
     }
 }

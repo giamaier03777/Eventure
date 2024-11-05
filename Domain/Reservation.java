@@ -1,3 +1,8 @@
+package Domain;
+
+import Domain.ActivitySchedule;
+import Domain.User;
+
 import java.time.LocalDateTime;
 
 public class Reservation {
@@ -6,7 +11,7 @@ public class Reservation {
     private int numberOfPeople;
     private LocalDateTime reservationDate;
 
-    public(User user, ActivitySchedule activitySchedule, int numberOfPeople, LocalDateTime reservationDate){
+    public Reservation(User user, ActivitySchedule activitySchedule, int numberOfPeople, LocalDateTime reservationDate){
         this.user = user;
         this.activitySchedule = activitySchedule;
         this.numberOfPeople = numberOfPeople;
