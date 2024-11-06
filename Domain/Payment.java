@@ -3,17 +3,22 @@ package Domain;
 import java.time.LocalDateTime;
 
 public class Payment {
+    private int id;
     private double amount;
     private LocalDateTime date;
     private User user;
     private String paymentMethod;
 
-    public Payment(double amount, LocalDateTime date, User user, String paymentMethod){
+    public Payment(int id, double amount, LocalDateTime date, User user, String paymentMethod){
+        this.id = id;
         this.amount = amount;
         this.date = date;
         this.user = user;
         this.paymentMethod = paymentMethod;
     }
+    public int getId() {return id;}
+
+    public void setId(int id) {this.id = id;}
 
     public double getAmount() {
         return amount;
