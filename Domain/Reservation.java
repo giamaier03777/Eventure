@@ -6,17 +6,23 @@ import Domain.User;
 import java.time.LocalDateTime;
 
 public class Reservation {
+    private int id;
     private User user;
     private ActivitySchedule activitySchedule;
     private int numberOfPeople;
     private LocalDateTime reservationDate;
 
-    public Reservation(User user, ActivitySchedule activitySchedule, int numberOfPeople, LocalDateTime reservationDate){
+    public Reservation(int id, User user, ActivitySchedule activitySchedule, int numberOfPeople, LocalDateTime reservationDate){
+        this.id = id;
         this.user = user;
         this.activitySchedule = activitySchedule;
         this.numberOfPeople = numberOfPeople;
         this.reservationDate = reservationDate;
     }
+
+    public int getId() {return id;}
+
+    public void setId(int id) {this.id = id;}
 
     public User getUser() {
         return user;
