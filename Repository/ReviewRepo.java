@@ -11,26 +11,41 @@ public class ReviewRepo implements IRepository<Review> {
 
     @Override
     public void create(Review entity) {
-
+        if (entity != null) {
+            reviewList.add(entity);
+        }
     }
 
     @Override
     public Review read(int id) {
+        for (Review review : reviewList) {
+            if (review.getId() == id) {
+                return review;
+            }
+        }
         return null;
     }
 
     @Override
     public void update(Review entity) {
-
+        if (entity == null) {
+            return;
+        }
+        for (int i = 0; i < reviewList.size(); i++) {
+            if (reviewList.get(i).getId() == entity.getId()) {
+                reviewList.set(i, entity);
+                return;
+            }
+        }
     }
 
     @Override
     public void delete(int id) {
-
+        reviewList.removeIf(review -> review.getId() == id);
     }
 
     @Override
     public List<Review> findAll() {
-        return List.of();
+        return new ArrayList<>(reviewList);
     }
 }

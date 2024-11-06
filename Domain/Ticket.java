@@ -3,21 +3,21 @@ package Domain;
 import Domain.Event;
 
 public class Ticket{
+    private int id;
     private Event event;
     private User owner;
     private String participantName;
 
     public Ticket(Event event, User owner, String participantName){
+        this.id = id;
         this.event = event;
         this.owner = owner;
         this.participantName = participantName;
-
-        if(event.getCurrentSize() < event.getCapacity()){
-            event.addParticipants(1);
-        } else {
-            throw new IllegalArgumentException("Event capacity exceeded for" + event.getName());
-        }
     }
+
+    public int getId(){return id;}
+
+    public void setId(int id) {this.id = id;}
 
     public Event getEvent(){
         return event;

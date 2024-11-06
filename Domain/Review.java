@@ -4,17 +4,23 @@ package Domain;
 import java.time.LocalDateTime;
 
 public class Review {
+    private int id;
     private User user;
     private ReviewableEntity reviewableEntity;
     private String comment;
     private LocalDateTime reviewDate;
 
-    public Review(User user, ReviewableEntity reviewableEntity, String comment, LocalDateTime reviewDate) {
+    public Review(int id, User user, ReviewableEntity reviewableEntity, String comment, LocalDateTime reviewDate) {
+        this.id = id;
         this.user = user;
         this.reviewableEntity = reviewableEntity;
         this.comment = comment;
         this.reviewDate = reviewDate;
     }
+
+    public int getId() {return id;}
+
+    public void setId(int id) {this.id = id;}
 
     public User getUser() {
         return user;
