@@ -31,7 +31,6 @@ public class Activity extends ReviewableEntity {
     public java.lang.String toString() {
         return "Activity{" +
                 "capacity=" + capacity +
-                ", location='" + location + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }
