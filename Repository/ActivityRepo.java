@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public class ActivityRepo implements IRepository<Activity> {
 
-    private List<Activity> activityList = new ArrayList<>();
+    private final List<Activity> activityList = new ArrayList<>();
 
     @Override
     public void create(Activity entity) {
