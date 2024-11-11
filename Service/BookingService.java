@@ -6,7 +6,7 @@ import Repository.BookingRepo;
 
 public class BookingService {
 
-    private BookingRepo bookingRepo;
+    private final BookingRepo bookingRepo;
 
     public BookingService(BookingRepo bookingRepo) {
         this.bookingRepo = bookingRepo;

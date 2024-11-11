@@ -9,7 +9,7 @@ import java.util.List;
 
 public class TicketService {
 
-    private TicketRepo ticketRepo;
+    private final TicketRepo ticketRepo;
 
     public TicketService(TicketRepo ticketRepo) {
         this.ticketRepo = ticketRepo;

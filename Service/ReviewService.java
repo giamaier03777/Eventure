@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ReviewService {
 
-    private ReviewRepo reviewRepo;
+    private final ReviewRepo reviewRepo;
 
     public ReviewService(ReviewRepo reviewRepo) {
         this.reviewRepo = reviewRepo;

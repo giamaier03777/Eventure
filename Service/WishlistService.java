@@ -9,7 +9,7 @@ import java.util.List;
 
 public class WishlistService {
 
-    private WishlistRepo wishlistRepo;
+    private final WishlistRepo wishlistRepo;
 
     public WishlistService(WishlistRepo wishlistRepo) {
         this.wishlistRepo = wishlistRepo;

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 public class PaymentService {
 
-    private PaymentRepo paymentRepo;
+    private final PaymentRepo paymentRepo;
 
     public PaymentService(PaymentRepo paymentRepo) {
         this.paymentRepo = paymentRepo;

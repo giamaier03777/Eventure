@@ -9,7 +9,7 @@ import java.time.LocalTime;
 
 public class ActivityScheduleService {
 
-    private ActivityScheduleRepo activityScheduleRepo;
+    private final ActivityScheduleRepo activityScheduleRepo;
 
     public ActivityScheduleService(ActivityScheduleRepo activityScheduleRepo) {
         this.activityScheduleRepo = activityScheduleRepo;

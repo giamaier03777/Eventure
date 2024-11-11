@@ -9,7 +9,7 @@ import java.time.format.DateTimeParseException;
 
 public class EventController {
 
-    private EventService eventService;
+    private final EventService eventService;
 
     public EventController(EventService eventService) {
         this.eventService = eventService;

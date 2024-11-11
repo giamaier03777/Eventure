@@ -6,7 +6,7 @@ import Repository.FreeActivityRepo;
 
 public class FreeActivityService {
 
-    private FreeActivityRepo freeActivityRepo;
+    private final FreeActivityRepo freeActivityRepo;
 
     public FreeActivityService(FreeActivityRepo freeActivityRepo) {
         this.freeActivityRepo = freeActivityRepo;

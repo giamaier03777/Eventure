@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ReservationService {
 
-    private ReservationRepo reservationRepo;
+    private final ReservationRepo reservationRepo;
 
     public ReservationService(ReservationRepo reservationRepo) {
         this.reservationRepo = reservationRepo;

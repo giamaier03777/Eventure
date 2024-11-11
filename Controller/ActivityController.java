@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ActivityController {
 
-    private ActivityService activityService;
+    private final ActivityService activityService;
 
     public ActivityController(ActivityService activityService) {
         this.activityService = activityService;

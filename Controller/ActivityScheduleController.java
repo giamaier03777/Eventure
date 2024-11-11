@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ActivityScheduleController {
 
-    private ActivityScheduleService activityScheduleService;
+    private final ActivityScheduleService activityScheduleService;
 
     public ActivityScheduleController(ActivityScheduleService activityScheduleService) {
         this.activityScheduleService = activityScheduleService;

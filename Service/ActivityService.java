@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ActivityService {
 
-    private ActivityRepo activityRepo;
+    private final ActivityRepo activityRepo;
 
     public ActivityService(ActivityRepo activityRepo) {
         this.activityRepo = activityRepo;

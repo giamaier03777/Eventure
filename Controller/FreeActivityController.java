@@ -6,7 +6,7 @@ import Service.FreeActivityService;
 
 public class FreeActivityController {
 
-    private FreeActivityService freeActivityService;
+    private final FreeActivityService freeActivityService;
 
     public FreeActivityController(FreeActivityService freeActivityService) {
         this.freeActivityService = freeActivityService;
