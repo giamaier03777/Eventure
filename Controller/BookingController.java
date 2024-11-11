@@ -61,4 +61,8 @@ public class BookingController {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
+    public void bookTicket(String ticketId, String numTickets) {
+        return;
+    }
 }

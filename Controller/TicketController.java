@@ -5,6 +5,8 @@ import Domain.Ticket;
 import Domain.User;
 import Service.TicketService;
 
+import java.util.List;
+
 public class TicketController {
 
     private final TicketService ticketService;
@@ -59,5 +61,9 @@ public class TicketController {
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    public List<Ticket> getAvailableTickets() {
+        return null;
     }
 }

@@ -6,6 +6,7 @@ import Service.EventService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 public class EventController {
 
@@ -75,5 +76,13 @@ public class EventController {
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    public List<Event> searchEvents(String keyword) {
+        return null;
+    }
+
+    public List<Event> filterByEventType(String eventType) {
+        return null;
     }
 }
