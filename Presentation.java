@@ -1,9 +1,5 @@
 import Controller.*;
 import Domain.*;
-import Repository.UserRepo;
-import Service.UserService;
-
-import javax.management.relation.Role;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -820,7 +816,6 @@ public class Presentation {
     }
 
 
-
     private void ticketAdminMenu() {
         while (true) {
             System.out.println("Ticket Management:\n1. Add\n2. View\n3. Update\n4. Delete\n5. Back");
@@ -902,6 +897,7 @@ public class Presentation {
         String id = scanner.nextLine();
         ticketController.deleteTicket(id);
     }
+
     private void userAdminMenu() {
         while (true) {
             System.out.println("User Management:\n1. Add\n2. View\n3. Update\n4. Delete\n5. Back");
@@ -931,19 +927,10 @@ public class Presentation {
             System.out.print("Enter Password: ");
             String password = scanner.nextLine();
 
-            System.out.print("Enter Role (e.g., ADMIN, USER): ");
-            String roleString = scanner.nextLine().trim();
+            Role role = promptForRole();
 
-            if (roleString.isEmpty()) {
-                System.out.println("Role cannot be empty. Please enter a valid role (e.g., ADMIN, USER).");
-                return;
-            }
-
-            String role;
-            try {
-                role = Role.roleValueToString(roleString);
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
+            if (role == null) {
+                System.out.println("Invalid role selection. Please try again.");
                 return;
             }
 
@@ -955,7 +942,6 @@ public class Presentation {
             System.out.println("An error occurred while adding the user: " + e.getMessage());
         }
     }
-
 
     private void viewUser() {
         System.out.print("Enter User ID: ");
@@ -969,24 +955,28 @@ public class Presentation {
     }
 
     private void updateUser() {
-        System.out.print("Enter User ID to Update: ");
-        int id = Integer.parseInt(scanner.nextLine());
-        System.out.print("Enter new Username: ");
-        String username = scanner.nextLine();
-        System.out.print("Enter new Password: ");
-        String password = scanner.nextLine();
-        System.out.print("Enter new Role (e.g., ADMIN, USER): ");
-        String roleString = scanner.nextLine();
-
-        Role role;
         try {
-            role = Role.roleValueToString(roleString.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            System.out.println("Invalid role. Please choose from ADMIN or USER.");
-            return;
-        }
+            System.out.print("Enter User ID to Update: ");
+            int id = Integer.parseInt(scanner.nextLine());
+            System.out.print("Enter new Username: ");
+            String username = scanner.nextLine();
+            System.out.print("Enter new Password: ");
+            String password = scanner.nextLine();
 
-        userController.updateUser(String.valueOf(id), username, password, role);
+            Role role = promptForRole();
+
+            if (role == null) {
+                System.out.println("Invalid role selection. Please try again.");
+                return;
+            }
+
+            userController.updateUser(String.valueOf(id), username, password, role);
+
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input for User ID. Please enter a valid number.");
+        } catch (Exception e) {
+            System.out.println("An error occurred while updating the user: " + e.getMessage());
+        }
     }
 
     private void deleteUser() {
@@ -995,148 +985,166 @@ public class Presentation {
         userController.deleteUser(idString);
     }
 
+    private Role promptForRole() {
+        System.out.println("Select Role:");
+        System.out.println("1. USER");
+        System.out.println("2. ADMIN");
+        System.out.print("Enter choice (1 or 2): ");
 
-    private void wishlistAdminMenu() {
-        while (true) {
-            System.out.println("Wishlist Management:\n1. Add\n2. View\n3. Update\n4. Delete\n5. Back");
-            int choice = Integer.parseInt(scanner.nextLine());
+        String choice = scanner.nextLine();
+        switch (choice) {
+            case "1":
+                return Role.USER;
+            case "2":
+                return Role.ADMIN;
+            default:
+                System.out.println("Invalid selection. Please choose 1 for USER or 2 for ADMIN.");
+                return null;
+        }
+    }
 
-            switch (choice) {
-                case 1 -> addWishlist();
-                case 2 -> viewWishlist();
-                case 3 -> updateWishlist();
-                case 4 -> deleteWishlist();
-                case 5 -> {
-                    return;
-                }
-                default -> System.out.println("Invalid choice, please try again.");
+
+private void wishlistAdminMenu() {
+    while (true) {
+        System.out.println("Wishlist Management:\n1. Add\n2. View\n3. Update\n4. Delete\n5. Back");
+        int choice = Integer.parseInt(scanner.nextLine());
+
+        switch (choice) {
+            case 1 -> addWishlist();
+            case 2 -> viewWishlist();
+            case 3 -> updateWishlist();
+            case 4 -> deleteWishlist();
+            case 5 -> {
+                return;
             }
+            default -> System.out.println("Invalid choice, please try again.");
+        }
+    }
+}
+
+private void addWishlist() {
+    System.out.print("Enter Wishlist ID: ");
+    String id = scanner.nextLine();
+    System.out.print("Enter User ID: ");
+    String userId = scanner.nextLine();
+    System.out.print("Enter Reviewable Entity IDs (comma-separated): ");
+    String entityIds = scanner.nextLine();
+
+    User user = userController.getUserById(userId);
+    if (user == null) {
+        System.out.println("User not found.");
+        return;
+    }
+
+    List<ReviewableEntity> items = new ArrayList<>();
+    String[] entityIdArray = entityIds.split(",");
+    for (String entityId : entityIdArray) {
+        ReviewableEntity item = reviewableEntityService.getEntityById(entityId.trim());
+        if (item != null) {
+            items.add(item);
+        } else {
+            System.out.println("ReviewableEntity with ID " + entityId.trim() + " not found.");
         }
     }
 
-    private void addWishlist() {
-        System.out.print("Enter Wishlist ID: ");
-        String id = scanner.nextLine();
-        System.out.print("Enter User ID: ");
-        String userId = scanner.nextLine();
-        System.out.print("Enter Reviewable Entity IDs (comma-separated): ");
-        String entityIds = scanner.nextLine();
+    wishlistController.addWishlist(id, user, items);
+}
 
-        User user = userController.getUserById(userId);
-        if (user == null) {
-            System.out.println("User not found.");
-            return;
+private void viewWishlist() {
+    System.out.print("Enter Wishlist ID: ");
+    String id = scanner.nextLine();
+    Wishlist wishlist = wishlistController.getWishlistById(id);
+    System.out.println(wishlist != null ? wishlist : "Wishlist not found.");
+}
+
+private void updateWishlist() {
+    System.out.print("Enter Wishlist ID to Update: ");
+    String id = scanner.nextLine();
+    System.out.print("Enter new User ID: ");
+    String userId = scanner.nextLine();
+    System.out.print("Enter new Reviewable Entity IDs (comma-separated): ");
+    String entityIds = scanner.nextLine();
+
+    User user = userController.getUserById(userId);
+    if (user == null) {
+        System.out.println("User not found.");
+        return;
+    }
+
+
+    List<ReviewableEntity> items = new ArrayList<>();
+    String[] entityIdArray = entityIds.split(",");
+    for (String entityId : entityIdArray) {
+        ReviewableEntity item = reviewableEntityService.getEntityById(entityId.trim());
+        if (item != null) {
+            items.add(item);
+        } else {
+            System.out.println("ReviewableEntity with ID " + entityId.trim() + " not found.");
         }
+    }
 
-        List<ReviewableEntity> items = new ArrayList<>();
-        String[] entityIdArray = entityIds.split(",");
-        for (String entityId : entityIdArray) {
-            ReviewableEntity item = reviewableEntityService.getEntityById(entityId.trim());
-            if (item != null) {
-                items.add(item);
-            } else {
-                System.out.println("ReviewableEntity with ID " + entityId.trim() + " not found.");
+    wishlistController.updateWishlist(id, user, items);
+}
+
+private void deleteWishlist() {
+    System.out.print("Enter Wishlist ID to delete: ");
+    String id = scanner.nextLine();
+    wishlistController.deleteWishlist(id);
+}
+
+
+private void userMenu() {
+    while (true) {
+        System.out.println("User Menu:\n1. Search Events\n2. Filter by Event Type\n3. Book Tickets\n4. View Available Tickets\n5. Back");
+        int choice = Integer.parseInt(scanner.nextLine());
+
+        switch (choice) {
+            case 1 -> searchEvents();
+            case 2 -> filterEventsByType();
+            case 3 -> bookTickets();
+            case 4 -> viewAvailableTickets();
+            case 5 -> {
+                return;
             }
-        }
-
-        wishlistController.addWishlist(id, user, items);
-    }
-
-    private void viewWishlist() {
-        System.out.print("Enter Wishlist ID: ");
-        String id = scanner.nextLine();
-        Wishlist wishlist = wishlistController.getWishlistById(id);
-        System.out.println(wishlist != null ? wishlist : "Wishlist not found.");
-    }
-
-    private void updateWishlist() {
-        System.out.print("Enter Wishlist ID to Update: ");
-        String id = scanner.nextLine();
-        System.out.print("Enter new User ID: ");
-        String userId = scanner.nextLine();
-        System.out.print("Enter new Reviewable Entity IDs (comma-separated): ");
-        String entityIds = scanner.nextLine();
-
-        User user = userController.getUserById(userId);
-        if (user == null) {
-            System.out.println("User not found.");
-            return;
-        }
-
-
-        List<ReviewableEntity> items = new ArrayList<>();
-        String[] entityIdArray = entityIds.split(",");
-        for (String entityId : entityIdArray) {
-            ReviewableEntity item = reviewableEntityService.getEntityById(entityId.trim());
-            if (item != null) {
-                items.add(item);
-            } else {
-                System.out.println("ReviewableEntity with ID " + entityId.trim() + " not found.");
-            }
-        }
-
-        wishlistController.updateWishlist(id, user, items);
-    }
-
-    private void deleteWishlist() {
-        System.out.print("Enter Wishlist ID to delete: ");
-        String id = scanner.nextLine();
-        wishlistController.deleteWishlist(id);
-    }
-
-
-    private void userMenu() {
-        while (true) {
-            System.out.println("User Menu:\n1. Search Events\n2. Filter by Event Type\n3. Book Tickets\n4. View Available Tickets\n5. Back");
-            int choice = Integer.parseInt(scanner.nextLine());
-
-            switch (choice) {
-                case 1 -> searchEvents();
-                case 2 -> filterEventsByType();
-                case 3 -> bookTickets();
-                case 4 -> viewAvailableTickets();
-                case 5 -> {
-                    return;
-                }
-                default -> System.out.println("Invalid choice, please try again.");
-            }
+            default -> System.out.println("Invalid choice, please try again.");
         }
     }
+}
 
 
-    private void searchEvents() {
-        System.out.print("Enter keyword to search events: ");
-        String keyword = scanner.nextLine();
-        List<Event> events = eventController.searchEvents(keyword);
-        for (Event event : events) {
-            System.out.println(event);
-        }
+private void searchEvents() {
+    System.out.print("Enter keyword to search events: ");
+    String keyword = scanner.nextLine();
+    List<Event> events = eventController.searchEvents(keyword);
+    for (Event event : events) {
+        System.out.println(event);
     }
+}
 
-    private void filterEventsByType() {
-        System.out.print("Enter Event Type (e.g., CONFERENCE): ");
-        String eventType = scanner.nextLine();
-        List<Event> events = eventController.filterByEventType(eventType);
-        for (Event event : events) {
-            System.out.println(event);
-        }
+private void filterEventsByType() {
+    System.out.print("Enter Event Type (e.g., CONFERENCE): ");
+    String eventType = scanner.nextLine();
+    List<Event> events = eventController.filterByEventType(eventType);
+    for (Event event : events) {
+        System.out.println(event);
     }
+}
 
-    private void bookTickets() {
-        System.out.print("Enter Ticket ID to book: ");
-        String ticketId = scanner.nextLine();
-        System.out.print("Enter number of tickets to book: ");
-        String numTickets = scanner.nextLine();
-        bookingController.bookTicket(ticketId, numTickets);
-    }
+private void bookTickets() {
+    System.out.print("Enter Ticket ID to book: ");
+    String ticketId = scanner.nextLine();
+    System.out.print("Enter number of tickets to book: ");
+    String numTickets = scanner.nextLine();
+    bookingController.bookTicket(ticketId, numTickets);
+}
 
-    private void viewAvailableTickets() {
-        System.out.println("Available Tickets:");
-        List<Ticket> tickets = ticketController.getAvailableTickets();
-        for (Ticket ticket : tickets) {
-            System.out.println(ticket);
-        }
+private void viewAvailableTickets() {
+    System.out.println("Available Tickets:");
+    List<Ticket> tickets = ticketController.getAvailableTickets();
+    for (Ticket ticket : tickets) {
+        System.out.println(ticket);
     }
+}
 }
 
 

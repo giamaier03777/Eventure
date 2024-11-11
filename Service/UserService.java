@@ -1,9 +1,8 @@
 package Service;
 
 import Domain.User;
+import Domain.Role;
 import Repository.UserRepo;
-
-import javax.management.relation.Role;
 
 public class UserService {
 

@@ -1,6 +1,5 @@
 package Domain;
 
-import javax.management.relation.Role;
 
 public class User {
     private int id;

@@ -1,9 +1,8 @@
 package Controller;
 
 import Domain.User;
+import Domain.Role;
 import Service.UserService;
-
-import javax.management.relation.Role;
 
 public class UserController {
 
