@@ -8,7 +8,7 @@ public class Ticket{
     private User owner;
     private String participantName;
 
-    public Ticket(Event event, User owner, String participantName){
+    public Ticket(int id, Event event, User owner, String participantName){
         this.id = id;
         this.event = event;
         this.owner = owner;

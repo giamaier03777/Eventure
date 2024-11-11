@@ -4,13 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Wishlist {
+    int id;
     private User user;
     private List<ReviewableEntity> items;
 
-    public Wishlist(User user){
+    public Wishlist(int id, User user, List<ReviewableEntity> items) {
+        this.id = id;
         this.user = user;
         this.items = new ArrayList<>();
     }
+
+    public int getId() {return id;}
+
+    public void setId(int id) {this.id = id;}
 
     public User getUser() {
         return user;
