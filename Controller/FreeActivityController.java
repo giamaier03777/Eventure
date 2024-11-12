@@ -4,6 +4,8 @@ import Domain.FreeActivity;
 import Domain.EventType;
 import Service.FreeActivityService;
 
+import java.util.List;
+
 public class FreeActivityController {
 
     private final FreeActivityService freeActivityService;
@@ -60,5 +62,9 @@ public class FreeActivityController {
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    public List<FreeActivity> getAllFreeActivities() {
+        return freeActivityService.getAllFreeActivities();
     }
 }

@@ -85,4 +85,12 @@ public class EventController {
     public List<Event> filterByEventType(String eventType) {
         return null;
     }
+
+    public List<Event> getUpcomingEvents() {
+        return eventService.getUpcomingEvents();
+    }
+
+    public List<Event> getAllEvents() {
+        return eventService.getAllEvents();
+    }
 }

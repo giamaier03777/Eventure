@@ -7,12 +7,15 @@ public class Ticket{
     private Event event;
     private User owner;
     private String participantName;
+    private double cost;
 
-    public Ticket(int id, Event event, User owner, String participantName){
+
+    public Ticket(int id, Event event, User owner, String participantName, double cost){
         this.id = id;
         this.event = event;
         this.owner = owner;
         this.participantName = participantName;
+        this.cost = cost;
     }
 
     public int getId(){return id;}
@@ -43,4 +46,11 @@ public class Ticket{
         this.participantName = participantName;
     }
 
+    public double getCost() {
+        return cost;
+    }
+
+    public void setCost(double cost) {
+        this.cost = cost;
+    }
 }

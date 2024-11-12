@@ -71,4 +71,24 @@ public class ActivityScheduleController {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
+    public List<ActivitySchedule> getSchedulesForActivity(Activity activity) {
+        if (activity == null) {
+            System.out.println("Activity cannot be null.");
+            return List.of();
+        }
+
+        List<ActivitySchedule> schedules = activityScheduleService.getSchedulesForActivity(activity);
+
+        if (schedules.isEmpty()) {
+            System.out.println("No schedules found for activity: " + activity.getName());
+        } else {
+            System.out.println("Schedules for activity: " + activity.getName());
+            for (ActivitySchedule schedule : schedules) {
+                System.out.println("Date: " + schedule.getDate() + " | Time: " + schedule.getStartTime() + " - " + schedule.getEndTime() + " | Available Capacity: " + schedule.getAvailableCapacity());
+            }
+        }
+
+        return schedules;
+    }
 }

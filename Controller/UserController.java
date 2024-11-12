@@ -59,4 +59,12 @@ public class UserController {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
+    public User getUserByUsername(String username) {
+        return userService.getUserByUsername(username);
+    }
+
+    public int generateNewUserId() {
+        return userService.generateNewUntakenId();
+    }
 }

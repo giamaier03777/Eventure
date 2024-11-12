@@ -69,4 +69,9 @@ public class ActivityController {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
+    public List<Activity> filterActivitiesByCapacity(int minCapacity) {
+        return activityService.filterActivitiesByCapacity(minCapacity);
+
+    }
 }

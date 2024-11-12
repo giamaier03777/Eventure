@@ -50,4 +50,11 @@ public class UserRepo implements IRepository<User> {
     public List<User> findAll() {
         return new ArrayList<>(userList);
     }
+
+    public User findByUsername(String username) {
+        return userList.stream()
+                .filter(user -> user.getUsername().equalsIgnoreCase(username))
+                .findFirst()
+                .orElse(null);
+    }
 }

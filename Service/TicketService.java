@@ -15,7 +15,7 @@ public class TicketService {
         this.ticketRepo = ticketRepo;
     }
 
-    public void addTicket(int id, Event event, User owner, String participantName) {
+    public void addTicket(int id, Event event, User owner, String participantName, double price) {
         if (ticketRepo.read(id) != null) {
             throw new IllegalArgumentException("A ticket with this ID already exists.");
         }
@@ -32,7 +32,7 @@ public class TicketService {
             throw new IllegalArgumentException("Participant name cannot be empty.");
         }
 
-        Ticket ticket = new Ticket(id, event, owner, participantName);
+        Ticket ticket = new Ticket(id, event, owner, participantName, price);
         ticketRepo.create(ticket);
     }
 

@@ -5,6 +5,7 @@ import Domain.EventType;
 import Repository.ActivityRepo;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ActivityService {
 
@@ -71,5 +72,11 @@ public class ActivityService {
 
     public List<Activity> getAllActivities() {
         return activityRepo.findAll();
+    }
+
+    public List<Activity> filterActivitiesByCapacity(int minCapacity) {
+        return activityRepo.findAll().stream()
+                .filter(activity -> activity.getCapacity() >= minCapacity)
+                .collect(Collectors.toList());
     }
 }

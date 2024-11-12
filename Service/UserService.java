@@ -74,5 +74,17 @@ public class UserService {
         userRepo.delete(id);
     }
 
+    public User getUserByUsername(String username) {
+        return userRepo.findByUsername(username);
+    }
+
+    public int generateNewUntakenId() {
+        return userRepo.findAll().stream()
+                .mapToInt(User::getId)
+                .max()
+                .orElse(0) + 1;
+    }
+
+
 }
 

@@ -1,6 +1,8 @@
 package Domain;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 public class Event extends ReviewableEntity {
     private int currentSize;
@@ -46,5 +48,10 @@ public class Event extends ReviewableEntity {
 
     public void setCapacity(int capacity) {
         this.capacity = capacity;
+    }
+
+
+    public Instant getDate() {
+        return startDate.toInstant(ZoneOffset.UTC);
     }
 }

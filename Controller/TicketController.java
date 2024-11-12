@@ -15,11 +15,11 @@ public class TicketController {
         this.ticketService = ticketService;
     }
 
-    public void addTicket(String idString, Event event, User owner, String participantName) {
+    public void addTicket(String idString, Event event, User owner, String participantName, double price) {
         try {
             int id = Integer.parseInt(idString);
 
-            ticketService.addTicket(id, event, owner, participantName);
+            ticketService.addTicket(id, event, owner, participantName, price);
             System.out.println("Ticket added successfully.");
         } catch (NumberFormatException e) {
             System.out.println("ID must be a valid number.");

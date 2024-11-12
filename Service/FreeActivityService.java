@@ -4,6 +4,8 @@ import Domain.FreeActivity;
 import Domain.EventType;
 import Repository.FreeActivityRepo;
 
+import java.util.List;
+
 public class FreeActivityService {
 
     private final FreeActivityRepo freeActivityRepo;
@@ -65,5 +67,9 @@ public class FreeActivityService {
         }
 
         freeActivityRepo.delete(id);
+    }
+
+    public List<FreeActivity> getAllFreeActivities() {
+        return freeActivityRepo.findAll();
     }
 }

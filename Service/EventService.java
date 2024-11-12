@@ -5,6 +5,8 @@ import Domain.EventType;
 import Repository.EventRepo;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class EventService {
 
@@ -107,5 +109,16 @@ public class EventService {
         }
 
         eventRepo.delete(id);
+    }
+
+    public List<Event> getUpcomingEvents() {
+        LocalDateTime now = LocalDateTime.now();
+        return eventRepo.findAll().stream()
+                .filter(event -> event.getStartDate().isAfter(now))
+                .collect(Collectors.toList());
+    }
+
+    public List<Event> getAllEvents() {
+        return eventRepo.findAll();
     }
 }

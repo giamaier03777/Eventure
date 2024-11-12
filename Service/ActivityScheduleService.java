@@ -6,6 +6,8 @@ import Repository.ActivityScheduleRepo;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ActivityScheduleService {
 
@@ -86,5 +88,16 @@ public class ActivityScheduleService {
         }
 
         activityScheduleRepo.delete(id);
+    }
+
+    public List<ActivitySchedule> getSchedulesForActivity(Activity activity) {
+        if (activity == null) {
+            throw new IllegalArgumentException("Activity cannot be null.");
+        }
+
+        return activityScheduleRepo.findAll()
+                .stream()
+                .filter(schedule -> schedule.getActivity().getId() == activity.getId())
+                .collect(Collectors.toList());
     }
 }

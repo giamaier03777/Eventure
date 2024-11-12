@@ -21,6 +21,8 @@ public class Presentation {
     private final TicketController ticketController;
     private final UserController userController;
     private final WishlistController wishlistController;
+    private User currentUser = null;
+
 
     private final Scanner scanner = new Scanner(System.in);
 
@@ -45,13 +47,16 @@ public class Presentation {
     }
 
     public void start() {
-        while (true) {
-            System.out.println("Select Role:\n1. Admin\n2. User\n3. Exit");
+        while (currentUser == null) {
+            System.out.println("Welcome! Please choose an option:");
+            System.out.println("1. Login");
+            System.out.println("2. Register");
+            System.out.println("3. Exit");
             int choice = Integer.parseInt(scanner.nextLine());
 
             switch (choice) {
-                case 1 -> adminMenu();
-                case 2 -> userMenu();
+                case 1 -> login();
+                case 2 -> register();
                 case 3 -> {
                     System.out.println("Exiting...");
                     return;
@@ -59,7 +64,70 @@ public class Presentation {
                 default -> System.out.println("Invalid choice, please try again.");
             }
         }
+
+        if (currentUser != null) {
+            if (currentUser.getRole() == Role.ADMIN) {
+                adminMenu();
+            } else {
+                userMenu();
+            }
+        }
     }
+
+    private void login() {
+        System.out.print("Username: ");
+        String username = scanner.nextLine();
+        System.out.print("Password: ");
+        String password = scanner.nextLine();
+
+        User user = userController.getUserByUsername(username);
+
+        if (user != null && user.getPassword().equals(password)) {
+            currentUser = user;
+            System.out.println("Login successful. Welcome, " + currentUser.getUsername() + "!");
+        } else {
+            System.out.println("Invalid username or password. Please try again.");
+        }
+    }
+
+    private void register() {
+        try {
+            System.out.print("Choose a Username: ");
+            String username = scanner.nextLine();
+
+            System.out.print("Choose a Password: ");
+            String password = scanner.nextLine();
+
+            Role role = promptForRole();
+            int id = userController.generateNewUserId();
+
+            userController.addUser(String.valueOf(id), username, password, role);
+            System.out.println("Registration successful. You can now log in.");
+
+        } catch (Exception e) {
+            System.out.println("Error during registration: " + e.getMessage());
+        }
+    }
+
+    private Role promptForRole() {
+        System.out.println("Select Role:");
+        System.out.println("1. USER");
+        System.out.println("2. ADMIN");
+        System.out.print("Enter choice (1 or 2): ");
+
+        String choice = scanner.nextLine();
+        switch (choice) {
+            case "1":
+                return Role.USER;
+            case "2":
+                return Role.ADMIN;
+            default:
+                System.out.println("Invalid selection. Please choose 1 for USER or 2 for ADMIN.");
+                return null;
+        }
+    }
+
+
 
     private void adminMenu() {
         while (true) {
@@ -753,32 +821,82 @@ public class Presentation {
             String id = scanner.nextLine();
             System.out.print("Enter User ID: ");
             String userId = scanner.nextLine();
+
+            User user = userController.getUserById(userId);
+            if (user == null) {
+                System.out.println("User not found.");
+                return;
+            }
+
+            System.out.println("Select the type of Reviewable Entity:");
+            System.out.println("1. Activity");
+            System.out.println("2. Event");
+            System.out.println("3. Free Activity");
+            System.out.print("Enter your choice (1-3): ");
+            String choice = scanner.nextLine();
+
             System.out.print("Enter Reviewable Entity ID: ");
             String entityId = scanner.nextLine();
+
+            ReviewableEntity reviewableEntity = null;
+
+            switch (choice) {
+                case "1":
+                    // Search in Activities
+                    for (Activity activity : activityController.getAllActivities()) {
+                        if (String.valueOf(activity.getId()).equals(entityId)) {
+                            reviewableEntity = activity;
+                            break;
+                        }
+                    }
+                    break;
+
+                case "2":
+                    // Search in Events
+                    for (Event event : eventController.getAllEvents()) {
+                        if (String.valueOf(event.getId()).equals(entityId)) {
+                            reviewableEntity = event;
+                            break;
+                        }
+                    }
+                    break;
+
+                case "3":
+                    // Search in Free Activities
+                    for (FreeActivity freeActivity : freeActivityController.getAllFreeActivities()) {
+                        if (String.valueOf(freeActivity.getId()).equals(entityId)) {
+                            reviewableEntity = freeActivity;
+                            break;
+                        }
+                    }
+                    break;
+
+                default:
+                    System.out.println("Invalid choice. Please select a valid type.");
+                    return;
+            }
+
+            if (reviewableEntity == null) {
+                System.out.println("Reviewable Entity not found with ID " + entityId + ".");
+                return;
+            }
+
             System.out.print("Enter Comment: ");
             String comment = scanner.nextLine();
             System.out.print("Enter Review Date (e.g., 2023-12-31T10:15): ");
             String dateString = scanner.nextLine();
 
-            User user = userController.getUserById(userId);
-            //ReviewableEntity reviewableEntity =
-
-            if (user == null) {
-                System.out.println("User not found.");
-                return;
-            }
-            if (reviewableEntity == null) {
-                System.out.println("Reviewable Entity not found.");
-                return;
-            }
-
             reviewController.addReview(id, user, reviewableEntity, comment, dateString);
+            System.out.println("Review added successfully.");
+
         } catch (NumberFormatException e) {
-            System.out.println("Invalid input for ID or Entity ID. Please enter valid numbers.");
+            System.out.println("Invalid input for ID. Please enter valid numbers.");
         } catch (DateTimeParseException e) {
             System.out.println("Invalid date format. Please enter the date in 'yyyy-MM-ddTHH:mm' format.");
         }
     }
+
+
 
     private void viewReview() {
         System.out.print("Enter Review ID: ");
@@ -843,6 +961,9 @@ public class Presentation {
         String userId = scanner.nextLine();
         System.out.print("Enter Participant Name: ");
         String participantName = scanner.nextLine();
+        System.out.print("Enter Price: ");
+        double price = Double.parseDouble(scanner.nextLine());
+
 
 
         Event event = eventController.getEventById(eventId);
@@ -857,7 +978,7 @@ public class Presentation {
             return;
         }
 
-        ticketController.addTicket(id, event, user, participantName);
+        ticketController.addTicket(id, event, user, participantName, price);
     }
 
     private void viewTicket() {
@@ -985,166 +1106,320 @@ public class Presentation {
         userController.deleteUser(idString);
     }
 
-    private Role promptForRole() {
-        System.out.println("Select Role:");
-        System.out.println("1. USER");
-        System.out.println("2. ADMIN");
-        System.out.print("Enter choice (1 or 2): ");
+    private void wishlistAdminMenu() {
+        while (true) {
+            System.out.println("Wishlist Management:\n1. Add\n2. Update\n3. Delete\n4. Back");
+            int choice = Integer.parseInt(scanner.nextLine());
 
-        String choice = scanner.nextLine();
-        switch (choice) {
-            case "1":
-                return Role.USER;
-            case "2":
-                return Role.ADMIN;
-            default:
-                System.out.println("Invalid selection. Please choose 1 for USER or 2 for ADMIN.");
-                return null;
+            switch (choice) {
+                case 1 -> addWishlist();
+                case 2 -> updateWishlist();
+                case 3 -> deleteWishlist();
+                case 4 -> {
+                    return;
+                }
+                default -> System.out.println("Invalid choice, please try again.");
+            }
+        }
+    }
+
+    private void addWishlist() {
+        System.out.print("Enter Wishlist ID: ");
+        String wishlistId = scanner.nextLine();
+        System.out.print("Enter User ID: ");
+        String userId = scanner.nextLine();
+
+        User user = userController.getUserById(userId);
+        if (user == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        List<ReviewableEntity> items = new ArrayList<>();
+
+        boolean continueAdding = true;
+        while (continueAdding) {
+            System.out.println("Select category to add to wishlist:\n1. Event\n2. Activity\n3. Free Activity\n4. Finish adding");
+            int choice = Integer.parseInt(scanner.nextLine());
+
+            switch (choice) {
+                case 1 -> addEventsToWishlist(items);
+                case 2 -> addActivitiesToWishlist(items);
+                case 3 -> addFreeActivitiesToWishlist(items);
+                case 4 -> continueAdding = false;
+                default -> System.out.println("Invalid choice, please try again.");
+            }
+        }
+
+        wishlistController.addWishlist(wishlistId, user, items);
+        System.out.println("Wishlist added successfully.");
+    }
+
+    private void addEventsToWishlist(List<ReviewableEntity> items) {
+        List<Event> events = eventController.getAllEvents();
+        if (events.isEmpty()) {
+            System.out.println("No events available.");
+            return;
+        }
+
+        System.out.println("Available Events:");
+        for (Event event : events) {
+            System.out.println("ID: " + event.getId() + " | Name: " + event.getName());
+        }
+
+        System.out.print("Enter Event ID to add (or type 'done' to finish): ");
+        String eventId;
+        while (!(eventId = scanner.nextLine()).equalsIgnoreCase("done")) {
+            Event event = eventController.getEventById(eventId);
+            if (event != null && !items.contains(event)) {
+                items.add(event);
+                System.out.println("Event added to wishlist.");
+            } else {
+                System.out.println("Invalid ID or item already added.");
+            }
+            System.out.print("Enter another Event ID or 'done' to finish: ");
+        }
+    }
+
+    private void addActivitiesToWishlist(List<ReviewableEntity> items) {
+        List<Activity> activities = activityController.getAllActivities();
+        if (activities.isEmpty()) {
+            System.out.println("No activities available.");
+            return;
+        }
+
+        System.out.println("Available Activities:");
+        for (Activity activity : activities) {
+            System.out.println("ID: " + activity.getId() + " | Name: " + activity.getName());
+        }
+
+        System.out.print("Enter Activity ID to add (or type 'done' to finish): ");
+        String activityId;
+        while (!(activityId = scanner.nextLine()).equalsIgnoreCase("done")) {
+            Activity activity = activityController.getActivityById(activityId);
+            if (activity != null && !items.contains(activity)) {
+                items.add(activity);
+                System.out.println("Activity added to wishlist.");
+            } else {
+                System.out.println("Invalid ID or item already added.");
+            }
+            System.out.print("Enter another Activity ID or 'done' to finish: ");
+        }
+    }
+
+    private void addFreeActivitiesToWishlist(List<ReviewableEntity> items) {
+        List<FreeActivity> freeActivities = freeActivityController.getAllFreeActivities();
+        if (freeActivities.isEmpty()) {
+            System.out.println("No free activities available.");
+            return;
+        }
+
+        System.out.println("Available Free Activities:");
+        for (FreeActivity freeActivity : freeActivities) {
+            System.out.println("ID: " + freeActivity.getId() + " | Name: " + freeActivity.getName());
+        }
+
+        System.out.print("Enter Free Activity ID to add (or type 'done' to finish): ");
+        String freeActivityId;
+        while (!(freeActivityId = scanner.nextLine()).equalsIgnoreCase("done")) {
+            FreeActivity freeActivity = freeActivityController.getFreeActivityById(freeActivityId);
+            if (freeActivity != null && !items.contains(freeActivity)) {
+                items.add(freeActivity);
+                System.out.println("Free Activity added to wishlist.");
+            } else {
+                System.out.println("Invalid ID or item already added.");
+            }
+            System.out.print("Enter another Free Activity ID or 'done' to finish: ");
+        }
+    }
+
+    private void updateWishlist() {
+        System.out.print("Enter Wishlist ID to Update: ");
+        String wishlistId = scanner.nextLine();
+        System.out.print("Enter new User ID: ");
+        String userId = scanner.nextLine();
+
+        User user = userController.getUserById(userId);
+        if (user == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        List<ReviewableEntity> items = new ArrayList<>();
+
+        boolean continueUpdating = true;
+        while (continueUpdating) {
+            System.out.println("Select category to add to wishlist:\n1. Event\n2. Activity\n3. Free Activity\n4. Finish updating");
+            int choice = Integer.parseInt(scanner.nextLine());
+
+            switch (choice) {
+                case 1 -> addEventsToWishlist(items);
+                case 2 -> addActivitiesToWishlist(items);
+                case 3 -> addFreeActivitiesToWishlist(items);
+                case 4 -> continueUpdating = false;
+                default -> System.out.println("Invalid choice, please try again.");
+            }
+        }
+
+        wishlistController.updateWishlist(wishlistId, user, items);
+        System.out.println("Wishlist updated successfully.");
+    }
+
+    private void deleteWishlist() {
+        System.out.print("Enter Wishlist ID to delete: ");
+        String id = scanner.nextLine();
+        wishlistController.deleteWishlist(id);
+    }
+
+    private void searchEvents() {
+        System.out.print("Enter keyword to search events: ");
+        String keyword = scanner.nextLine();
+        List<Event> events = eventController.searchEvents(keyword);
+        for (Event event : events) {
+            System.out.println(event);
+        }
+    }
+
+    private void filterEventsByType() {
+        System.out.print("Enter Event Type (e.g., CONFERENCE): ");
+        String eventType = scanner.nextLine();
+        List<Event> events = eventController.filterByEventType(eventType);
+        for (Event event : events) {
+            System.out.println(event);
+        }
+    }
+
+    private void bookTickets() {
+        System.out.print("Enter Ticket ID to book: ");
+        String ticketId = scanner.nextLine();
+        System.out.print("Enter number of tickets to book: ");
+        String numTickets = scanner.nextLine();
+        bookingController.bookTicket(ticketId, numTickets);
+    }
+
+    private void viewAvailableTickets() {
+        System.out.println("Available Tickets:");
+        List<Ticket> tickets = ticketController.getAvailableTickets();
+        for (Ticket ticket : tickets) {
+            System.out.println(ticket);
+        }
+    }
+    private void userMenu () {
+            while (true) {
+                System.out.println("User Menu:\n1. View Upcoming Events\n2. View Activity Schedules\n3. Book and Pay for Tickets\n4. Filter Activities\n5. Back");
+                int choice = Integer.parseInt(scanner.nextLine());
+
+                switch (choice) {
+                    case 1 -> viewUpcomingEvents();
+                    case 2 -> viewActivitySchedules();
+                    case 3 -> bookAndPayForTickets();
+                    case 4 -> filterActivities();
+                    case 5 -> {
+                        return;
+                    }
+                    default -> System.out.println("Invalid choice, please try again.");
+                }
+            }
+        }
+
+    private void viewUpcomingEvents() {
+        List<Event> events = eventController.getUpcomingEvents();
+
+        if (events.isEmpty()) {
+            System.out.println("No upcoming events or activities available.");
+        } else {
+            System.out.println("Upcoming Events and Activities:");
+
+            for (Event event : events) {
+                int availableTickets = event.getCapacity() - event.getCurrentSize();
+                System.out.println("Event: " + event.getName() + " | Date: " + event.getStartDate() + " | Available Tickets: " + availableTickets);
+            }
         }
     }
 
 
-private void wishlistAdminMenu() {
-    while (true) {
-        System.out.println("Wishlist Management:\n1. Add\n2. View\n3. Update\n4. Delete\n5. Back");
-        int choice = Integer.parseInt(scanner.nextLine());
+        private void viewActivitySchedules () {
+            System.out.print("Enter Activity ID to view schedules: ");
+            String activityId = scanner.nextLine();
+            Activity activity = activityController.getActivityById(activityId);
 
-        switch (choice) {
-            case 1 -> addWishlist();
-            case 2 -> viewWishlist();
-            case 3 -> updateWishlist();
-            case 4 -> deleteWishlist();
-            case 5 -> {
+            if (activity == null) {
+                System.out.println("Activity not found.");
                 return;
             }
-            default -> System.out.println("Invalid choice, please try again.");
-        }
-    }
-}
 
-private void addWishlist() {
-    System.out.print("Enter Wishlist ID: ");
-    String id = scanner.nextLine();
-    System.out.print("Enter User ID: ");
-    String userId = scanner.nextLine();
-    System.out.print("Enter Reviewable Entity IDs (comma-separated): ");
-    String entityIds = scanner.nextLine();
-
-    User user = userController.getUserById(userId);
-    if (user == null) {
-        System.out.println("User not found.");
-        return;
-    }
-
-    List<ReviewableEntity> items = new ArrayList<>();
-    String[] entityIdArray = entityIds.split(",");
-    for (String entityId : entityIdArray) {
-        ReviewableEntity item = reviewableEntityService.getEntityById(entityId.trim());
-        if (item != null) {
-            items.add(item);
-        } else {
-            System.out.println("ReviewableEntity with ID " + entityId.trim() + " not found.");
-        }
-    }
-
-    wishlistController.addWishlist(id, user, items);
-}
-
-private void viewWishlist() {
-    System.out.print("Enter Wishlist ID: ");
-    String id = scanner.nextLine();
-    Wishlist wishlist = wishlistController.getWishlistById(id);
-    System.out.println(wishlist != null ? wishlist : "Wishlist not found.");
-}
-
-private void updateWishlist() {
-    System.out.print("Enter Wishlist ID to Update: ");
-    String id = scanner.nextLine();
-    System.out.print("Enter new User ID: ");
-    String userId = scanner.nextLine();
-    System.out.print("Enter new Reviewable Entity IDs (comma-separated): ");
-    String entityIds = scanner.nextLine();
-
-    User user = userController.getUserById(userId);
-    if (user == null) {
-        System.out.println("User not found.");
-        return;
-    }
-
-
-    List<ReviewableEntity> items = new ArrayList<>();
-    String[] entityIdArray = entityIds.split(",");
-    for (String entityId : entityIdArray) {
-        ReviewableEntity item = reviewableEntityService.getEntityById(entityId.trim());
-        if (item != null) {
-            items.add(item);
-        } else {
-            System.out.println("ReviewableEntity with ID " + entityId.trim() + " not found.");
-        }
-    }
-
-    wishlistController.updateWishlist(id, user, items);
-}
-
-private void deleteWishlist() {
-    System.out.print("Enter Wishlist ID to delete: ");
-    String id = scanner.nextLine();
-    wishlistController.deleteWishlist(id);
-}
-
-
-private void userMenu() {
-    while (true) {
-        System.out.println("User Menu:\n1. Search Events\n2. Filter by Event Type\n3. Book Tickets\n4. View Available Tickets\n5. Back");
-        int choice = Integer.parseInt(scanner.nextLine());
-
-        switch (choice) {
-            case 1 -> searchEvents();
-            case 2 -> filterEventsByType();
-            case 3 -> bookTickets();
-            case 4 -> viewAvailableTickets();
-            case 5 -> {
-                return;
+            List<ActivitySchedule> schedules = activityScheduleController.getSchedulesForActivity(activity);
+            if (schedules.isEmpty()) {
+                System.out.println("No schedules available for this activity.");
+            } else {
+                System.out.println("Available Schedules for " + activity.getName() + ":");
+                for (ActivitySchedule schedule : schedules) {
+                    System.out.println("Date: " + schedule.getDate() + " | Time: " + schedule.getStartTime() + " - " + schedule.getEndTime() + " | Available Capacity: " + schedule.getAvailableCapacity());
+                }
             }
-            default -> System.out.println("Invalid choice, please try again.");
         }
-    }
+
+        private void bookAndPayForTickets() {
+            try {
+                System.out.print("Enter Event ID to book tickets: ");
+                String eventId = scanner.nextLine();
+                Event event = eventController.getEventById(eventId);
+
+                if (event == null) {
+                    System.out.println("Event not found.");
+                    return;
+                }
+
+                System.out.print("Enter number of tickets to book: ");
+                int numTickets = Integer.parseInt(scanner.nextLine());
+
+                int availableTickets = event.getCapacity() - event.getCurrentSize();
+                if (availableTickets < numTickets) {
+                    System.out.println("Insufficient tickets available. Only " + availableTickets + " tickets left.");
+                    return;
+                }
+
+                System.out.print("Enter Reservation ID: ");
+                String reservationId = scanner.nextLine();
+                User user = currentUser;
+                LocalDateTime reservationDate = LocalDateTime.now();
+
+                ActivitySchedule activitySchedule = activityScheduleController.getActivityScheduleById(eventId);
+                reservationController.addReservation(reservationId, user, activitySchedule, String.valueOf(numTickets), reservationDate.toString());
+
+                System.out.print("Enter Payment Amount: ");
+                double amount = Double.parseDouble(scanner.nextLine());
+                System.out.print("Enter Payment Method (e.g., CARD, CASH): ");
+                String paymentMethod = scanner.nextLine();
+
+                String paymentId = String.valueOf(reservationId.hashCode());
+                paymentController.addPayment(paymentId, String.valueOf(amount), reservationDate.toString(), user, paymentMethod);
+
+                System.out.println("Payment successful! Your booking is confirmed.");
+
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter valid numbers.");
+            } catch (IllegalArgumentException e) {
+                System.out.println("Error: " + e.getMessage());
+            } catch (Exception e) {
+                System.out.println("Error during booking or payment: " + e.getMessage());
+            }
+        }
+
+
+        private void filterActivities () {
+            System.out.print("Enter minimum capacity (number of people): ");
+            int minCapacity = Integer.parseInt(scanner.nextLine());
+
+            List<Activity> activities = activityController.filterActivitiesByCapacity(minCapacity);
+
+            if (activities.isEmpty()) {
+                System.out.println("No activities match the given criteria.");
+            } else {
+                System.out.println("Filtered Activities:");
+                for (Activity activity : activities) {
+                    System.out.println(activity);
+                }
+            }
+        }
 }
-
-
-private void searchEvents() {
-    System.out.print("Enter keyword to search events: ");
-    String keyword = scanner.nextLine();
-    List<Event> events = eventController.searchEvents(keyword);
-    for (Event event : events) {
-        System.out.println(event);
-    }
-}
-
-private void filterEventsByType() {
-    System.out.print("Enter Event Type (e.g., CONFERENCE): ");
-    String eventType = scanner.nextLine();
-    List<Event> events = eventController.filterByEventType(eventType);
-    for (Event event : events) {
-        System.out.println(event);
-    }
-}
-
-private void bookTickets() {
-    System.out.print("Enter Ticket ID to book: ");
-    String ticketId = scanner.nextLine();
-    System.out.print("Enter number of tickets to book: ");
-    String numTickets = scanner.nextLine();
-    bookingController.bookTicket(ticketId, numTickets);
-}
-
-private void viewAvailableTickets() {
-    System.out.println("Available Tickets:");
-    List<Ticket> tickets = ticketController.getAvailableTickets();
-    for (Ticket ticket : tickets) {
-        System.out.println(ticket);
-    }
-}
-}
-
-
