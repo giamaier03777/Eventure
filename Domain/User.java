@@ -6,12 +6,14 @@ public class User {
     private String username;
     private String password;
     private Role role;
+    private double balance;
 
     public User(int id, String username, String password, Role role) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.role = role;
+        this.balance = 0;
     }
 
     public int getId() {
@@ -44,5 +46,17 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void increaseBalance(double amount) {
+        this.balance += amount;
+    }
+
+    public void setBalance(double amount) {
+        this.balance = amount;
     }
 }

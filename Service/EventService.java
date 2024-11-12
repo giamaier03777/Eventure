@@ -16,7 +16,7 @@ public class EventService {
         this.eventRepo = eventRepo;
     }
 
-    public void addEvent(int id, String eventName, String location, int capacity, EventType eventType, int currentSize, LocalDateTime startDate, LocalDateTime endDate) {
+    public void addEvent(int id, String eventName, String location, int capacity, EventType eventType, int currentSize, LocalDateTime startDate, LocalDateTime endDate, double price) {
         if (eventRepo.read(id) != null) {
             throw new IllegalArgumentException("An event with this ID already exists.");
         }
@@ -53,7 +53,7 @@ public class EventService {
             throw new IllegalArgumentException("Event cannot start in the past.");
         }
 
-        Event event = new Event(id, eventName, location, capacity, eventType, currentSize, startDate, endDate);
+        Event event = new Event(id, eventName, location, capacity, eventType, currentSize, startDate, endDate, price);
         eventRepo.create(event);
     }
 
@@ -61,7 +61,7 @@ public class EventService {
         return eventRepo.read(id);
     }
 
-    public void updateEvent(int id, String eventName, String location, int capacity, EventType eventType, int currentSize, LocalDateTime startDate, LocalDateTime endDate) {
+    public void updateEvent(int id, String eventName, String location, int capacity, EventType eventType, int currentSize, LocalDateTime startDate, LocalDateTime endDate, double price) {
         Event existingEvent = eventRepo.read(id);
         if (existingEvent == null) {
             throw new IllegalArgumentException("Event with the specified ID does not exist.");
@@ -99,7 +99,7 @@ public class EventService {
             throw new IllegalArgumentException("Event cannot start in the past.");
         }
 
-        Event updatedEvent = new Event(id, eventName, location, capacity, eventType, currentSize, startDate, endDate);
+        Event updatedEvent = new Event(id, eventName, location, capacity, eventType, currentSize, startDate, endDate, price);
         eventRepo.update(updatedEvent);
     }
 

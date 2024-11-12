@@ -80,7 +80,7 @@ public class BookingService {
         }
 
         ActivitySchedule schedule = booking.getSchedule();
-        schedule.reduceCapacity(-booking.getNumberOfPeople()); // Restore the capacity
+        schedule.reduceCapacity(-booking.getNumberOfPeople());
         bookingRepo.delete(id);
     }
 }

@@ -186,9 +186,11 @@ public class Presentation {
         String eventType = scanner.nextLine();
         System.out.print("Description: ");
         String description = scanner.nextLine();
+        System.out.println("Enter ticket price: ");
+        double ticketPrice = Double.parseDouble(scanner.nextLine());
 
 
-        activityController.addActivity(String.valueOf(id), name, String.valueOf(capacity), location, eventType, description);
+        activityController.addActivity(String.valueOf(id), name, String.valueOf(capacity), location, eventType, description, ticketPrice);
     }
 
     private void viewActivity() {
@@ -216,9 +218,11 @@ public class Presentation {
         String eventType = scanner.nextLine();
         System.out.print("Description: ");
         String description = scanner.nextLine();
+        System.out.println("Enter ticket price: ");
+        double ticketPrice = Double.parseDouble(scanner.nextLine());
 
 
-        activityController.updateActivity(String.valueOf(id), name, String.valueOf(capacity), location, eventType, description);
+        activityController.updateActivity(String.valueOf(id), name, String.valueOf(capacity), location, eventType, description, ticketPrice);
     }
 
     private void deleteActivity() {
@@ -452,7 +456,10 @@ public class Presentation {
             System.out.print("Enter End Date (yyyy-MM-ddTHH:mm): ");
             String endDateString = scanner.nextLine();
 
-            eventController.addEvent(idString, eventName, location, capacityString, eventTypeString, currentSizeString, startDateString, endDateString);
+            System.out.println("Enter ticket price: ");
+            double ticketPrice = Double.parseDouble(scanner.nextLine());
+
+            eventController.addEvent(idString, eventName, location, capacityString, eventTypeString, currentSizeString, startDateString, endDateString, ticketPrice);
         } catch (Exception e) {
             System.out.println("Error adding event: " + e.getMessage());
         }
@@ -491,7 +498,10 @@ public class Presentation {
             System.out.print("Enter new End Date (yyyy-MM-ddTHH:mm): ");
             String endDateString = scanner.nextLine();
 
-            eventController.updateEvent(idString, eventName, location, capacityString, eventTypeString, currentSizeString, startDateString, endDateString);
+            System.out.println("Enter ticket price: ");
+            double priceString = Double.parseDouble(scanner.nextLine());
+
+            eventController.updateEvent(idString, eventName, location, capacityString, eventTypeString, currentSizeString, startDateString, endDateString, priceString);
         } catch (Exception e) {
             System.out.println("Error updating event: " + e.getMessage());
         }
@@ -721,7 +731,7 @@ public class Presentation {
                 case 3 -> updateReservation();
                 case 4 -> deleteReservation();
                 case 5 -> {
-                    return;  // Exit the menu
+                    return;
                 }
                 default -> System.out.println("Invalid choice, please try again.");
             }
@@ -842,7 +852,6 @@ public class Presentation {
 
             switch (choice) {
                 case "1":
-                    // Search in Activities
                     for (Activity activity : activityController.getAllActivities()) {
                         if (String.valueOf(activity.getId()).equals(entityId)) {
                             reviewableEntity = activity;
@@ -852,7 +861,6 @@ public class Presentation {
                     break;
 
                 case "2":
-                    // Search in Events
                     for (Event event : eventController.getAllEvents()) {
                         if (String.valueOf(event.getId()).equals(entityId)) {
                             reviewableEntity = event;
@@ -862,7 +870,6 @@ public class Presentation {
                     break;
 
                 case "3":
-                    // Search in Free Activities
                     for (FreeActivity freeActivity : freeActivityController.getAllFreeActivities()) {
                         if (String.valueOf(freeActivity.getId()).equals(entityId)) {
                             reviewableEntity = freeActivity;
@@ -961,10 +968,6 @@ public class Presentation {
         String userId = scanner.nextLine();
         System.out.print("Enter Participant Name: ");
         String participantName = scanner.nextLine();
-        System.out.print("Enter Price: ");
-        double price = Double.parseDouble(scanner.nextLine());
-
-
 
         Event event = eventController.getEventById(eventId);
         User user = userController.getUserById(userId);
@@ -978,7 +981,7 @@ public class Presentation {
             return;
         }
 
-        ticketController.addTicket(id, event, user, participantName, price);
+        ticketController.addTicket(id, event, user, participantName);
     }
 
     private void viewTicket() {
@@ -997,6 +1000,8 @@ public class Presentation {
         String userId = scanner.nextLine();
         System.out.print("Enter new Participant Name: ");
         String participantName = scanner.nextLine();
+        System.out.println("Enter new Price: ");
+        double price = Double.parseDouble(scanner.nextLine());
 
         Event event = eventController.getEventById(eventId);
         User user = userController.getUserById(userId);
@@ -1010,7 +1015,7 @@ public class Presentation {
             return;
         }
 
-        ticketController.updateTicket(id, event, user, participantName);
+        ticketController.updateTicket(id, event, user, participantName, price);
     }
 
     private void deleteTicket() {
@@ -1328,7 +1333,7 @@ public class Presentation {
         if (events.isEmpty()) {
             System.out.println("No upcoming events or activities available.");
         } else {
-            System.out.println("Upcoming Events and Activities:");
+            System.out.println("Upcoming Events:");
 
             for (Event event : events) {
                 int availableTickets = event.getCapacity() - event.getCurrentSize();
@@ -1359,67 +1364,127 @@ public class Presentation {
             }
         }
 
-        private void bookAndPayForTickets() {
-            try {
+    private void bookAndPayForTickets() {
+        try {
+            System.out.println("What would you like to book?");
+            System.out.println("1. Event");
+            System.out.println("2. Activity");
+            System.out.print("Enter choice (1 or 2): ");
+            int choice = Integer.parseInt(scanner.nextLine());
+
+            Event event = null;
+            Activity activity = null;
+
+            if (choice == 1) {
+                System.out.println("Available events:");
+                System.out.println(eventController.getAllEvents());
                 System.out.print("Enter Event ID to book tickets: ");
                 String eventId = scanner.nextLine();
-                Event event = eventController.getEventById(eventId);
+                event = eventController.getEventById(eventId);
 
                 if (event == null) {
                     System.out.println("Event not found.");
                     return;
                 }
+            } else if (choice == 2) {
+                System.out.println("Available activities:");
+                System.out.println(activityController.getAllActivities());
+                System.out.print("Enter Activity ID to book tickets: ");
+                String activityId = scanner.nextLine();
+                activity = activityController.getActivityById(activityId);
 
-                System.out.print("Enter number of tickets to book: ");
-                int numTickets = Integer.parseInt(scanner.nextLine());
-
-                int availableTickets = event.getCapacity() - event.getCurrentSize();
-                if (availableTickets < numTickets) {
-                    System.out.println("Insufficient tickets available. Only " + availableTickets + " tickets left.");
+                if (activity == null) {
+                    System.out.println("Activity not found.");
                     return;
                 }
-
-                System.out.print("Enter Reservation ID: ");
-                String reservationId = scanner.nextLine();
-                User user = currentUser;
-                LocalDateTime reservationDate = LocalDateTime.now();
-
-                ActivitySchedule activitySchedule = activityScheduleController.getActivityScheduleById(eventId);
-                reservationController.addReservation(reservationId, user, activitySchedule, String.valueOf(numTickets), reservationDate.toString());
-
-                System.out.print("Enter Payment Amount: ");
-                double amount = Double.parseDouble(scanner.nextLine());
-                System.out.print("Enter Payment Method (e.g., CARD, CASH): ");
-                String paymentMethod = scanner.nextLine();
-
-                String paymentId = String.valueOf(reservationId.hashCode());
-                paymentController.addPayment(paymentId, String.valueOf(amount), reservationDate.toString(), user, paymentMethod);
-
-                System.out.println("Payment successful! Your booking is confirmed.");
-
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter valid numbers.");
-            } catch (IllegalArgumentException e) {
-                System.out.println("Error: " + e.getMessage());
-            } catch (Exception e) {
-                System.out.println("Error during booking or payment: " + e.getMessage());
-            }
-        }
-
-
-        private void filterActivities () {
-            System.out.print("Enter minimum capacity (number of people): ");
-            int minCapacity = Integer.parseInt(scanner.nextLine());
-
-            List<Activity> activities = activityController.filterActivitiesByCapacity(minCapacity);
-
-            if (activities.isEmpty()) {
-                System.out.println("No activities match the given criteria.");
             } else {
-                System.out.println("Filtered Activities:");
-                for (Activity activity : activities) {
-                    System.out.println(activity);
-                }
+                System.out.println("Invalid choice. Please enter 1 for Event or 2 for Activity.");
+                return;
+            }
+
+            double ticketCost = (event != null) ? event.getPrice() : activity.getPrice();
+            int availableTickets = (event != null) ? event.getCapacity() - event.getCurrentSize()
+                    : activity.getCapacity() - activity.getCurrentSize();
+
+            System.out.print("Enter number of tickets to book: ");
+            int numTickets = Integer.parseInt(scanner.nextLine());
+
+            if (availableTickets < numTickets) {
+                System.out.println("Insufficient tickets available. Only " + availableTickets + " tickets left.");
+                return;
+            }
+
+            double totalCost = numTickets * ticketCost;
+            System.out.println("You have to pay: " + totalCost + " euro.");
+            if (currentUser.getBalance() < totalCost) {
+                System.out.println("Insufficient balance. You need " + totalCost + " euros, but have only " + currentUser.getBalance() + " euros.");
+                return;
+            }
+
+            System.out.println("Select payment method:");
+            System.out.println("1. CASH");
+            System.out.println("2. CARD");
+            System.out.print("Enter choice (1 or 2): ");
+            int paymentChoice = Integer.parseInt(scanner.nextLine());
+            String paymentMethod = (paymentChoice == 1) ? "CASH" : "CARD";
+
+            currentUser.setBalance(currentUser.getBalance() - totalCost);
+
+            String paymentId = (event != null) ? String.valueOf(event.getId()) : String.valueOf(activity.getId());
+            paymentController.addPayment(paymentId, String.valueOf(totalCost), LocalDateTime.now().toString(), currentUser, paymentMethod);
+
+            System.out.println("Payment successful! Your booking is confirmed.");
+
+            for (int i = 0; i < numTickets; i++) {
+                String participantName = "Participant " + (i + 1);
+                String ticketId = String.valueOf(ticketController.generateUniqueId());
+                ticketController.addTicket(ticketId, event != null ? event : activity, currentUser, participantName);
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter valid numbers.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error during booking or payment: " + e.getMessage());
+        }
+    }
+
+
+    private void filterActivities() {
+        System.out.println("Choose filter option:");
+        System.out.println("1. Filter by category");
+        System.out.println("2. Filter by minimum capacity");
+        System.out.print("Enter choice (1 or 2): ");
+        int choice = Integer.parseInt(scanner.nextLine());
+
+        List<Activity> filteredActivities;
+
+        switch (choice) {
+            case 1 -> {
+                System.out.print("Enter category (e.g., RELAXATION, WORKSHOP, ENTERTAINMENT): ");
+                String categoryInput = scanner.nextLine().toUpperCase();
+                filteredActivities = activityController.filterActivitiesByCategory(categoryInput);
+            }
+            case 2 -> {
+                System.out.print("Enter minimum capacity (number of people): ");
+                int minCapacity = Integer.parseInt(scanner.nextLine());
+                filteredActivities = activityController.filterActivitiesByCapacity(minCapacity);
+            }
+            default -> {
+                System.out.println("Invalid choice. Returning to menu.");
+                return;
             }
         }
+
+        if (filteredActivities.isEmpty()) {
+            System.out.println("No activities match the given criteria.");
+        } else {
+            System.out.println("Filtered Activities:");
+            for (Activity activity : filteredActivities) {
+                System.out.println(activity);
+            }
+        }
+    }
+
 }

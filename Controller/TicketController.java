@@ -1,6 +1,7 @@
 package Controller;
 
 import Domain.Event;
+import Domain.ReviewableEntity;
 import Domain.Ticket;
 import Domain.User;
 import Service.TicketService;
@@ -15,11 +16,11 @@ public class TicketController {
         this.ticketService = ticketService;
     }
 
-    public void addTicket(String idString, Event event, User owner, String participantName, double price) {
+    public void addTicket(String idString, ReviewableEntity event, User owner, String participantName) {
         try {
             int id = Integer.parseInt(idString);
 
-            ticketService.addTicket(id, event, owner, participantName, price);
+            ticketService.addTicket(id, event, owner, participantName);
             System.out.println("Ticket added successfully.");
         } catch (NumberFormatException e) {
             System.out.println("ID must be a valid number.");
@@ -38,11 +39,11 @@ public class TicketController {
         }
     }
 
-    public void updateTicket(String idString, Event event, User owner, String participantName) {
+    public void updateTicket(String idString, Event event, User owner, String participantName, double price) {
         try {
             int id = Integer.parseInt(idString);
 
-            ticketService.updateTicket(id, event, owner, participantName);
+            ticketService.updateTicket(id, event, owner, participantName, price);
             System.out.println("Ticket updated successfully.");
         } catch (NumberFormatException e) {
             System.out.println("ID must be a valid number.");
@@ -65,5 +66,9 @@ public class TicketController {
 
     public List<Ticket> getAvailableTickets() {
         return null;
+    }
+
+    public int generateUniqueId() {
+        return ticketService.generateUniqueid();
     }
 }

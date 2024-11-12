@@ -1,14 +1,18 @@
 package Domain;
 
 public class Activity extends ReviewableEntity {
+    private int currentSize;
     private String description;
     private int capacity;
+    private double price;
 
 
-    public Activity(int id, String activityName, int capacity, String location, EventType eventType, String description) {
+    public Activity(int id, String activityName, int capacity, String location, EventType eventType, String description, double price) {
         super(id, activityName,eventType, location);
         this.capacity = capacity;
         this.description = description;
+        this.price = price;
+        this.currentSize = 0;
     }
 
     public String getDescription() {
@@ -27,11 +31,32 @@ public class Activity extends ReviewableEntity {
         this.capacity = capacity;
     }
 
-    @java.lang.Override
-    public java.lang.String toString() {
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public int getCurrentSize() {
+        return currentSize;
+    }
+
+    public void setCurrentSize(int currentSize) {
+        this.currentSize = currentSize;
+    }
+
+    @Override
+    public String toString() {
         return "Activity{" +
-                "capacity=" + capacity +
-                ", description='" + description + '\'' +
+                "description='" + description + '\'' +
+                ", capacity=" + capacity +
+                ", price=" + price +
                 '}';
+    }
+
+    public EventType getCategory() {
+        return super.getEventType();
     }
 }

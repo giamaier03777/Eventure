@@ -9,13 +9,15 @@ public class Event extends ReviewableEntity {
     private int capacity;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    double price;
 
-    public Event(int id, String eventName, String location, int capacity, EventType eventType, int currentSize, LocalDateTime startDate, LocalDateTime endDate) {
+    public Event(int id, String eventName, String location, int capacity, EventType eventType, int currentSize, LocalDateTime startDate, LocalDateTime endDate, double price) {
         super(id, eventName, eventType, location);
         this.capacity = capacity;
         this.currentSize = currentSize;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.price = price;
     }
 
     public int getCurrentSize() {
@@ -53,5 +55,22 @@ public class Event extends ReviewableEntity {
 
     public Instant getDate() {
         return startDate.toInstant(ZoneOffset.UTC);
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return "Id: " + this.getId() +
+                ", Event name: " + this.getName() +
+                ", Location: " + this.getLocation() +
+                ", Event type: " + this.getEventType() +
+                ", price: " + price + "\n";
     }
 }

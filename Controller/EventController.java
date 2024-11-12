@@ -16,7 +16,7 @@ public class EventController {
         this.eventService = eventService;
     }
 
-    public void addEvent(String idString, String eventName, String location, String capacityString, String eventTypeString, String currentSizeString, String startDateString, String endDateString) {
+    public void addEvent(String idString, String eventName, String location, String capacityString, String eventTypeString, String currentSizeString, String startDateString, String endDateString, double price) {
         try {
             int id = Integer.parseInt(idString);
             int capacity = Integer.parseInt(capacityString);
@@ -25,7 +25,7 @@ public class EventController {
             LocalDateTime startDate = LocalDateTime.parse(startDateString);
             LocalDateTime endDate = LocalDateTime.parse(endDateString);
 
-            eventService.addEvent(id, eventName, location, capacity, eventType, currentSize, startDate, endDate);
+            eventService.addEvent(id, eventName, location, capacity, eventType, currentSize, startDate, endDate, price);
             System.out.println("Event added successfully.");
         } catch (NumberFormatException e) {
             System.out.println("ID, capacity, and current size must be valid numbers.");
@@ -46,7 +46,7 @@ public class EventController {
         }
     }
 
-    public void updateEvent(String idString, String eventName, String location, String capacityString, String eventTypeString, String currentSizeString, String startDateString, String endDateString) {
+    public void updateEvent(String idString, String eventName, String location, String capacityString, String eventTypeString, String currentSizeString, String startDateString, String endDateString, double price) {
         try {
             int id = Integer.parseInt(idString);
             int capacity = Integer.parseInt(capacityString);
@@ -55,7 +55,7 @@ public class EventController {
             LocalDateTime startDate = LocalDateTime.parse(startDateString);
             LocalDateTime endDate = LocalDateTime.parse(endDateString);
 
-            eventService.updateEvent(id, eventName, location, capacity, eventType, currentSize, startDate, endDate);
+            eventService.updateEvent(id, eventName, location, capacity, eventType, currentSize, startDate, endDate, price);
             System.out.println("Event updated successfully.");
         } catch (NumberFormatException e) {
             System.out.println("ID, capacity, and current size must be valid numbers.");

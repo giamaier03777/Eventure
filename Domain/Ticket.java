@@ -4,29 +4,27 @@ import Domain.Event;
 
 public class Ticket{
     private int id;
-    private Event event;
+    private ReviewableEntity event;
     private User owner;
     private String participantName;
-    private double cost;
 
 
-    public Ticket(int id, Event event, User owner, String participantName, double cost){
+    public Ticket(int id, ReviewableEntity event, User owner, String participantName){
         this.id = id;
         this.event = event;
         this.owner = owner;
         this.participantName = participantName;
-        this.cost = cost;
     }
 
     public int getId(){return id;}
 
     public void setId(int id) {this.id = id;}
 
-    public Event getEvent(){
+    public ReviewableEntity getEvent(){
         return event;
     }
 
-    public void setEvent(Event event){
+    public void setEvent(ReviewableEntity event){
         this.event = event;
     }
 
@@ -46,11 +44,4 @@ public class Ticket{
         this.participantName = participantName;
     }
 
-    public double getCost() {
-        return cost;
-    }
-
-    public void setCost(double cost) {
-        this.cost = cost;
-    }
 }

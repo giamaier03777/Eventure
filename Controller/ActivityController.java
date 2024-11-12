@@ -14,13 +14,13 @@ public class ActivityController {
         this.activityService = activityService;
     }
 
-    public void addActivity(String idString, String activityName, String capacityString, String location, String eventTypeString, String description) {
+    public void addActivity(String idString, String activityName, String capacityString, String location, String eventTypeString, String description, double price) {
         try {
             int id = Integer.parseInt(idString);
             int capacity = Integer.parseInt(capacityString);
             EventType eventType = EventType.valueOf(eventTypeString.toUpperCase());
 
-            activityService.addActivity(id, activityName, capacity, location, eventType, description);
+            activityService.addActivity(id, activityName, capacity, location, eventType, description, price);
             System.out.println("Activity added successfully.");
         } catch (NumberFormatException e) {
             System.out.println("ID and capacity must be valid numbers.");
@@ -43,13 +43,13 @@ public class ActivityController {
         return activityService.getAllActivities();
     }
 
-    public void updateActivity(String idString, String activityName, String capacityString, String location, String eventTypeString, String description) {
+    public void updateActivity(String idString, String activityName, String capacityString, String location, String eventTypeString, String description, double price) {
         try {
             int id = Integer.parseInt(idString);
             int capacity = Integer.parseInt(capacityString);
             EventType eventType = EventType.valueOf(eventTypeString.toUpperCase());
 
-            activityService.updateActivity(id, activityName, capacity, location, eventType, description);
+            activityService.updateActivity(id, activityName, capacity, location, eventType, description, price);
             System.out.println("Activity updated successfully.");
         } catch (NumberFormatException e) {
             System.out.println("ID and capacity must be valid numbers.");
@@ -73,5 +73,9 @@ public class ActivityController {
     public List<Activity> filterActivitiesByCapacity(int minCapacity) {
         return activityService.filterActivitiesByCapacity(minCapacity);
 
+    }
+
+    public List<Activity> filterActivitiesByCategory(String category) {
+        return activityService.filterActivitiesByCategory(category);
     }
 }

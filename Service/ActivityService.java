@@ -15,7 +15,7 @@ public class ActivityService {
         this.activityRepo = activityRepo;
     }
 
-    public void addActivity(int id, String activityName, int capacity, String location, EventType eventType, String description) {
+    public void addActivity(int id, String activityName, int capacity, String location, EventType eventType, String description, double price) {
         if (activityRepo.read(id) != null) {
             throw new IllegalArgumentException("An activity with this ID already exists.");
         }
@@ -32,7 +32,7 @@ public class ActivityService {
             throw new IllegalArgumentException("Activity location cannot be empty.");
         }
 
-        Activity activity = new Activity(id, activityName, capacity, location, eventType, description);
+        Activity activity = new Activity(id, activityName, capacity, location, eventType, description, price);
         activityRepo.create(activity);
     }
 
@@ -40,7 +40,7 @@ public class ActivityService {
         return activityRepo.read(id);
     }
 
-    public void updateActivity(int id, String activityName, int capacity, String location, EventType eventType, String description) {
+    public void updateActivity(int id, String activityName, int capacity, String location, EventType eventType, String description, double price) {
         Activity existingActivity = activityRepo.read(id);
         if (existingActivity == null) {
             throw new IllegalArgumentException("Activity with the specified ID does not exist.");
@@ -58,7 +58,7 @@ public class ActivityService {
             throw new IllegalArgumentException("Activity location cannot be empty.");
         }
 
-        Activity updatedActivity = new Activity(id, activityName, capacity, location, eventType, description);
+        Activity updatedActivity = new Activity(id, activityName, capacity, location, eventType, description, price);
         activityRepo.update(updatedActivity);
     }
 
@@ -79,4 +79,10 @@ public class ActivityService {
                 .filter(activity -> activity.getCapacity() >= minCapacity)
                 .collect(Collectors.toList());
     }
-}
+
+    public List<Activity> filterActivitiesByCategory(String category) {
+            return activityRepo.findAll().stream()
+                    .filter(activity -> activity.getCategory().name().equalsIgnoreCase(category))
+                    .collect(Collectors.toList());
+        }
+    }
