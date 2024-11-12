@@ -1,5 +1,6 @@
 package Service;
 
+import Domain.Event;
 import Domain.Review;
 import Domain.User;
 import Domain.ReviewableEntity;
@@ -71,6 +72,10 @@ public class ReviewService {
             throw new IllegalArgumentException("Review with the specified ID does not exist.");
         }
         reviewRepo.delete(id);
+    }
+
+    public List<Review> getReviewsByEvent(ReviewableEntity event) {
+        return reviewRepo.getReviewsByEvent(event);
     }
 
 }

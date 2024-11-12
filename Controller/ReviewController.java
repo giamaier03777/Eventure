@@ -1,5 +1,6 @@
 package Controller;
 
+import Domain.Event;
 import Domain.Review;
 import Domain.User;
 import Domain.ReviewableEntity;
@@ -7,6 +8,7 @@ import Service.ReviewService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 public class ReviewController {
 
@@ -68,5 +70,9 @@ public class ReviewController {
         } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
         }
+    }
+
+    public List<Review> getReviewByEvent(ReviewableEntity event) {
+        return this.reviewService.getReviewsByEvent(event);
     }
 }

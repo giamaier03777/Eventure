@@ -637,8 +637,7 @@ public class Presentation {
             System.out.print("Enter Payment ID: ");
             int id = Integer.parseInt(scanner.nextLine());
 
-            System.out.print("Enter User ID: ");
-            int userId = Integer.parseInt(scanner.nextLine());
+            int userId = currentUser.getId();
 
             User user = userController.getUserById(String.valueOf(userId));
             if (user == null) {
@@ -686,8 +685,7 @@ public class Presentation {
             System.out.print("Enter new Payment Date (e.g., 2023-12-31T10:15:30): ");
             String dateString = scanner.nextLine();
 
-            System.out.print("Enter User ID: ");
-            int userId = Integer.parseInt(scanner.nextLine());
+            int userId = currentUser.getId();
             User user = userController.getUserById(String.valueOf(userId));
             if (user == null) {
                 System.out.println("User not found.");
@@ -744,8 +742,7 @@ public class Presentation {
         System.out.print("Enter Reservation ID: ");
         int id = Integer.parseInt(scanner.nextLine());
 
-        System.out.print("Enter User ID: ");
-        int userId = Integer.parseInt(scanner.nextLine());
+        int userId = currentUser.getId();
         User user = userController.getUserById(String.valueOf(userId));
 
         System.out.print("Enter Activity Schedule ID: ");
@@ -831,8 +828,7 @@ public class Presentation {
         try {
             System.out.print("Enter Review ID: ");
             String id = scanner.nextLine();
-            System.out.print("Enter User ID: ");
-            String userId = scanner.nextLine();
+            String userId = String.valueOf(currentUser.getId());
 
             User user = userController.getUserById(userId);
             if (user == null) {
@@ -908,15 +904,61 @@ public class Presentation {
 
 
     private void viewReview() {
-        System.out.print("Enter Review ID: ");
-        String id = scanner.nextLine();
-        Review review = reviewController.getReviewById(id);
-        if (review != null) {
-            System.out.println(review);
+        System.out.println("Select the type of reviewable entity:");
+        System.out.println("1. Activity");
+        System.out.println("2. Event");
+        System.out.println("3. Free Activity");
+        System.out.print("Enter choice (1, 2, or 3): ");
+
+        int choice = Integer.parseInt(scanner.nextLine());
+        ReviewableEntity entity = null;
+
+        switch (choice) {
+            case 2 -> {
+                System.out.print("Enter Event ID: ");
+                String id = scanner.nextLine();
+                entity = eventController.getEventById(id);
+                if (entity == null) {
+                    System.out.println("Event not found.");
+                    return;
+                }
+            }
+            case 1 -> {
+                System.out.print("Enter Activity ID: ");
+                String id = scanner.nextLine();
+                entity = activityController.getActivityById(id);
+                if (entity == null) {
+                    System.out.println("Activity not found.");
+                    return;
+                }
+            }
+            case 3 -> {
+                System.out.print("Enter Free Activity ID: ");
+                String id = scanner.nextLine();
+                entity = freeActivityController.getFreeActivityById(id);
+                if (entity == null) {
+                    System.out.println("Free Activity not found.");
+                    return;
+                }
+            }
+            default -> {
+                System.out.println("Invalid choice. Please enter 1, 2, or 3.");
+                return;
+            }
+        }
+
+        List<Review> reviews = reviewController.getReviewByEvent(entity);
+        if (!reviews.isEmpty()) {
+            System.out.println("Reviews for selected entity:");
+            for (Review review : reviews) {
+                System.out.println(review);
+            }
         } else {
-            System.out.println("Review not found.");
+            System.out.println("No reviews found for this entity.");
         }
     }
+
+
 
     private void updateReview() {
         try {
@@ -966,8 +1008,7 @@ public class Presentation {
         String id = scanner.nextLine();
         System.out.print("Enter Event ID: ");
         String eventId = scanner.nextLine();
-        System.out.print("Enter User ID: ");
-        String userId = scanner.nextLine();
+        String userId = String.valueOf(currentUser.getId());
         System.out.print("Enter Participant Name: ");
         String participantName = scanner.nextLine();
 
@@ -1133,8 +1174,7 @@ public class Presentation {
     private void addWishlist() {
         System.out.print("Enter Wishlist ID: ");
         String wishlistId = scanner.nextLine();
-        System.out.print("Enter User ID: ");
-        String userId = scanner.nextLine();
+        String userId = String.valueOf(currentUser.getId());
 
         User user = userController.getUserById(userId);
         if (user == null) {
@@ -1313,21 +1353,42 @@ public class Presentation {
     }
     private void userMenu () {
             while (true) {
-                System.out.println("User Menu:\n1. View Upcoming Events\n2. View Activity Schedules\n3. Book and Pay for Tickets\n4. Filter Activities\n5. Back");
-                int choice = Integer.parseInt(scanner.nextLine());
+                System.out.println("User Menu:\n" +
+                        "1. View Upcoming Events\n" +
+                        "2. View Activity Schedules\n" +
+                        "3. Book and Pay for Tickets\n" +
+                        "4. Filter Activities\n" +
+                        "5. Add Review\n" +
+                        "6. View Reviews\n" +
+                        "7. Create Wishlist\n" +
+                        "8. Add to Wishlist\n" +
+                        "9. View Wishlist\n" +
+                        "10. Back");                int choice = Integer.parseInt(scanner.nextLine());
 
                 switch (choice) {
                     case 1 -> viewUpcomingEvents();
                     case 2 -> viewActivitySchedules();
                     case 3 -> bookAndPayForTickets();
                     case 4 -> filterActivities();
-                    case 5 -> {
+                    case 5 -> addReview();
+                    case 6 -> viewReview();
+                    case 7 -> createWishlist();
+                    case 8 -> addToWishlist();
+                    case 9 -> viewWishlist();
+                    case 10 -> {
                         return;
                     }
                     default -> System.out.println("Invalid choice, please try again.");
                 }
             }
         }
+
+    private void viewWishlist() {
+        System.out.print("Enter Wishlist ID: ");
+        String wishlistId = scanner.nextLine();
+        Wishlist wishlist = wishlistController.getWishlistById(wishlistId);
+        System.out.println(wishlist);
+    }
 
     private void viewUpcomingEvents() {
         List<Event> events = eventController.getUpcomingEvents();
@@ -1487,6 +1548,69 @@ public class Presentation {
                 System.out.println(activity);
             }
         }
+    }
+
+    private void addToWishlist() {
+        System.out.print("Enter Wishlist ID: ");
+        String wishlistId = scanner.nextLine();
+
+        Wishlist wishlist = wishlistController.getWishlistById(wishlistId);
+        if (wishlist == null) {
+            System.out.println("Wishlist not found.");
+            return;
+        }
+
+        System.out.println("Choose the type of entity to add:");
+        System.out.println("1. Activity");
+        System.out.println("2. FreeActivity");
+        System.out.println("3. Event");
+        System.out.print("Enter choice (1, 2, or 3): ");
+        int choice = Integer.parseInt(scanner.nextLine());
+
+        ReviewableEntity entity = null;
+
+        switch (choice) {
+            case 1:
+                System.out.print("Enter Activity ID: ");
+                String activityId = scanner.nextLine();
+                entity = activityController.getActivityById(activityId);
+                break;
+            case 2:
+                System.out.print("Enter FreeActivity ID: ");
+                String freeActivityId = scanner.nextLine();
+                entity = freeActivityController.getFreeActivityById(freeActivityId);
+                break;
+            case 3:
+                System.out.print("Enter Event ID: ");
+                String eventId = scanner.nextLine();
+                entity = eventController.getEventById(eventId);
+                break;
+            default:
+                System.out.println("Invalid choice.");
+                return;
+        }
+
+        if (entity == null) {
+            System.out.println("Entity not found.");
+            return;
+        }
+
+        wishlistController.addItemToWishlist(String.valueOf(wishlist.getId()), entity);
+        System.out.println("Item added to wishlist successfully.");
+    }
+
+    private void createWishlist() {
+        System.out.print("Enter Wishlist ID: ");
+        String id = scanner.nextLine();
+
+        User user = userController.getUserById(String.valueOf(currentUser.getId()));
+        if (user == null) {
+            System.out.println("User not found.");
+            return;
+        }
+
+        wishlistController.addWishlist(id, user, new ArrayList<>() );
+        System.out.println("Wishlist created successfully.");
     }
 
 }

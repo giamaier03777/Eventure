@@ -53,4 +53,15 @@ public class Review {
     public void setReviewDate(LocalDateTime reviewDate) {
         this.reviewDate = reviewDate;
     }
+
+    @Override
+    public String toString() {
+        return "Review{" +
+                "id=" + id +
+                ", user=" + user +
+                ", reviewableEntity=" + reviewableEntity +
+                ", comment='" + comment + '\'' +
+                ", reviewDate=" + reviewDate +
+                '}';
+    }
 }

@@ -1,6 +1,9 @@
 package Repository;
 
+import Domain.Event;
 import Domain.Review;
+import Domain.ReviewableEntity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,5 +50,15 @@ public class ReviewRepo implements IRepository<Review> {
     @Override
     public List<Review> findAll() {
         return new ArrayList<>(reviewList);
+    }
+
+    public List<Review> getReviewsByEvent(ReviewableEntity event) {
+        List<Review> matchingReviews = new ArrayList<>();
+        for (Review review : reviewList) {
+            if (review.getReviewableEntity().equals(event)) {
+                matchingReviews.add(review);
+            }
+        }
+        return matchingReviews;
     }
 }

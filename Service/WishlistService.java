@@ -24,10 +24,6 @@ public class WishlistService {
             throw new IllegalArgumentException("User cannot be null.");
         }
 
-        if (items == null || items.isEmpty()) {
-            throw new IllegalArgumentException("Wishlist items cannot be empty.");
-        }
-
         Wishlist wishlist = new Wishlist(id, user, items);
         wishlistRepo.create(wishlist);
     }
@@ -49,10 +45,6 @@ public class WishlistService {
 
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null.");
-        }
-
-        if (items == null || items.isEmpty()) {
-            throw new IllegalArgumentException("Wishlist items cannot be empty.");
         }
 
         existingWishlist.setUser(user);

@@ -45,4 +45,13 @@ public class Wishlist {
     public void removeItem(ReviewableEntity item){
         items.remove(item);
     }
+
+    @Override
+    public String toString() {
+        return "Wishlist{" +
+                "id=" + id +
+                ", user=" + user +
+                ", items=" + items +
+                '}';
+    }
 }

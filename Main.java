@@ -48,7 +48,9 @@ public class Main {
 
 
         int userId = 1;
-        userService.addUser(userId, "test", "test", Role.USER);
+        int userId1 = 2;
+        userService.addUser(userId, "user", "user", Role.USER);
+        userService.addUser(userId1, "admin", "admin", Role.ADMIN);
 
         activityService.addActivity(101, "Yoga Class", 20, "Community Center", EventType.RELAXATION, "A relaxing yoga session.", 200);
         activityService.addActivity(102, "Cooking Workshop", 15, "Kitchen Studio", EventType.WORKSHOP, "Learn new cooking skills.", 100);
