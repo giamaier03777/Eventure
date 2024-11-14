@@ -2,16 +2,16 @@ package Service;
 
 import Domain.Activity;
 import Domain.EventType;
-import Repository.ActivityRepo;
+import Repository.InMemoryRepo;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ActivityService {
 
-    private final ActivityRepo activityRepo;
+    private final InMemoryRepo<Activity> activityRepo;
 
-    public ActivityService(ActivityRepo activityRepo) {
+    public ActivityService(InMemoryRepo<Activity> activityRepo) {
         this.activityRepo = activityRepo;
     }
 
@@ -81,8 +81,8 @@ public class ActivityService {
     }
 
     public List<Activity> filterActivitiesByCategory(String category) {
-            return activityRepo.findAll().stream()
-                    .filter(activity -> activity.getCategory().name().equalsIgnoreCase(category))
-                    .collect(Collectors.toList());
-        }
+        return activityRepo.findAll().stream()
+                .filter(activity -> activity.getCategory().name().equalsIgnoreCase(category))
+                .collect(Collectors.toList());
     }
+}

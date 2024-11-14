@@ -2,15 +2,15 @@ package Service;
 
 import Domain.FreeActivity;
 import Domain.EventType;
-import Repository.FreeActivityRepo;
+import Repository.InMemoryRepo;
 
 import java.util.List;
 
 public class FreeActivityService {
 
-    private final FreeActivityRepo freeActivityRepo;
+    private final InMemoryRepo<FreeActivity> freeActivityRepo;
 
-    public FreeActivityService(FreeActivityRepo freeActivityRepo) {
+    public FreeActivityService(InMemoryRepo<FreeActivity> freeActivityRepo) {
         this.freeActivityRepo = freeActivityRepo;
     }
 

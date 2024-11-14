@@ -2,13 +2,15 @@ package Service;
 
 import Domain.User;
 import Domain.Role;
-import Repository.UserRepo;
+import Repository.InMemoryRepo;
+
+import java.util.Optional;
 
 public class UserService {
 
-    private final UserRepo userRepo;
+    private final InMemoryRepo<User> userRepo;
 
-    public UserService(UserRepo userRepo) {
+    public UserService(InMemoryRepo<User> userRepo) {
         this.userRepo = userRepo;
     }
 
@@ -75,7 +77,10 @@ public class UserService {
     }
 
     public User getUserByUsername(String username) {
-        return userRepo.findByUsername(username);
+        return userRepo.findAll().stream()
+                .filter(user -> user.getUsername().equalsIgnoreCase(username))
+                .findFirst()
+                .orElse(null);
     }
 
     public int generateNewUntakenId() {
@@ -84,7 +89,4 @@ public class UserService {
                 .max()
                 .orElse(0) + 1;
     }
-
-
 }
-

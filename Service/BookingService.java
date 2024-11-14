@@ -2,13 +2,13 @@ package Service;
 
 import Domain.ActivitySchedule;
 import Domain.Booking;
-import Repository.BookingRepo;
+import Repository.InMemoryRepo;
 
 public class BookingService {
 
-    private final BookingRepo bookingRepo;
+    private final InMemoryRepo<Booking> bookingRepo;
 
-    public BookingService(BookingRepo bookingRepo) {
+    public BookingService(InMemoryRepo<Booking> bookingRepo) {
         this.bookingRepo = bookingRepo;
     }
 

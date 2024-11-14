@@ -5,13 +5,13 @@ import Domain.Activity;
 import Domain.ReviewableEntity;
 import Domain.Ticket;
 import Domain.User;
-import Repository.TicketRepo;
+import Repository.InMemoryRepo;
 
 public class TicketService {
 
-    private final TicketRepo ticketRepo;
+    private final InMemoryRepo<Ticket> ticketRepo;
 
-    public TicketService(TicketRepo ticketRepo) {
+    public TicketService(InMemoryRepo<Ticket> ticketRepo) {
         this.ticketRepo = ticketRepo;
     }
 
@@ -100,7 +100,7 @@ public class TicketService {
         ticketRepo.delete(id);
     }
 
-    public int generateUniqueid() {
+    public int generateUniqueId() {
         return ticketRepo.findAll().stream()
                 .mapToInt(Ticket::getId)
                 .max()

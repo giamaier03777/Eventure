@@ -3,22 +3,19 @@ package Service;
 import Domain.Reservation;
 import Domain.User;
 import Domain.ActivitySchedule;
-import Repository.ReservationRepo;
+import Repository.InMemoryRepo;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class ReservationService {
 
-    private final ReservationRepo reservationRepo;
+    private final InMemoryRepo<Reservation> reservationRepo;
 
-    public ReservationService(ReservationRepo reservationRepo) {
+    public ReservationService(InMemoryRepo<Reservation> reservationRepo) {
         this.reservationRepo = reservationRepo;
     }
 
-
     public void addReservation(int id, User user, ActivitySchedule activitySchedule, int numberOfPeople, LocalDateTime reservationDate) {
-
         if (reservationRepo.read(id) != null) {
             throw new IllegalArgumentException("A reservation with this ID already exists.");
         }
@@ -50,7 +47,6 @@ public class ReservationService {
         }
         return reservation;
     }
-
 
     public void updateReservation(int id, User user, ActivitySchedule activitySchedule, int numberOfPeople, LocalDateTime reservationDate) {
         Reservation existingReservation = reservationRepo.read(id);
@@ -86,5 +82,4 @@ public class ReservationService {
         }
         reservationRepo.delete(id);
     }
-
 }

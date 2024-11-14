@@ -3,15 +3,15 @@ package Service;
 import Domain.ReviewableEntity;
 import Domain.Wishlist;
 import Domain.User;
-import Repository.WishlistRepo;
+import Repository.InMemoryRepo;
 
 import java.util.List;
 
 public class WishlistService {
 
-    private final WishlistRepo wishlistRepo;
+    private final InMemoryRepo<Wishlist> wishlistRepo;
 
-    public WishlistService(WishlistRepo wishlistRepo) {
+    public WishlistService(InMemoryRepo<Wishlist> wishlistRepo) {
         this.wishlistRepo = wishlistRepo;
     }
 
@@ -59,6 +59,4 @@ public class WishlistService {
         }
         wishlistRepo.delete(id);
     }
-
 }
-

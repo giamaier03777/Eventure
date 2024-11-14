@@ -4,16 +4,17 @@ import Domain.Event;
 import Domain.Review;
 import Domain.User;
 import Domain.ReviewableEntity;
-import Repository.ReviewRepo;
+import Repository.InMemoryRepo;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ReviewService {
 
-    private final ReviewRepo reviewRepo;
+    private final InMemoryRepo<Review> reviewRepo;
 
-    public ReviewService(ReviewRepo reviewRepo) {
+    public ReviewService(InMemoryRepo<Review> reviewRepo) {
         this.reviewRepo = reviewRepo;
     }
 
@@ -65,7 +66,6 @@ public class ReviewService {
         reviewRepo.update(review);
     }
 
-
     public void deleteReview(int id) {
         Review review = reviewRepo.read(id);
         if (review == null) {
@@ -74,11 +74,9 @@ public class ReviewService {
         reviewRepo.delete(id);
     }
 
-    public List<Review> getReviewsByEvent(ReviewableEntity event) {
-        return reviewRepo.getReviewsByEvent(event);
+    public List<Review> getReviewsByEvent(ReviewableEntity entity) {
+        return reviewRepo.findAll().stream()
+                .filter(review -> review.getReviewableEntity().equals(entity))
+                .collect(Collectors.toList());
     }
-
 }
-
-
-

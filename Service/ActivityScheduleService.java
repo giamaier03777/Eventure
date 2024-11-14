@@ -2,7 +2,7 @@ package Service;
 
 import Domain.Activity;
 import Domain.ActivitySchedule;
-import Repository.ActivityScheduleRepo;
+import Repository.InMemoryRepo;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 
 public class ActivityScheduleService {
 
-    private final ActivityScheduleRepo activityScheduleRepo;
+    private final InMemoryRepo<ActivitySchedule> activityScheduleRepo;
 
-    public ActivityScheduleService(ActivityScheduleRepo activityScheduleRepo) {
+    public ActivityScheduleService(InMemoryRepo<ActivitySchedule> activityScheduleRepo) {
         this.activityScheduleRepo = activityScheduleRepo;
     }
 

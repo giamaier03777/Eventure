@@ -2,15 +2,15 @@ package Service;
 
 import Domain.Payment;
 import Domain.User;
-import Repository.PaymentRepo;
+import Repository.InMemoryRepo;
 
 import java.time.LocalDateTime;
 
 public class PaymentService {
 
-    private final PaymentRepo paymentRepo;
+    private final InMemoryRepo<Payment> paymentRepo;
 
-    public PaymentService(PaymentRepo paymentRepo) {
+    public PaymentService(InMemoryRepo<Payment> paymentRepo) {
         this.paymentRepo = paymentRepo;
     }
 

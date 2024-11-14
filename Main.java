@@ -10,17 +10,17 @@ import java.time.LocalTime;
 
 public class Main {
     public static void main(String[] args) {
-        ActivityRepo activityRepo = new ActivityRepo();
-        ActivityScheduleRepo activityScheduleRepo = new ActivityScheduleRepo();
-        BookingRepo bookingRepo = new BookingRepo();
-        EventRepo eventRepo = new EventRepo();
-        FreeActivityRepo freeActivityRepo = new FreeActivityRepo();
-        PaymentRepo paymentRepo = new PaymentRepo();
-        ReservationRepo reservationRepo = new ReservationRepo();
-        ReviewRepo reviewRepo = new ReviewRepo();
-        TicketRepo ticketRepo = new TicketRepo();
-        UserRepo userRepo = new UserRepo();
-        WishlistRepo wishlistRepo = new WishlistRepo();
+        InMemoryRepo activityRepo = new InMemoryRepo();
+        InMemoryRepo activityScheduleRepo = new InMemoryRepo();
+        InMemoryRepo bookingRepo = new InMemoryRepo<>();
+        InMemoryRepo eventRepo = new InMemoryRepo();
+        InMemoryRepo freeActivityRepo = new InMemoryRepo();
+        InMemoryRepo paymentRepo = new InMemoryRepo();
+        InMemoryRepo reservationRepo = new InMemoryRepo();
+        InMemoryRepo reviewRepo = new InMemoryRepo();
+        InMemoryRepo ticketRepo = new InMemoryRepo();
+        InMemoryRepo userRepo = new InMemoryRepo();
+        InMemoryRepo wishlistRepo = new InMemoryRepo();
 
         ActivityService activityService = new ActivityService(activityRepo);
         ActivityScheduleService activityScheduleService = new ActivityScheduleService(activityScheduleRepo);
