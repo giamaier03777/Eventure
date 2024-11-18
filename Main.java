@@ -1,6 +1,6 @@
 import Controller.*;
 import Domain.*;
-import Presentation.Presentation;
+import Presentation.PresentationAdmin;
 import Repository.*;
 import Service.*;
 
@@ -46,7 +46,6 @@ public class Main {
         UserController userController = new UserController(userService);
         WishlistController wishlistController = new WishlistController(wishlistService);
 
-
         int userId = 1;
         int userId1 = 2;
         userService.addUser(userId, "user", "user", Role.USER);
@@ -74,8 +73,7 @@ public class Main {
         ticketService.addTicket(401, concertEvent, testUser, "Alice Smith");
         ticketService.addTicket(402, concertEvent, testUser, "Bob Johnson");
 
-
-        Presentation presentation = new Presentation(
+        PresentationAdmin presentationAdmin = new PresentationAdmin(
                 activityController,
                 activityScheduleController,
                 bookingController,
@@ -89,6 +87,7 @@ public class Main {
                 wishlistController
         );
 
-        presentation.start();
+        presentationAdmin.start();
     }
 }
+
