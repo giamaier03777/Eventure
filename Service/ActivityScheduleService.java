@@ -9,15 +9,40 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing activity schedules.
+ */
 public class ActivityScheduleService {
 
     private final InMemoryRepo<ActivitySchedule> activityScheduleRepo;
 
+    /**
+     * Constructs a new {@code ActivityScheduleService}.
+     *
+     * @param activityScheduleRepo the repository for storing and retrieving activity schedules.
+     */
     public ActivityScheduleService(InMemoryRepo<ActivitySchedule> activityScheduleRepo) {
         this.activityScheduleRepo = activityScheduleRepo;
     }
 
-    public void addActivitySchedule(int id, Activity activity, LocalDate date, LocalTime startTime, LocalTime endTime, int availableCapacity) {
+    /**
+     * Adds a new activity schedule.
+     *
+     * @param idString       the unique identifier for the schedule as a string.
+     * @param activity       the activity associated with the schedule.
+     * @param dateString     the date of the schedule in ISO format.
+     * @param startTimeString the start time of the schedule in ISO format.
+     * @param endTimeString   the end time of the schedule in ISO format.
+     * @param capacityString  the available capacity for the schedule as a string.
+     * @throws IllegalArgumentException if any validation fails.
+     */
+    public void addActivitySchedule(String idString, Activity activity, String dateString, String startTimeString, String endTimeString, String capacityString) {
+        int id = Integer.parseInt(idString);
+        int availableCapacity = Integer.parseInt(capacityString);
+        LocalDate date = LocalDate.parse(dateString);
+        LocalTime startTime = LocalTime.parse(startTimeString);
+        LocalTime endTime = LocalTime.parse(endTimeString);
+
         if (activityScheduleRepo.read(id) != null) {
             throw new IllegalArgumentException("An ActivitySchedule with this ID already exists.");
         }
@@ -47,11 +72,34 @@ public class ActivityScheduleService {
         activityScheduleRepo.create(activitySchedule);
     }
 
-    public ActivitySchedule getActivityScheduleById(int id) {
-        return activityScheduleRepo.read(id);
+    /**
+     * Retrieves an activity schedule by its ID.
+     *
+     * @param id the unique identifier for the schedule.
+     * @return the corresponding {@code ActivitySchedule} object, or {@code null} if not found.
+     */
+    public ActivitySchedule getActivityScheduleById(String id) {
+        return activityScheduleRepo.read(Integer.parseInt(id));
     }
 
-    public void updateActivitySchedule(int id, Activity activity, LocalDate date, LocalTime startTime, LocalTime endTime, int availableCapacity) {
+    /**
+     * Updates an existing activity schedule.
+     *
+     * @param idString       the unique identifier for the schedule as a string.
+     * @param activity       the activity associated with the schedule.
+     * @param dateString     the date of the schedule in ISO format.
+     * @param startTimeString the start time of the schedule in ISO format.
+     * @param endTimeString   the end time of the schedule in ISO format.
+     * @param capacityString  the available capacity for the schedule as a string.
+     * @throws IllegalArgumentException if the schedule does not exist or validation fails.
+     */
+    public void updateActivitySchedule(String idString, Activity activity, String dateString, String startTimeString, String endTimeString, String capacityString) {
+        int id = Integer.parseInt(idString);
+        int availableCapacity = Integer.parseInt(capacityString);
+        LocalDate date = LocalDate.parse(dateString);
+        LocalTime startTime = LocalTime.parse(startTimeString);
+        LocalTime endTime = LocalTime.parse(endTimeString);
+
         ActivitySchedule existingSchedule = activityScheduleRepo.read(id);
         if (existingSchedule == null) {
             throw new IllegalArgumentException("ActivitySchedule with the specified ID does not exist.");
@@ -82,14 +130,26 @@ public class ActivityScheduleService {
         activityScheduleRepo.update(updatedSchedule);
     }
 
-    public void deleteActivitySchedule(int id) {
-        if (activityScheduleRepo.read(id) == null) {
+    /**
+     * Deletes an activity schedule by its ID.
+     *
+     * @param id the unique identifier of the schedule.
+     * @throws IllegalArgumentException if the schedule does not exist.
+     */
+    public void deleteActivitySchedule(String id) {
+        if (activityScheduleRepo.read(Integer.parseInt(id)) == null) {
             throw new IllegalArgumentException("ActivitySchedule with the specified ID does not exist.");
         }
-
-        activityScheduleRepo.delete(id);
+        activityScheduleRepo.delete(Integer.parseInt(id));
     }
 
+    /**
+     * Retrieves all schedules for a given activity.
+     *
+     * @param activity the activity for which schedules are to be retrieved.
+     * @return a list of {@code ActivitySchedule} objects associated with the activity.
+     * @throws IllegalArgumentException if the activity is {@code null}.
+     */
     public List<ActivitySchedule> getSchedulesForActivity(Activity activity) {
         if (activity == null) {
             throw new IllegalArgumentException("Activity cannot be null.");
@@ -99,5 +159,25 @@ public class ActivityScheduleService {
                 .stream()
                 .filter(schedule -> schedule.getActivity().getId() == activity.getId())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves an activity schedule by its ID.
+     *
+     * @param number the unique identifier of the schedule as a string.
+     * @return the corresponding {@code ActivitySchedule} object.
+     * @throws IllegalArgumentException if the ID is invalid or the schedule does not exist.
+     */
+    public ActivitySchedule getScheduleById(String number) {
+        try {
+            int id = Integer.parseInt(number);
+            ActivitySchedule schedule = activityScheduleRepo.read(id);
+            if (schedule == null) {
+                throw new IllegalArgumentException("No ActivitySchedule found with the specified ID: " + number);
+            }
+            return schedule;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid ID format. ID must be a number: " + number, e);
+        }
     }
 }

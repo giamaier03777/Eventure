@@ -6,15 +6,37 @@ import Repository.InMemoryRepo;
 
 import java.time.LocalDateTime;
 
+/**
+ * Service class for managing payments in the system.
+ */
 public class PaymentService {
 
     private final InMemoryRepo<Payment> paymentRepo;
 
+    /**
+     * Constructs a new {@code PaymentService}.
+     *
+     * @param paymentRepo the repository for storing and managing payments.
+     */
     public PaymentService(InMemoryRepo<Payment> paymentRepo) {
         this.paymentRepo = paymentRepo;
     }
 
-    public void addPayment(int id, double amount, LocalDateTime date, User user, String paymentMethod) {
+    /**
+     * Adds a new payment to the repository.
+     *
+     * @param idString      the unique identifier of the payment as a string.
+     * @param amountString  the payment amount as a string.
+     * @param dateString    the date of the payment as a string in ISO-8601 format.
+     * @param user          the user who made the payment.
+     * @param paymentMethod the method of payment (e.g., "CASH", "CARD").
+     * @throws IllegalArgumentException if validation fails or the payment already exists.
+     */
+    public void addPayment(String idString, String amountString, String dateString, User user, String paymentMethod) {
+        int id = Integer.parseInt(idString);
+        double amount = Double.parseDouble(amountString);
+        LocalDateTime date = LocalDateTime.parse(dateString);
+
         if (paymentRepo.read(id) != null) {
             throw new IllegalArgumentException("A payment with this ID already exists.");
         }
@@ -39,12 +61,32 @@ public class PaymentService {
         paymentRepo.create(payment);
     }
 
-    public Payment getPaymentById(int id) {
-        return paymentRepo.read(id);
+    /**
+     * Retrieves a payment by its ID.
+     *
+     * @param id the unique identifier of the payment as a string.
+     * @return the {@code Payment} object if found, or {@code null} if not found.
+     */
+    public Payment getPaymentById(String id) {
+        return paymentRepo.read(Integer.parseInt(id));
     }
 
-    public void updatePayment(int id, double amount, LocalDateTime date, User user, String paymentMethod) {
+    /**
+     * Updates an existing payment in the repository.
+     *
+     * @param idString      the unique identifier of the payment as a string.
+     * @param amountString  the updated payment amount as a string.
+     * @param dateString    the updated date of the payment as a string in ISO-8601 format.
+     * @param user          the updated user who made the payment.
+     * @param paymentMethod the updated method of payment.
+     * @throws IllegalArgumentException if the payment does not exist or validation fails.
+     */
+    public void updatePayment(String idString, String amountString, String dateString, User user, String paymentMethod) {
+        int id = Integer.parseInt(idString);
+        double amount = Double.parseDouble(amountString);
+        LocalDateTime date = LocalDateTime.parse(dateString);
         Payment existingPayment = paymentRepo.read(id);
+
         if (existingPayment == null) {
             throw new IllegalArgumentException("Payment with the specified ID does not exist.");
         }
@@ -69,11 +111,17 @@ public class PaymentService {
         paymentRepo.update(updatedPayment);
     }
 
-    public void deletePayment(int id) {
-        if (paymentRepo.read(id) == null) {
+    /**
+     * Deletes a payment by its ID.
+     *
+     * @param id the unique identifier of the payment as a string.
+     * @throws IllegalArgumentException if the payment does not exist.
+     */
+    public void deletePayment(String id) {
+        if (paymentRepo.read(Integer.parseInt(id)) == null) {
             throw new IllegalArgumentException("Payment with the specified ID does not exist.");
         }
 
-        paymentRepo.delete(id);
+        paymentRepo.delete(Integer.parseInt(id));
     }
 }

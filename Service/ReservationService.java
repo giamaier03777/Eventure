@@ -7,15 +7,37 @@ import Repository.InMemoryRepo;
 
 import java.time.LocalDateTime;
 
+/**
+ * Service class for managing reservations in the system.
+ */
 public class ReservationService {
 
     private final InMemoryRepo<Reservation> reservationRepo;
 
+    /**
+     * Constructs a new {@code ReservationService}.
+     *
+     * @param reservationRepo the repository for storing and managing reservations.
+     */
     public ReservationService(InMemoryRepo<Reservation> reservationRepo) {
         this.reservationRepo = reservationRepo;
     }
 
-    public void addReservation(int id, User user, ActivitySchedule activitySchedule, int numberOfPeople, LocalDateTime reservationDate) {
+    /**
+     * Adds a new reservation to the repository.
+     *
+     * @param idString            the unique identifier of the reservation as a string.
+     * @param user                the user making the reservation.
+     * @param activitySchedule    the activity schedule being reserved.
+     * @param numberOfPeopleString the number of people included in the reservation as a string.
+     * @param reservationDateString the date and time of the reservation as a string in ISO-8601 format.
+     * @throws IllegalArgumentException if validation fails or the reservation already exists.
+     */
+    public void addReservation(String idString, User user, ActivitySchedule activitySchedule, String numberOfPeopleString, String reservationDateString) {
+        int id = Integer.parseInt(idString);
+        int numberOfPeople = Integer.parseInt(numberOfPeopleString);
+        LocalDateTime reservationDate = LocalDateTime.parse(reservationDateString);
+
         if (reservationRepo.read(id) != null) {
             throw new IllegalArgumentException("A reservation with this ID already exists.");
         }
@@ -40,15 +62,36 @@ public class ReservationService {
         reservationRepo.create(reservation);
     }
 
-    public Reservation getReservationById(int id) {
-        Reservation reservation = reservationRepo.read(id);
+    /**
+     * Retrieves a reservation by its ID.
+     *
+     * @param id the unique identifier of the reservation as a string.
+     * @return the {@code Reservation} object if found.
+     * @throws IllegalArgumentException if the reservation does not exist.
+     */
+    public Reservation getReservationById(String id) {
+        Reservation reservation = reservationRepo.read(Integer.parseInt(id));
         if (reservation == null) {
             throw new IllegalArgumentException("Reservation with the specified ID does not exist.");
         }
         return reservation;
     }
 
-    public void updateReservation(int id, User user, ActivitySchedule activitySchedule, int numberOfPeople, LocalDateTime reservationDate) {
+    /**
+     * Updates an existing reservation in the repository.
+     *
+     * @param idString            the unique identifier of the reservation as a string.
+     * @param user                the updated user making the reservation.
+     * @param activitySchedule    the updated activity schedule being reserved.
+     * @param numberOfPeopleString the updated number of people included in the reservation as a string.
+     * @param reservationDateString the updated date and time of the reservation as a string in ISO-8601 format.
+     * @throws IllegalArgumentException if validation fails or the reservation does not exist.
+     */
+    public void updateReservation(String idString, User user, ActivitySchedule activitySchedule, String numberOfPeopleString, String reservationDateString) {
+        int id = Integer.parseInt(idString);
+        int numberOfPeople = Integer.parseInt(numberOfPeopleString);
+        LocalDateTime reservationDate = LocalDateTime.parse(reservationDateString);
+
         Reservation existingReservation = reservationRepo.read(id);
 
         if (existingReservation == null) {
@@ -75,11 +118,17 @@ public class ReservationService {
         reservationRepo.update(updatedReservation);
     }
 
-    public void deleteReservation(int id) {
-        Reservation reservation = reservationRepo.read(id);
+    /**
+     * Deletes a reservation by its ID.
+     *
+     * @param id the unique identifier of the reservation as a string.
+     * @throws IllegalArgumentException if the reservation does not exist.
+     */
+    public void deleteReservation(String id) {
+        Reservation reservation = reservationRepo.read(Integer.parseInt(id));
         if (reservation == null) {
             throw new IllegalArgumentException("Reservation with the specified ID does not exist.");
         }
-        reservationRepo.delete(id);
+        reservationRepo.delete(Integer.parseInt(id));
     }
 }
