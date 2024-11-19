@@ -12,24 +12,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+/**
+ * The PresentationUser class handles the user interface for standard users,
+ * allowing them to interact with events, activities, reviews, and more.
+ */
 public class PresentationUser {
     private final UserController userController;
-
     private User currentUser = null;
-
-
     private final Scanner scanner = new Scanner(System.in);
 
+    /**
+     * Constructs the PresentationUser class with a given UserController.
+     *
+     * @param userController the controller used to manage user operations
+     */
     public PresentationUser(UserController userController) {
         this.userController = userController;
     }
 
-
+    /**
+     * Starts the user interface for the current user.
+     *
+     * @param user the current user
+     */
     public void start(User user) {
         this.currentUser = user;
         userMenu();
     }
 
+    /**
+     * Displays the main menu for the user and handles their choices.
+     *
+     * @return true if the user chooses to exit to the main menu
+     */
     private boolean userMenu() {
         while (true) {
             System.out.println("User Menu:\n" +
@@ -73,10 +88,16 @@ public class PresentationUser {
         }
     }
 
+    /**
+     * Displays the user's current balance.
+     */
     private void viewBalance() {
         System.out.println(currentUser.getBalance());
     }
 
+    /**
+     * Displays the most popular events and activities based on participant count.
+     */
     private void showMostPopularEntities() {
         Map<ReviewableEntity, Integer> popularEntities = userController.getMostPopularEntities();
 
@@ -90,7 +111,9 @@ public class PresentationUser {
         }
     }
 
-
+    /**
+     * Sorts entities alphabetically and displays the results.
+     */
     private void sortEntitiesAlphabetically() {
         System.out.println("Choose the type of entity to sort:");
         System.out.println("1. Events");
@@ -100,38 +123,58 @@ public class PresentationUser {
         int choice = Integer.parseInt(scanner.nextLine());
 
         switch (choice) {
-            case 1 -> {
-                List<Event> events = userController.getEventsSortedByName();
-                if (events.isEmpty()) {
-                    System.out.println("No events available to sort.");
-                } else {
-                    System.out.println("Events sorted alphabetically:");
-                    events.forEach(event -> System.out.println(event.getName() + " | Price: " + event.getPrice()));
-                }
-            }
-            case 2 -> {
-                List<Activity> activities = userController.getActivitiesSortedByName();
-                if (activities.isEmpty()) {
-                    System.out.println("No activities available to sort.");
-                } else {
-                    System.out.println("Activities sorted alphabetically:");
-                    activities.forEach(activity -> System.out.println(activity.getName() + " | Price: " + activity.getPrice()));
-                }
-            }
-            case 3 -> {
-                List<FreeActivity> freeActivities = userController.getFreeActivitiesSortedByName();
-                if (freeActivities.isEmpty()) {
-                    System.out.println("No free activities available to sort.");
-                } else {
-                    System.out.println("Free Activities sorted alphabetically:");
-                    freeActivities.forEach(freeActivity -> System.out.println(freeActivity.getName()));
-                }
-            }
+            case 1 -> displaySortedEvents(userController.getEventsSortedByName());
+            case 2 -> displaySortedActivities(userController.getActivitiesSortedByName());
+            case 3 -> displaySortedFreeActivities(userController.getFreeActivitiesSortedByName());
             default -> System.out.println("Invalid choice. Please enter 1, 2, or 3.");
         }
     }
 
+    /**
+     * Displays sorted events.
+     *
+     * @param events the list of events
+     */
+    private void displaySortedEvents(List<Event> events) {
+        if (events.isEmpty()) {
+            System.out.println("No events available to sort.");
+        } else {
+            System.out.println("Events sorted alphabetically:");
+            events.forEach(event -> System.out.println(event.getName() + " | Price: " + event.getPrice()));
+        }
+    }
 
+    /**
+     * Displays sorted activities.
+     *
+     * @param activities the list of activities
+     */
+    private void displaySortedActivities(List<Activity> activities) {
+        if (activities.isEmpty()) {
+            System.out.println("No activities available to sort.");
+        } else {
+            System.out.println("Activities sorted alphabetically:");
+            activities.forEach(activity -> System.out.println(activity.getName() + " | Price: " + activity.getPrice()));
+        }
+    }
+
+    /**
+     * Displays sorted free activities.
+     *
+     * @param freeActivities the list of free activities
+     */
+    private void displaySortedFreeActivities(List<FreeActivity> freeActivities) {
+        if (freeActivities.isEmpty()) {
+            System.out.println("No free activities available to sort.");
+        } else {
+            System.out.println("Free Activities sorted alphabetically:");
+            freeActivities.forEach(freeActivity -> System.out.println(freeActivity.getName()));
+        }
+    }
+
+    /**
+     * Sorts events by price in ascending order and displays the results.
+     */
     private void sortByPriceAsc() {
         List<Event> events = userController.getEventsSortedByPriceAsc();
 
@@ -146,6 +189,9 @@ public class PresentationUser {
         }
     }
 
+    /**
+     * Sorts events by price in descending order and displays the results.
+     */
     private void sortByPriceDesc() {
         List<Event> events = userController.getEventsSortedByPriceDesc();
 
@@ -160,9 +206,9 @@ public class PresentationUser {
         }
     }
 
-
-
-
+    /**
+     * Views the details of a specific wishlist by its ID.
+     */
     private void viewWishlist() {
         System.out.print("Enter Wishlist ID: ");
         String wishlistId = scanner.nextLine();
@@ -170,6 +216,9 @@ public class PresentationUser {
         System.out.println(wishlist);
     }
 
+    /**
+     * Views upcoming events and their available tickets.
+     */
     private void viewUpcomingEvents() {
         List<Event> events = userController.getUpcomingEvents();
 
@@ -185,7 +234,9 @@ public class PresentationUser {
         }
     }
 
-
+    /**
+     * Displays schedules for a specific activity by its ID.
+     */
     private void viewActivitySchedules() {
         System.out.print("Enter Activity ID to view schedules: ");
         String activityId = scanner.nextLine();
@@ -207,6 +258,11 @@ public class PresentationUser {
         }
     }
 
+    /**
+     * Books and processes payment for tickets for either events or activities.
+     * The user selects the type of entity to book, the number of tickets, and the payment method.
+     * Validates ticket availability and user balance before confirming the booking.
+     */
     private void bookAndPayForTickets() {
         try {
             System.out.println("What would you like to book?");
@@ -293,7 +349,11 @@ public class PresentationUser {
         }
     }
 
-
+    /**
+     * Filters activities based on the user's chosen criteria.
+     * The user can filter activities by category or by minimum capacity.
+     * Displays the filtered list of activities if matching results are found.
+     */
     private void filterActivities() {
         System.out.println("Choose filter option:");
         System.out.println("1. Filter by category");
@@ -330,6 +390,11 @@ public class PresentationUser {
         }
     }
 
+    /**
+     * Adds a review for a specified reviewable entity (activity, event, or free activity).
+     * The user provides the review details, including the entity ID, comment, and review date.
+     * Validates the entity and ensures it exists before adding the review.
+     */
     private void addReview() {
         try {
             System.out.print("Enter Review ID: ");
@@ -407,6 +472,11 @@ public class PresentationUser {
         }
     }
 
+    /**
+     * Views reviews for a selected reviewable entity.
+     * The user selects an entity type (Activity, Event, or Free Activity), enters the entity's ID,
+     * and the method fetches and displays the reviews associated with the entity.
+     */
     private void viewReview() {
         System.out.println("Select the type of reviewable entity:");
         System.out.println("1. Activity");
@@ -462,6 +532,11 @@ public class PresentationUser {
         }
     }
 
+    /**
+     * Adds an item to an existing wishlist.
+     * The user selects the type of entity (Activity, Free Activity, or Event), enters the entity's ID,
+     * and the selected item is added to the specified wishlist.
+     */
     private void addToWishlist() {
         System.out.print("Enter Wishlist ID: ");
         String wishlistId = scanner.nextLine();
@@ -511,6 +586,10 @@ public class PresentationUser {
         System.out.println("Item added to wishlist successfully.");
     }
 
+    /**
+     * Creates a new wishlist for the current user.
+     * The user enters a unique Wishlist ID, and an empty wishlist is created and associated with the user.
+     */
     private void createWishlist() {
         System.out.print("Enter Wishlist ID: ");
         String id = scanner.nextLine();
@@ -524,6 +603,4 @@ public class PresentationUser {
         userController.addWishlist(id, user, new ArrayList<>());
         System.out.println("Wishlist created successfully.");
     }
-
-
 }

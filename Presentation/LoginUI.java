@@ -8,12 +8,23 @@ import Service.RoleBasedMenuService;
 
 import java.util.Scanner;
 
+/**
+ * The `LoginUI` class provides a user interface for logging in,
+ * registering new users, and navigating the application based on user roles.
+ */
 public class LoginUI {
     private final AdminController adminController;
     private final UserController userController;
     private final RoleBasedMenuService menuService;
     private final Scanner scanner;
 
+    /**
+     * Constructs a new instance of `LoginUI`.
+     *
+     * @param adminController the controller for admin-related operations
+     * @param userController  the controller for user-related operations
+     * @param menuService     the service for role-based menu navigation
+     */
     public LoginUI(AdminController adminController, UserController userController, RoleBasedMenuService menuService) {
         this.adminController = adminController;
         this.userController = userController;
@@ -21,6 +32,9 @@ public class LoginUI {
         this.scanner = new Scanner(System.in);
     }
 
+    /**
+     * Starts the login UI and displays the main menu.
+     */
     public void start() {
         while (true) {
             System.out.println("\n=== Welcome to the Application ===");
@@ -42,6 +56,10 @@ public class LoginUI {
         }
     }
 
+    /**
+     * Handles the login functionality, prompting the user for credentials
+     * and directing them to the appropriate menu based on their role.
+     */
     private void login() {
         System.out.print("Username: ");
         String username = scanner.nextLine();
@@ -58,6 +76,10 @@ public class LoginUI {
         }
     }
 
+    /**
+     * Handles the registration process for new users,
+     * prompting them to provide necessary details.
+     */
     private void register() {
         try {
             System.out.print("Choose a Username: ");
@@ -81,6 +103,11 @@ public class LoginUI {
         }
     }
 
+    /**
+     * Prompts the user to select a role during registration.
+     *
+     * @return the selected `Role`, or `null` if the input is invalid
+     */
     private Role promptForRole() {
         System.out.println("Select Role:");
         System.out.println("1. USER");
