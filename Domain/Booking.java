@@ -6,7 +6,7 @@ import Repository.Identifiable;
 /**
  * Represents a booking for an activity schedule.
  */
-public class Booking implements Identifiable, EntityParser {
+public class Booking implements Identifiable {
 
     private int id;
     private ActivitySchedule schedule;
@@ -25,7 +25,6 @@ public class Booking implements Identifiable, EntityParser {
         this.customerName = customerName;
         this.numberOfPeople = numberOfPeople;
 
-        // Reduce the available capacity in the schedule
         this.schedule.reduceCapacity(numberOfPeople);
     }
 
@@ -106,35 +105,5 @@ public class Booking implements Identifiable, EntityParser {
      */
     public void setNumberOfPeople(int numberOfPeople) {
         this.numberOfPeople = numberOfPeople;
-    }
-
-    /**
-     * Converts the booking object into a comma-separated values (CSV) string.
-     *
-     * @return a CSV string representing the booking
-     */
-    @Override
-    public String toCSV() {
-        return id + "," + schedule.toCSV() + "," + customerName + "," + numberOfPeople;
-    }
-
-    /**
-     * Parses a CSV string and creates a {@link Booking} object.
-     *
-     * @param csv the CSV string representing a booking
-     * @return a {@link Booking} object parsed from the CSV string
-     */
-    @Override
-    public Booking parseFromCSV(String csv) {
-        String[] parts = csv.split(",", 4);
-
-        int id = Integer.parseInt(parts[0]);
-        String scheduleCSV = parts[1];
-        ActivitySchedule schedule = new ActivitySchedule().parseFromCSV(scheduleCSV);
-        String customerName = parts[2];
-        int numberOfPeople = Integer.parseInt(parts[3]);
-        Booking booking = new Booking(schedule, customerName, numberOfPeople);
-        booking.setId(id);
-        return booking;
     }
 }

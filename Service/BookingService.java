@@ -3,6 +3,7 @@ package Service;
 import Domain.ActivitySchedule;
 import Domain.Booking;
 import Domain.ReviewableEntity;
+import Repository.IRepository;
 import Repository.InMemoryRepo;
 
 import java.util.*;
@@ -12,14 +13,14 @@ import java.util.*;
  */
 public class BookingService {
 
-    private final InMemoryRepo<Booking> bookingRepo;
+    private final IRepository<Booking> bookingRepo;
 
     /**
      * Constructs a new {@code BookingService}.
      *
      * @param bookingRepo the repository for storing and managing bookings.
      */
-    public BookingService(InMemoryRepo<Booking> bookingRepo) {
+    public BookingService(IRepository<Booking> bookingRepo) {
         this.bookingRepo = bookingRepo;
     }
 

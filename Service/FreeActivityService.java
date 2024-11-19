@@ -2,6 +2,7 @@ package Service;
 
 import Domain.FreeActivity;
 import Domain.EventType;
+import Repository.IRepository;
 import Repository.InMemoryRepo;
 
 import java.util.Comparator;
@@ -12,14 +13,14 @@ import java.util.List;
  */
 public class FreeActivityService {
 
-    private final InMemoryRepo<FreeActivity> freeActivityRepo;
+    private final IRepository<FreeActivity> freeActivityRepo;
 
     /**
      * Constructs a new {@code FreeActivityService}.
      *
      * @param freeActivityRepo the repository for storing and managing free activities.
      */
-    public FreeActivityService(InMemoryRepo<FreeActivity> freeActivityRepo) {
+    public FreeActivityService(IRepository<FreeActivity> freeActivityRepo) {
         this.freeActivityRepo = freeActivityRepo;
     }
 

@@ -2,6 +2,7 @@ package Service;
 
 import Domain.User;
 import Domain.Role;
+import Repository.IRepository;
 import Repository.InMemoryRepo;
 
 /**
@@ -9,14 +10,14 @@ import Repository.InMemoryRepo;
  */
 public class UserService {
 
-    private final InMemoryRepo<User> userRepo;
+    private final IRepository<User> userRepo;
 
     /**
      * Constructs a UserService with the specified user repository.
      *
      * @param userRepo the repository used to store users.
      */
-    public UserService(InMemoryRepo<User> userRepo) {
+    public UserService(IRepository<User> userRepo) {
         this.userRepo = userRepo;
     }
 

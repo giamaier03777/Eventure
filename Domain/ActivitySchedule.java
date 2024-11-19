@@ -9,7 +9,7 @@ import java.time.LocalTime;
 /**
  * Represents a schedule for a specific activity, including date, time, and available capacity.
  */
-public class ActivitySchedule implements Identifiable, EntityParser {
+public class ActivitySchedule implements Identifiable {
 
     private int id;
     private Activity activity;
@@ -162,40 +162,5 @@ public class ActivitySchedule implements Identifiable, EntityParser {
         } else {
             throw new IllegalArgumentException("Insufficient capacity for booking!");
         }
-    }
-
-    /**
-     * Converts the activity schedule object into a comma-separated values (CSV) string.
-     *
-     * @return a CSV string representing the activity schedule
-     */
-    @Override
-    public String toCSV() {
-        return id + "," + activity.toCSV() + "," + date + "," + startTime + "," + endTime + "," + availableCapacity;
-    }
-
-    /**
-     * Parses a CSV string and creates an {@link ActivitySchedule} object.
-     *
-     * @param csv the CSV string representing an activity schedule
-     * @return an {@link ActivitySchedule} object parsed from the CSV string
-     */
-    @Override
-    public ActivitySchedule parseFromCSV(String csv) {
-        String[] parts = csv.split(",", 6);
-
-        int id = Integer.parseInt(parts[0]);
-
-        String activityCSV = parts[1];
-        Activity activity = new Activity().parseFromCSV(activityCSV);
-
-        LocalDate date = LocalDate.parse(parts[2]);
-        LocalTime startTime = LocalTime.parse(parts[3]);
-        LocalTime endTime = LocalTime.parse(parts[4]);
-        int availableCapacity = Integer.parseInt(parts[5]);
-
-        ActivitySchedule schedule = new ActivitySchedule(activity, date, startTime, endTime, availableCapacity);
-        schedule.setId(id);
-        return schedule;
     }
 }

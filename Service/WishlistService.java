@@ -3,6 +3,7 @@ package Service;
 import Domain.ReviewableEntity;
 import Domain.Wishlist;
 import Domain.User;
+import Repository.IRepository;
 import Repository.InMemoryRepo;
 
 import java.util.List;
@@ -12,14 +13,14 @@ import java.util.List;
  */
 public class WishlistService {
 
-    private final InMemoryRepo<Wishlist> wishlistRepo;
+    private final IRepository<Wishlist> wishlistRepo;
 
     /**
      * Constructs a WishlistService with the specified repository.
      *
      * @param wishlistRepo the repository for storing and retrieving wishlists.
      */
-    public WishlistService(InMemoryRepo<Wishlist> wishlistRepo) {
+    public WishlistService(IRepository<Wishlist> wishlistRepo) {
         this.wishlistRepo = wishlistRepo;
     }
 

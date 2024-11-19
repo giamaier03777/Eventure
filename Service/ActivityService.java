@@ -21,7 +21,7 @@ public class ActivityService {
      *
      * @param activityRepo the repository for storing and managing activities.
      */
-    public ActivityService(InMemoryRepo<Activity> activityRepo) {
+    public ActivityService(IRepository<Activity> activityRepo) {
         this.activityRepo = activityRepo;
     }
 

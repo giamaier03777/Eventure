@@ -2,6 +2,7 @@ package Service;
 
 import Domain.Event;
 import Domain.EventType;
+import Repository.IRepository;
 import Repository.InMemoryRepo;
 
 import java.time.LocalDateTime;
@@ -14,14 +15,14 @@ import java.util.stream.Collectors;
  */
 public class EventService {
 
-    private final InMemoryRepo<Event> eventRepo;
+    private final IRepository<Event> eventRepo;
 
     /**
      * Constructs a new {@code EventService}.
      *
      * @param eventRepo the repository for storing and managing events.
      */
-    public EventService(InMemoryRepo<Event> eventRepo) {
+    public EventService(IRepository<Event> eventRepo) {
         this.eventRepo = eventRepo;
     }
 

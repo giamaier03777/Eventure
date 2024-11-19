@@ -1,22 +1,25 @@
 package Repository;
 
 /**
- * Interface for parsing and converting entities to and from CSV format.
+ * An interface for parsing entities to and from CSV format.
+ *
+ * @param <T> the type of the entity being parsed.
  */
-public interface EntityParser {
+public interface EntityParser<T> {
 
     /**
-     * Converts the entity into a CSV-formatted string.
+     * Converts an entity to its CSV string representation.
      *
-     * @return a string representing the entity in CSV format.
+     * @param entity the entity to convert.
+     * @return the CSV string representation of the entity.
      */
-    String toCSV();
+    String toCSV(T entity);
 
     /**
-     * Parses an entity from a CSV-formatted string.
+     * Parses an entity from its CSV string representation.
      *
-     * @param csv the CSV string to parse.
-     * @return an object representing the parsed entity.
+     * @param csv the CSV string representation of the entity.
+     * @return the parsed entity.
      */
-    Object parseFromCSV(String csv);
+    T parseFromCSV(String csv);
 }

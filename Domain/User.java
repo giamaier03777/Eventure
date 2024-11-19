@@ -7,7 +7,7 @@ import Repository.Identifiable;
  * Represents a user within the system.
  * Implements {@link Identifiable} for unique identification and {@link EntityParser} for CSV serialization/deserialization.
  */
-public class User implements Identifiable, EntityParser {
+public class User implements Identifiable {
     private int id;
     private String username;
     private String password;
@@ -133,33 +133,5 @@ public class User implements Identifiable, EntityParser {
      */
     public void setBalance(double amount) {
         this.balance = amount;
-    }
-
-    /**
-     * Converts the {@code User} object into a CSV string representation.
-     *
-     * @return a CSV string representing the user.
-     */
-    @Override
-    public String toCSV() {
-        return id + "," + username + "," + password + "," + role;
-    }
-
-    /**
-     * Parses a {@code User} object from a CSV string.
-     *
-     * @param csv the CSV string to parse.
-     * @return the constructed {@code User} object.
-     */
-    @Override
-    public User parseFromCSV(String csv) {
-        String[] parts = csv.split(",");
-        int id = Integer.parseInt(parts[0]);
-        String username = parts[1];
-        String password = parts[2];
-        Role role = Role.valueOf(parts[3].toUpperCase());
-        User user = new User(id, username, password, role);
-        user.setId(id);
-        return user;
     }
 }

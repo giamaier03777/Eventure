@@ -11,7 +11,7 @@ import java.time.ZoneOffset;
  * Represents an event, which is a type of reviewable entity.
  * Events have specific attributes such as capacity, start and end dates, and ticket pricing.
  */
-public class Event extends ReviewableEntity implements Identifiable, EntityParser {
+public class Event extends ReviewableEntity implements Identifiable {
 
     private int currentSize;
     private int capacity;
@@ -162,36 +162,17 @@ public class Event extends ReviewableEntity implements Identifiable, EntityParse
                 ", price: " + price + "\n";
     }
 
-    /**
-     * Converts the event object into a comma-separated values (CSV) string.
-     *
-     * @return a CSV string representing the event
-     */
     @Override
     public String toCSV() {
-        return getId() + "," + getName() + "," + getLocation() + "," + capacity + "," +
-                getEventType().name() + "," + currentSize + "," + startDate + "," +
-                endDate + "," + price;
+        return "Event," + getId() + "," +
+                getName() + "," +
+                getLocation() + "," +
+                getCapacity() + "," +
+                getEventType() + "," +
+                getCurrentSize() + "," +
+                getStartDate() + "," +
+                getEndDate() + "," +
+                getPrice();
     }
 
-    /**
-     * Parses a CSV string and creates an {@link Event} object.
-     *
-     * @param csv the CSV string representing an event
-     * @return an {@link Event} object parsed from the CSV string
-     */
-    @Override
-    public Event parseFromCSV(String csv) {
-        String[] parts = csv.split(",");
-        int id = Integer.parseInt(parts[0]);
-        String name = parts[1];
-        String location = parts[2];
-        int capacity = Integer.parseInt(parts[3]);
-        EventType eventType = EventType.valueOf(parts[4]);
-        int currentSize = Integer.parseInt(parts[5]);
-        LocalDateTime startDate = LocalDateTime.parse(parts[6]);
-        LocalDateTime endDate = LocalDateTime.parse(parts[7]);
-        double price = Double.parseDouble(parts[8]);
-        return new Event(id, name, location, capacity, eventType, currentSize, startDate, endDate, price);
-    }
 }

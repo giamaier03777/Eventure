@@ -57,8 +57,6 @@ public class AdminController {
         this.wishlistService = wishlistService;
     }
 
-    // Activity Management Methods
-
     /**
      * Adds a new activity.
      *
@@ -143,8 +141,6 @@ public class AdminController {
         }
     }
 
-    // Activity Schedule Management Methods
-
     /**
      * Adds a new activity schedule.
      *
@@ -228,7 +224,6 @@ public class AdminController {
         return activityScheduleService.getSchedulesForActivity(activity);
     }
 
-// Booking
 
     /**
      * Adds a new booking.
@@ -299,8 +294,6 @@ public class AdminController {
         }
     }
 
-// Event
-
     /**
      * Adds a new event.
      *
@@ -368,9 +361,6 @@ public class AdminController {
         }
     }
 
-
-// Event
-
     /**
      * Deletes an event by its ID.
      *
@@ -394,7 +384,7 @@ public class AdminController {
      * @return a list of events matching the keyword
      */
     public List<Event> searchEvents(String keyword) {
-        return null; // Placeholder for implementation
+        return null;
     }
 
     /**
@@ -404,7 +394,7 @@ public class AdminController {
      * @return a list of events of the specified type
      */
     public List<Event> filterByEventType(String eventType) {
-        return null; // Placeholder for implementation
+        return null;
     }
 
     /**
@@ -425,7 +415,6 @@ public class AdminController {
         return eventService.getAllEvents();
     }
 
-// FreeActivity
 
     /**
      * Adds a new free activity.
@@ -511,7 +500,6 @@ public class AdminController {
         return freeActivityService.getAllFreeActivities();
     }
 
-// Payment
 
     /**
      * Adds a new payment.
@@ -534,8 +522,6 @@ public class AdminController {
             System.out.println("Error: " + e.getMessage());
         }
     }
-
-// Payment
 
     /**
      * Retrieves a payment by its ID.
@@ -587,8 +573,6 @@ public class AdminController {
             System.out.println("ID must be a valid number.");
         }
     }
-
-// Reservation
 
     /**
      * Adds a new reservation.
@@ -664,8 +648,6 @@ public class AdminController {
             System.out.println("Error: " + e.getMessage());
         }
     }
-
-// Review
 
     /**
      * Adds a new review.
@@ -751,8 +733,6 @@ public class AdminController {
         return this.reviewService.getReviewsByEvent(event);
     }
 
-// Ticket
-
     /**
      * Adds a new ticket.
      *
@@ -786,9 +766,6 @@ public class AdminController {
             return null;
         }
     }
-
-
-    // Ticket
 
     /**
      * Updates an existing ticket.
@@ -835,7 +812,6 @@ public class AdminController {
         return null;
     }
 
-// User
 
     /**
      * Adds a new user.
@@ -925,7 +901,6 @@ public class AdminController {
         return userService.generateNewUntakenId();
     }
 
-// Wishlist
 
     /**
      * Adds a new wishlist.

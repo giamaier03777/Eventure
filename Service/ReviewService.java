@@ -4,6 +4,7 @@ import Domain.Event;
 import Domain.Review;
 import Domain.User;
 import Domain.ReviewableEntity;
+import Repository.IRepository;
 import Repository.InMemoryRepo;
 
 import java.time.LocalDateTime;
@@ -15,14 +16,14 @@ import java.util.stream.Collectors;
  */
 public class ReviewService {
 
-    private final InMemoryRepo<Review> reviewRepo;
+    private final IRepository<Review> reviewRepo;
 
     /**
      * Constructs a new {@code ReviewService}.
      *
      * @param reviewRepo the repository for managing {@link Review} objects.
      */
-    public ReviewService(InMemoryRepo<Review> reviewRepo) {
+    public ReviewService(IRepository<Review> reviewRepo) {
         this.reviewRepo = reviewRepo;
     }
 

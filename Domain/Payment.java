@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * Implements {@link Identifiable} to provide a unique identifier for the payment and
  * {@link EntityParser} for converting between objects and CSV strings.
  */
-public class Payment implements Identifiable, EntityParser {
+public class Payment implements Identifiable {
     private int id;
     private double amount;
     private LocalDateTime date;
@@ -131,37 +131,5 @@ public class Payment implements Identifiable, EntityParser {
         this.paymentMethod = paymentMethod;
     }
 
-    /**
-     * Converts the {@code Payment} object into a comma-separated value (CSV) string.
-     *
-     * @return a CSV string representation of the {@code Payment} object.
-     */
-    @Override
-    public String toCSV() {
-        return id + "," + amount + "," + date + "," + user.getId() + "," + paymentMethod;
-    }
 
-    /**
-     * Parses a {@code Payment} object from a CSV string.
-     *
-     * @param csv the CSV string containing the {@code Payment} data.
-     * @return a {@code Payment} object populated with the parsed data.
-     */
-    @Override
-    public Payment parseFromCSV(String csv) {
-        String[] parts = csv.split(",", 5);
-
-        int id = Integer.parseInt(parts[0]);
-        double amount = Double.parseDouble(parts[1]);
-        LocalDateTime date = LocalDateTime.parse(parts[2]);
-
-        String userCSV = parts[3];
-        User user = new User().parseFromCSV(userCSV);
-
-        String paymentMethod = parts[4];
-
-        Payment payment = new Payment(id, amount, date, user, paymentMethod);
-        payment.setId(id);
-        return payment;
-    }
 }

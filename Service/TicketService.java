@@ -5,6 +5,7 @@ import Domain.Activity;
 import Domain.ReviewableEntity;
 import Domain.Ticket;
 import Domain.User;
+import Repository.IRepository;
 import Repository.InMemoryRepo;
 
 /**
@@ -12,14 +13,14 @@ import Repository.InMemoryRepo;
  */
 public class TicketService {
 
-    private final InMemoryRepo<Ticket> ticketRepo;
+    private final IRepository<Ticket> ticketRepo;
 
     /**
      * Constructs a TicketService with the specified ticket repository.
      *
      * @param ticketRepo the repository used to store tickets.
      */
-    public TicketService(InMemoryRepo<Ticket> ticketRepo) {
+    public TicketService(IRepository<Ticket> ticketRepo) {
         this.ticketRepo = ticketRepo;
     }
 

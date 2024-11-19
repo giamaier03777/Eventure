@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
  * Represents a review given by a user for a specific reviewable entity.
  * Implements {@link Identifiable} for unique identification and {@link EntityParser} for CSV serialization/deserialization.
  */
-public class Review implements Identifiable, EntityParser {
+public class Review implements Identifiable {
     private int id;
     private User user;
     private ReviewableEntity reviewableEntity;
@@ -143,65 +143,5 @@ public class Review implements Identifiable, EntityParser {
                 ", comment='" + comment + '\'' +
                 ", reviewDate=" + reviewDate +
                 '}';
-    }
-
-    /**
-     * Converts the {@link Review} object into a CSV string representation.
-     *
-     * @return a CSV string representing the review
-     */
-    @Override
-    public String toCSV() {
-        return id + "," + user.toCSV() + "," + reviewableEntity.toCSV() + "," + comment + "," + reviewDate;
-    }
-
-    /**
-     * Parses a {@link Review} object from a CSV string.
-     *
-     * @param csv the CSV string to parse
-     * @return the constructed {@link Review} object
-     */
-    @Override
-    public Review parseFromCSV(String csv) {
-        String[] parts = csv.split(",", 5);
-
-        int id = Integer.parseInt(parts[0]);
-
-        String userCSV = parts[1];
-        User user = new User().parseFromCSV(userCSV);
-
-        String entityCSV = parts[2];
-        ReviewableEntity reviewableEntity = parseReviewableEntityFromCSV(entityCSV);
-
-        String comment = parts[3];
-        LocalDateTime reviewDate = LocalDateTime.parse(parts[4]);
-
-        Review review = new Review(id, user, reviewableEntity, comment, reviewDate);
-        review.setId(id);
-        return review;
-    }
-
-    /**
-     * Helper method to parse a {@link ReviewableEntity} from a CSV string.
-     *
-     * @param csv the CSV string to parse
-     * @return the constructed {@link ReviewableEntity} object
-     * @throws IllegalArgumentException if the entity type is unknown
-     */
-    private ReviewableEntity parseReviewableEntityFromCSV(String csv) {
-        String[] parts = csv.split(",", 2);
-        String type = parts[0];
-        String entityData = parts[1];
-
-        switch (type) {
-            case "Activity":
-                return new Activity().parseFromCSV(entityData);
-            case "Event":
-                return new Event().parseFromCSV(entityData);
-            case "FreeActivity":
-                return new FreeActivity().parseFromCSV(entityData);
-            default:
-                throw new IllegalArgumentException("Unknown ReviewableEntity type: " + type);
-        }
     }
 }

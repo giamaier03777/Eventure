@@ -3,6 +3,7 @@ package Service;
 import Domain.Reservation;
 import Domain.User;
 import Domain.ActivitySchedule;
+import Repository.IRepository;
 import Repository.InMemoryRepo;
 
 import java.time.LocalDateTime;
@@ -12,14 +13,14 @@ import java.time.LocalDateTime;
  */
 public class ReservationService {
 
-    private final InMemoryRepo<Reservation> reservationRepo;
+    private final IRepository<Reservation> reservationRepo;
 
     /**
      * Constructs a new {@code ReservationService}.
      *
      * @param reservationRepo the repository for storing and managing reservations.
      */
-    public ReservationService(InMemoryRepo<Reservation> reservationRepo) {
+    public ReservationService(IRepository<Reservation> reservationRepo) {
         this.reservationRepo = reservationRepo;
     }
 

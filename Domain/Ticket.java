@@ -7,7 +7,7 @@ import Repository.Identifiable;
  * Represents a ticket for an event or activity within the system.
  * Implements {@link Identifiable} for unique identification and {@link EntityParser} for CSV serialization/deserialization.
  */
-public class Ticket implements Identifiable, EntityParser {
+public class Ticket implements Identifiable {
     private int id;
     private ReviewableEntity event;
     private User owner;
@@ -104,64 +104,5 @@ public class Ticket implements Identifiable, EntityParser {
      */
     public void setParticipantName(String participantName) {
         this.participantName = participantName;
-    }
-
-    /**
-     * Converts the {@code Ticket} object into a CSV string representation.
-     *
-     * @return a CSV string representing the ticket.
-     */
-    @Override
-    public String toCSV() {
-        return id + "," + event.toCSV() + "," + owner.toCSV() + "," + participantName;
-    }
-
-    /**
-     * Parses a {@code Ticket} object from a CSV string.
-     *
-     * @param csv the CSV string to parse.
-     * @return the constructed {@code Ticket} object.
-     */
-    @Override
-    public Ticket parseFromCSV(String csv) {
-        String[] parts = csv.split(",", 4);
-
-        int id = Integer.parseInt(parts[0]);
-
-        String entityCSV = parts[1];
-        ReviewableEntity event = parseReviewableEntityFromCSV(entityCSV);
-
-        String userCSV = parts[2];
-        User owner = new User().parseFromCSV(userCSV);
-
-        String participantName = parts[3];
-
-        Ticket ticket = new Ticket(id, event, owner, participantName);
-        ticket.setId(id);
-        return ticket;
-    }
-
-    /**
-     * Helper method to parse a {@link ReviewableEntity} from a CSV string.
-     *
-     * @param csv the CSV string to parse.
-     * @return the constructed {@link ReviewableEntity} object.
-     * @throws IllegalArgumentException if the entity type is unknown.
-     */
-    private ReviewableEntity parseReviewableEntityFromCSV(String csv) {
-        String[] parts = csv.split(",", 2);
-        String type = parts[0];
-        String entityData = parts[1];
-
-        switch (type) {
-            case "Activity":
-                return new Activity().parseFromCSV(entityData);
-            case "Event":
-                return new Event().parseFromCSV(entityData);
-            case "FreeActivity":
-                return new FreeActivity().parseFromCSV(entityData);
-            default:
-                throw new IllegalArgumentException("Unknown ReviewableEntity type: " + type);
-        }
     }
 }

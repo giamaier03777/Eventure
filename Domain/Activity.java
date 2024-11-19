@@ -1,13 +1,12 @@
 package Domain;
 
-import Repository.EntityParser;
 import Repository.Identifiable;
 
 /**
  * Represents an activity that users can participate in.
  * Extends the {@link ReviewableEntity} class.
  */
-public class Activity extends ReviewableEntity implements Identifiable, EntityParser {
+public class Activity extends ReviewableEntity implements Identifiable{
 
     private int currentSize;
     private String description;
@@ -58,6 +57,19 @@ public class Activity extends ReviewableEntity implements Identifiable, EntityPa
     public void setId(int id) {
         super.setId(id);
     }
+
+
+    @Override
+    public String toCSV() {
+        return "Activity," + getId() + "," +
+                getName() + "," +
+                getCapacity() + "," +
+                getLocation() + "," +
+                getCategory() + "," +
+                getDescription() + "," +
+                getPrice();
+    }
+
 
     /**
      * Gets the description of the activity.
@@ -138,38 +150,6 @@ public class Activity extends ReviewableEntity implements Identifiable, EntityPa
      */
     public EventType getCategory() {
         return super.getEventType();
-    }
-
-    /**
-     * Converts the activity object into a comma-separated values (CSV) string.
-     *
-     * @return a CSV string representing the activity
-     */
-    @Override
-    public String toCSV() {
-        return getId() + "," + getName() + "," + capacity + "," + getLocation() + "," + getEventType() + "," + description + "," + price;
-    }
-
-    /**
-     * Parses a CSV string and creates an {@link Activity} object.
-     *
-     * @param csv the CSV string representing an activity
-     * @return an {@link Activity} object parsed from the CSV string
-     */
-    @Override
-    public Activity parseFromCSV(String csv) {
-        String[] parts = csv.split(",");
-        int id = Integer.parseInt(parts[0]);
-        String name = parts[1];
-        int capacity = Integer.parseInt(parts[2]);
-        String location = parts[3];
-        EventType eventType = EventType.valueOf(parts[4].toUpperCase());
-        String description = parts[5];
-        double price = Double.parseDouble(parts[6]);
-
-        Activity activity = new Activity(id, name, capacity, location, eventType, description, price);
-        activity.setId(id);
-        return activity;
     }
 
     /**

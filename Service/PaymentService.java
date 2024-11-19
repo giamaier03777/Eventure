@@ -2,6 +2,7 @@ package Service;
 
 import Domain.Payment;
 import Domain.User;
+import Repository.IRepository;
 import Repository.InMemoryRepo;
 
 import java.time.LocalDateTime;
@@ -11,14 +12,14 @@ import java.time.LocalDateTime;
  */
 public class PaymentService {
 
-    private final InMemoryRepo<Payment> paymentRepo;
+    private final IRepository<Payment> paymentRepo;
 
     /**
      * Constructs a new {@code PaymentService}.
      *
      * @param paymentRepo the repository for storing and managing payments.
      */
-    public PaymentService(InMemoryRepo<Payment> paymentRepo) {
+    public PaymentService(IRepository<Payment> paymentRepo) {
         this.paymentRepo = paymentRepo;
     }
 

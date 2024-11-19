@@ -9,7 +9,7 @@ import java.io.Serializable;
  * Represents an abstract base class for entities that can be reviewed.
  * This class defines common properties and methods for reviewable entities such as events, activities, etc.
  */
-public abstract class ReviewableEntity implements Identifiable, EntityParser {
+public abstract class ReviewableEntity implements Identifiable {
     private int id;
     private String name;
     private EventType eventType;
@@ -105,6 +105,13 @@ public abstract class ReviewableEntity implements Identifiable, EntityParser {
     public void setLocation(String location) {
         this.location = location;
     }
+
+    /**
+     * Converts the entity to a CSV string.
+     *
+     * @return the CSV representation of the entity.
+     */
+    public abstract String toCSV();
 
 
 }
