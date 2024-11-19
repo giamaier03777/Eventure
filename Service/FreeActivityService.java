@@ -4,16 +4,35 @@ import Domain.FreeActivity;
 import Domain.EventType;
 import Repository.InMemoryRepo;
 
+import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Service class for managing free activities in the system.
+ */
 public class FreeActivityService {
 
     private final InMemoryRepo<FreeActivity> freeActivityRepo;
 
+    /**
+     * Constructs a new {@code FreeActivityService}.
+     *
+     * @param freeActivityRepo the repository for storing and managing free activities.
+     */
     public FreeActivityService(InMemoryRepo<FreeActivity> freeActivityRepo) {
         this.freeActivityRepo = freeActivityRepo;
     }
 
+    /**
+     * Adds a new free activity to the repository.
+     *
+     * @param id       the unique identifier of the activity.
+     * @param name     the name of the activity.
+     * @param location the location where the activity will take place.
+     * @param eventType the type of the activity (e.g., WORKSHOP, RELAXATION).
+     * @param program  the program details or description of the activity.
+     * @throws IllegalArgumentException if validation fails or the activity already exists.
+     */
     public void addFreeActivity(int id, String name, String location, EventType eventType, String program) {
         if (freeActivityRepo.read(id) != null) {
             throw new IllegalArgumentException("A free activity with this ID already exists.");
@@ -35,12 +54,31 @@ public class FreeActivityService {
         freeActivityRepo.create(freeActivity);
     }
 
+    /**
+     * Retrieves a free activity by its ID.
+     *
+     * @param id the unique identifier of the activity.
+     * @return the {@code FreeActivity} object if found, or {@code null} if not found.
+     */
     public FreeActivity getFreeActivityById(int id) {
         return freeActivityRepo.read(id);
     }
 
-    public void updateFreeActivity(int id, String name, String location, EventType eventType, String program) {
+    /**
+     * Updates an existing free activity in the repository.
+     *
+     * @param idString   the unique identifier of the activity as a string.
+     * @param name       the updated name of the activity.
+     * @param location   the updated location of the activity.
+     * @param eventTypeString the updated type of the activity.
+     * @param program    the updated program details or description.
+     * @throws IllegalArgumentException if the activity does not exist or validation fails.
+     */
+    public void updateFreeActivity(String idString, String name, String location, String eventTypeString, String program) {
+        int id = Integer.parseInt(idString);
+        EventType eventType = EventType.valueOf(eventTypeString.toUpperCase());
         FreeActivity existingActivity = freeActivityRepo.read(id);
+
         if (existingActivity == null) {
             throw new IllegalArgumentException("Free activity with the specified ID does not exist.");
         }
@@ -61,15 +99,37 @@ public class FreeActivityService {
         freeActivityRepo.update(updatedFreeActivity);
     }
 
-    public void deleteFreeActivity(int id) {
-        if (freeActivityRepo.read(id) == null) {
+    /**
+     * Deletes a free activity by its ID.
+     *
+     * @param id the unique identifier of the activity as a string.
+     * @throws IllegalArgumentException if the activity does not exist.
+     */
+    public void deleteFreeActivity(String id) {
+        if (freeActivityRepo.read(Integer.parseInt(id)) == null) {
             throw new IllegalArgumentException("Free activity with the specified ID does not exist.");
         }
 
-        freeActivityRepo.delete(id);
+        freeActivityRepo.delete(Integer.parseInt(id));
     }
 
+    /**
+     * Retrieves all free activities from the repository.
+     *
+     * @return a list of all free activities.
+     */
     public List<FreeActivity> getAllFreeActivities() {
         return freeActivityRepo.findAll();
+    }
+
+    /**
+     * Retrieves all free activities sorted alphabetically by name.
+     *
+     * @return a list of free activities sorted by name.
+     */
+    public List<FreeActivity> getFreeActivitiesSortedByName() {
+        List<FreeActivity> freeActivities = freeActivityRepo.findAll();
+        freeActivities.sort(Comparator.comparing(FreeActivity::getName));
+        return freeActivities;
     }
 }
