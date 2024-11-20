@@ -37,7 +37,7 @@ public class LoginUI {
      */
     public void start() {
         while (true) {
-            System.out.println("\n=== Welcome to the Application ===");
+            System.out.println("\n=== Welcome to EVENTURE ===");
             System.out.println("1. Login");
             System.out.println("2. Register");
             System.out.println("3. Exit");
