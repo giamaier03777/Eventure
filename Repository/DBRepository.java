@@ -21,7 +21,7 @@ public class DBRepository<T extends Identifiable> implements IRepository<T> {
      * @param tableName  the name of the table storing entities.
      * @param parser     the parser to handle entity serialization and deserialization.
      */
-    public DBRepository(Connection connection, String tableName, EntityParser<T> parser) {
+    public DBRepository(Connection connection, String tableName, SQLParser<T> parser) {
         this.connection = connection;
         this.tableName = tableName;
         this.parser = (SQLParser<T>) parser;

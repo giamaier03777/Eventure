@@ -7,6 +7,7 @@ import Repository.*;
 import Service.*;
 import Parsers.ActivityParser;
 import Parsers.*;
+import SQLParser.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -197,10 +198,89 @@ public class Main {
         loginUI.start();
     }
 
+    public static void startInDb() {
+        DatabaseConnection dbConnection = new DatabaseConnection();
+        java.sql.Connection connection = dbConnection.getConnection();
+
+        UserSQLParser userParser = new UserSQLParser();
+        ActivitySQLParser activityParser = new ActivitySQLParser();
+        ActivityScheduleSQLParser activityScheduleParser = new ActivityScheduleSQLParser(activityParser);
+        BookingSQLParser bookingParser = new BookingSQLParser(activityScheduleParser);
+        EventSQLParser eventParser = new EventSQLParser();
+        FreeActivitySQLParser freeActivityParser = new FreeActivitySQLParser();
+        PaymentSQLParser paymentParser = new PaymentSQLParser(userParser);
+        ReservationSQLParser reservationParser = new ReservationSQLParser(userParser, activityScheduleParser);
+        ReviewSQLParser reviewParser = new ReviewSQLParser(userParser, activityParser, eventParser, freeActivityParser);
+        TicketSQLParser ticketParser = new TicketSQLParser(userParser, activityParser, eventParser, freeActivityParser);
+        WishlistSQLParser wishlistParser = new WishlistSQLParser(userParser, activityParser, eventParser, freeActivityParser);
+
+        IRepository<Activity> activityRepo = new DBRepository<>(connection, "activities", activityParser);
+        IRepository<ActivitySchedule> activityScheduleRepo = new DBRepository<>(connection, "activity_schedules", activityScheduleParser);
+        IRepository<Booking> bookingRepo = new DBRepository<>(connection, "bookings", bookingParser);
+        IRepository<Event> eventRepo = new DBRepository<>(connection, "events", eventParser);
+        IRepository<FreeActivity> freeActivityRepo = new DBRepository<>(connection, "free_activities", freeActivityParser);
+        IRepository<Payment> paymentRepo = new DBRepository<>(connection, "payments", paymentParser);
+        IRepository<Reservation> reservationRepo = new DBRepository<>(connection, "reservations", reservationParser);
+        IRepository<Review> reviewRepo = new DBRepository<>(connection, "reviews", reviewParser);
+        IRepository<Ticket> ticketRepo = new DBRepository<>(connection, "tickets", ticketParser);
+        IRepository<User> userRepo = new DBRepository<>(connection, "users", userParser);
+        IRepository<Wishlist> wishlistRepo = new DBRepository<>(connection, "wishlists", wishlistParser);
+
+
+        ActivityService activityService = new ActivityService(activityRepo);
+        ActivityScheduleService activityScheduleService = new ActivityScheduleService(activityScheduleRepo);
+        BookingService bookingService = new BookingService(bookingRepo);
+        EventService eventService = new EventService(eventRepo);
+        FreeActivityService freeActivityService = new FreeActivityService(freeActivityRepo);
+        PaymentService paymentService = new PaymentService(paymentRepo);
+        ReservationService reservationService = new ReservationService(reservationRepo);
+        ReviewService reviewService = new ReviewService(reviewRepo);
+        TicketService ticketService = new TicketService(ticketRepo);
+        UserService userService = new UserService(userRepo);
+        WishlistService wishlistService = new WishlistService(wishlistRepo);
+
+        AdminController adminController = new AdminController(
+                activityService,
+                userService,
+                activityScheduleService,
+                bookingService,
+                eventService,
+                freeActivityService,
+                paymentService,
+                reservationService,
+                reviewService,
+                ticketService,
+                wishlistService
+        );
+        UserController userController = new UserController(
+                activityService,
+                userService,
+                activityScheduleService,
+                bookingService,
+                eventService,
+                freeActivityService,
+                paymentService,
+                reservationService,
+                reviewService,
+                ticketService,
+                wishlistService
+        );
+
+        PresentationAdmin adminMenu = new PresentationAdmin(adminController);
+        PresentationUser userMenu = new PresentationUser(userController);
+
+        RoleBasedMenuService menuService = new RoleBasedMenuService(adminMenu, userMenu);
+
+        LoginUI loginUI = new LoginUI(adminController, userController, menuService);
+        loginUI.start();
+    }
+
+
 
     public static void main(String[] args) {
-//                startInMemory();
+//              startInMemory();
                 startInFile();
+                startInDb();
             }
         }
 
