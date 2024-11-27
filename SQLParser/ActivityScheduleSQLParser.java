@@ -56,7 +56,7 @@ public class ActivityScheduleSQLParser implements SQLParser<ActivitySchedule> {
         stmt.setTime(3, java.sql.Time.valueOf(schedule.getStartTime()));
         stmt.setTime(4, java.sql.Time.valueOf(schedule.getEndTime()));
         stmt.setInt(5, schedule.getAvailableCapacity());
-        stmt.setInt(6, schedule.getId());
+        stmt.setInt(6, schedule.getId()); //WHERE clause
     }
 
     @Override

@@ -1,7 +1,6 @@
 package SQLParser;
 
-import Domain.Booking;
-import Domain.ActivitySchedule;
+import Domain.*;
 import Repository.SQLParser;
 
 import java.sql.PreparedStatement;
@@ -52,7 +51,7 @@ public class BookingSQLParser implements SQLParser<Booking> {
         stmt.setInt(1, booking.getSchedule().getId());
         stmt.setString(2, booking.getCustomerName());
         stmt.setInt(3, booking.getNumberOfPeople());
-        stmt.setInt(4, booking.getId());
+        stmt.setInt(4, booking.getId()); // WHERE clause
     }
 
     @Override

@@ -1,7 +1,6 @@
 package SQLParser;
 
-import Domain.Activity;
-import Domain.EventType;
+import Domain.*;
 import Repository.SQLParser;
 
 import java.sql.PreparedStatement;
@@ -47,6 +46,7 @@ public class ActivitySQLParser implements SQLParser<Activity> {
         stmt.setString(4, activity.getCategory().name());
         stmt.setString(5, activity.getDescription());
         stmt.setDouble(6, activity.getPrice());
+        stmt.setInt(7, activity.getId()); //WHERE clause
     }
 
     @Override
