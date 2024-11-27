@@ -14,17 +14,17 @@ public class DatabaseConnection {
      * The URL of the database, including protocol, host, port, and database name.
      * Format: jdbc:mysql://hostname:port/databaseName
      */
-    private static final String URL = "jdbc:mysql://localhost:3306/your_database";
+    private static final String URL = "jdbc:postgresql://localhost:5432/Eventure";
 
     /**
      * The username used to authenticate with the database.
      */
-    private static final String USER = "your_user";
+    private static final String USER = "Eventure";
 
     /**
      * The password used to authenticate with the database.
      */
-    private static final String PASSWORD = "your_password";
+    private static final String PASSWORD = "200412";
 
     /**
      * Establishes a connection to the database.
