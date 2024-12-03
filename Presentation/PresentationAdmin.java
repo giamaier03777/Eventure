@@ -73,6 +73,15 @@ public class PresentationAdmin {
             switch (choice) {
                 case 1 -> activityAdminMenu();
                 case 2 -> activityScheduleAdminMenu();
+                case 3 -> bookingAdminMenu();
+                case 4 -> eventAdminMenu();
+                case 5 -> freeActivityAdminMenu();
+                case 6 -> paymentAdminMenu();
+                case 7 -> reviewAdminMenu();
+                case 8 -> reviewAdminMenu();
+                case 9 -> ticketAdminMenu();
+                case 10 -> userAdminMenu();
+                case 11 -> wishlistAdminMenu();
                 case 12 -> {
                     return;
                 }
@@ -616,7 +625,7 @@ public class PresentationAdmin {
             System.out.print("Enter Payment Date (e.g., 2023-12-31T10:15:30): ");
             String dateString = scanner.nextLine();
 
-            String paymentMethod = "CARD";
+            String paymentMethod = "PAYPAL";
             adminController.addPayment(String.valueOf(id), String.valueOf(amount), dateString, user, paymentMethod);
 
         } catch (NumberFormatException e) {

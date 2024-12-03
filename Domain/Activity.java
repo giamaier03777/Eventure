@@ -152,6 +152,10 @@ public class Activity extends ReviewableEntity implements Identifiable{
         return super.getEventType();
     }
 
+    public void setCategory(EventType activityCategory) {
+        super.setEventType(activityCategory);
+    }
+
     /**
      * Returns a string representation of the activity.
      *
@@ -165,4 +169,5 @@ public class Activity extends ReviewableEntity implements Identifiable{
                 ", price=" + price +
                 '}';
     }
+
 }

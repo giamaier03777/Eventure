@@ -301,6 +301,8 @@ public class PresentationUser {
                 return;
             }
 
+//            de introdus in service
+
             double ticketCost = (event != null) ? event.getPrice() : activity.getPrice();
             int availableTickets = (event != null) ? event.getCapacity() - event.getCurrentSize()
                     : activity.getCapacity() - activity.getCurrentSize();

@@ -61,17 +61,30 @@ public class ActivityScheduleSQLParser implements SQLParser<ActivitySchedule> {
 
     @Override
     public ActivitySchedule parseFromResultSet(ResultSet rs) throws SQLException {
-        int id = rs.getInt("id");
-        Activity activity = activitySQLParser.parseFromResultSet(rs);
-        LocalDate date = rs.getDate("date").toLocalDate();
-        LocalTime startTime = rs.getTime("start_time").toLocalTime();
-        LocalTime endTime = rs.getTime("end_time").toLocalTime();
-        int availableCapacity = rs.getInt("available_capacity");
+        int id = rs.getInt("schedule_id");
+
+        Activity activity = new Activity();
+        activity.setId(rs.getInt("activity_id"));
+        activity.setName(rs.getString("activity_name"));
+        activity.setCapacity(rs.getInt("activity_capacity"));
+        activity.setLocation(rs.getString("activity_location"));
+        activity.setCategory(EventType.valueOf(rs.getString("activity_category").toUpperCase()));
+        activity.setDescription(rs.getString("activity_description"));
+        activity.setPrice(rs.getDouble("activity_price"));
+
+        LocalDate date = rs.getDate("schedule_date").toLocalDate();
+        LocalTime startTime = rs.getTime("schedule_start_time").toLocalTime();
+        LocalTime endTime = rs.getTime("schedule_end_time").toLocalTime();
+        int availableCapacity = rs.getInt("schedule_capacity");
 
         ActivitySchedule schedule = new ActivitySchedule(activity, date, startTime, endTime, availableCapacity);
         schedule.setId(id);
+
         return schedule;
     }
+
+
+
 
     @Override
     public int getUpdateParametersCount() {
