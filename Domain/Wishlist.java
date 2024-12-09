@@ -117,10 +117,11 @@ public class Wishlist implements Identifiable {
      */
     @Override
     public String toString() {
-        return "Wishlist{" +
-                "id=" + id +
-                ", user=" + user +
-                ", items=" + items +
+        return "Wishlist {" +
+                "ID = " + id +
+                ", User = " + user +
+                ", Items = " + items +
                 '}';
     }
+
 }

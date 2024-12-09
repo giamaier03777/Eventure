@@ -62,4 +62,13 @@ public class FreeActivity extends ReviewableEntity implements Identifiable {
                 getProgram();
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+                "Free Activity Details:\n" +
+                        "- Program: %s\n",
+                this.program
+        );
+    }
+
 }

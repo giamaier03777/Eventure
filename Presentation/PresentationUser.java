@@ -62,7 +62,8 @@ public class PresentationUser {
                     "12. Sort Events Alphabetical\n" +
                     "13. Find the favorite tourist-spot\n" +
                     "14. View balance\n" +
-                    "15. Back to Main Menu");
+                    "15. Add balance\n" +
+                    "16. Back to Main Menu");
             int choice = Integer.parseInt(scanner.nextLine());
 
             switch (choice) {
@@ -80,7 +81,8 @@ public class PresentationUser {
                 case 12 -> sortEntitiesAlphabetically();
                 case 13 -> showMostPopularEntities();
                 case 14 -> viewBalance();
-                case 15 -> {
+                case 15 -> addMoney();
+                case 16 -> {
                     return true;
                 }
                 default -> System.out.println("Invalid choice, please try again.");
@@ -93,6 +95,12 @@ public class PresentationUser {
      */
     private void viewBalance() {
         System.out.println(currentUser.getBalance());
+    }
+
+    private void addMoney() {
+        System.out.println("Enter the amount to add to balance");
+        double amount = Double.parseDouble(scanner.nextLine());
+        currentUser.increaseBalance(amount);
     }
 
     /**
@@ -300,8 +308,6 @@ public class PresentationUser {
                 System.out.println("Invalid choice. Please enter 1 for Event or 2 for Activity.");
                 return;
             }
-
-//            de introdus in service
 
             double ticketCost = (event != null) ? event.getPrice() : activity.getPrice();
             int availableTickets = (event != null) ? event.getCapacity() - event.getCurrentSize()

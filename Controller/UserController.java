@@ -3,6 +3,7 @@ package Controller;
 import Domain.*;
 import Service.*;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
@@ -407,6 +408,61 @@ public class UserController {
     public Map<ReviewableEntity, Integer> getMostPopularEntities() {
         return bookingService.getMostPopularEntities();
     }
+
+    public void bookAndPayForTickets(User currentUser, int choice, String entityId, int numTickets, String paymentMethod) {
+        try {
+            if (choice != 1 && choice != 2) {
+                throw new IllegalArgumentException("Invalid choice. Please select 1 for Event or 2 for Activity.");
+            }
+
+            Event event = null;
+            Activity activity = null;
+
+            if (choice == 1) {
+                event = getEventById(entityId);
+                if (event == null) {
+                    throw new IllegalArgumentException("Event not found.");
+                }
+            } else {
+                activity = getActivityById(entityId);
+                if (activity == null) {
+                    throw new IllegalArgumentException("Activity not found.");
+                }
+            }
+
+            double ticketCost = (event != null) ? event.getPrice() : activity.getPrice();
+            int availableTickets = (event != null)
+                    ? event.getCapacity() - event.getCurrentSize()
+                    : activity.getCapacity() - activity.getCurrentSize();
+
+            if (availableTickets < numTickets) {
+                throw new IllegalArgumentException("Insufficient tickets available. Only " + availableTickets + " tickets left.");
+            }
+
+            double totalCost = numTickets * ticketCost;
+            if (currentUser.getBalance() < totalCost) {
+                throw new IllegalArgumentException("Insufficient balance. You need " + totalCost + " euros, but have only " + currentUser.getBalance() + " euros.");
+            }
+
+            currentUser.setBalance(currentUser.getBalance() - totalCost);
+
+            String paymentId = (event != null) ? String.valueOf(event.getId()) : String.valueOf(activity.getId());
+            addPayment(paymentId, String.valueOf(totalCost), LocalDateTime.now().toString(), currentUser, paymentMethod);
+
+            for (int i = 0; i < numTickets; i++) {
+                String participantName = "Participant " + (i + 1);
+                String ticketId = String.valueOf(generateUniqueId());
+                addTicket(ticketId, event != null ? event : activity, currentUser, participantName);
+            }
+
+            System.out.println("Payment successful! Your booking is confirmed.");
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Booking failed: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("An unexpected error occurred during booking or payment.", e);
+        }
+    }
+
 
 
 }

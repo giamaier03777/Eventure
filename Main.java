@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class Main {
-    public static void startInMemory(){
+    public static void startInMemory() {
         InMemoryRepo activityRepo = new InMemoryRepo();
         InMemoryRepo activityScheduleRepo = new InMemoryRepo();
         InMemoryRepo bookingRepo = new InMemoryRepo<>();
@@ -115,17 +115,17 @@ public class Main {
     }
 
     public static void startInFile() {
-        String activityFile = "activities.csv";
-        String activityScheduleFile = "activity_schedules.csv";
+        String activityFile = "Files/activities.csv";
+        String activityScheduleFile = "Files/activity_schedules.csv";
         String bookingFile = "bookings.csv";
-        String eventFile = "events.csv";
-        String freeActivityFile = "free_activities.csv";
-        String paymentFile = "payments.csv";
-        String reservationFile = "reservations.csv";
-        String reviewFile = "reviews.csv";
-        String ticketFile = "tickets.csv";
-        String userFile = "users.csv";
-        String wishlistFile = "wishlists.csv";
+        String eventFile = "Files/events.csv";
+        String freeActivityFile = "Files/free_activities.csv";
+        String paymentFile = "Files/payments.csv";
+        String reservationFile = "Files/reservations.csv";
+        String reviewFile = "Files/reviews.csv";
+        String ticketFile = "Files/tickets.csv";
+        String userFile = "Files/users.csv";
+        String wishlistFile = "Files/wishlists.csv";
 
         UserParser userParser = new UserParser();
         ActivityParser activityParser = new ActivityParser();
@@ -203,29 +203,50 @@ public class Main {
         java.sql.Connection connection = dbConnection.getConnection();
 
         UserSQLParser userParser = new UserSQLParser();
-        ActivitySQLParser activityParser = new ActivitySQLParser();
-        ActivityScheduleSQLParser activityScheduleParser = new ActivityScheduleSQLParser(activityParser);
-        BookingSQLParser bookingParser = new BookingSQLParser(activityScheduleParser);
-        EventSQLParser eventParser = new EventSQLParser();
-        FreeActivitySQLParser freeActivityParser = new FreeActivitySQLParser();
-        PaymentSQLParser paymentParser = new PaymentSQLParser(userParser);
-        ReservationSQLParser reservationParser = new ReservationSQLParser(userParser, activityScheduleParser);
-        ReviewSQLParser reviewParser = new ReviewSQLParser(userParser, activityParser, eventParser, freeActivityParser);
-        TicketSQLParser ticketParser = new TicketSQLParser(userParser, activityParser, eventParser, freeActivityParser);
-        WishlistSQLParser wishlistParser = new WishlistSQLParser(userParser, activityParser, eventParser, freeActivityParser);
+        DBRepository<User> userRepo = new DBRepository<>(connection, "users", userParser);
 
-        IRepository<Activity> activityRepo = new DBRepository<>(connection, "activities", activityParser);
-        IRepository<ActivitySchedule> activityScheduleRepo = new DBRepository<>(connection, "activity_schedules", activityScheduleParser);
+        ActivitySQLParser activityParser = new ActivitySQLParser();
+        DBRepository<Activity> activityRepo = new DBRepository<>(connection, "activities", activityParser);
+
+        ActivityScheduleSQLParser activityScheduleParser = new ActivityScheduleSQLParser(activityParser, activityRepo);
+        DBRepository<ActivitySchedule> activityScheduleRepo = new DBRepository<>(connection, "activity_schedules", activityScheduleParser);
+
+        BookingSQLParser bookingParser = new BookingSQLParser(activityScheduleRepo);
+
+        PaymentSQLParser paymentParser = new PaymentSQLParser(userRepo);
+
+        ReservationSQLParser reservationParser = new ReservationSQLParser(userRepo, activityScheduleRepo);
+
+        DBRepository<Event> eventRepo = new DBRepository<>(connection, "events", new EventSQLParser());
+        DBRepository<FreeActivity> freeActivityRepo = new DBRepository<>(connection, "free_activities", new FreeActivitySQLParser());
+
+        ReviewSQLParser reviewParser = new ReviewSQLParser(
+                userRepo,
+                activityRepo,
+                eventRepo,
+                freeActivityRepo
+        );
+
+        TicketSQLParser ticketParser = new TicketSQLParser(
+                userRepo,
+                activityRepo,
+                eventRepo,
+                freeActivityRepo
+        );
+
+        WishlistSQLParser wishlistParser = new WishlistSQLParser(
+                userRepo,
+                activityRepo,
+                eventRepo,
+                freeActivityRepo
+        );
+
         IRepository<Booking> bookingRepo = new DBRepository<>(connection, "bookings", bookingParser);
-        IRepository<Event> eventRepo = new DBRepository<>(connection, "events", eventParser);
-        IRepository<FreeActivity> freeActivityRepo = new DBRepository<>(connection, "free_activities", freeActivityParser);
         IRepository<Payment> paymentRepo = new DBRepository<>(connection, "payments", paymentParser);
         IRepository<Reservation> reservationRepo = new DBRepository<>(connection, "reservations", reservationParser);
         IRepository<Review> reviewRepo = new DBRepository<>(connection, "reviews", reviewParser);
         IRepository<Ticket> ticketRepo = new DBRepository<>(connection, "tickets", ticketParser);
-        IRepository<User> userRepo = new DBRepository<>(connection, "users", userParser);
         IRepository<Wishlist> wishlistRepo = new DBRepository<>(connection, "wishlists", wishlistParser);
-
 
         ActivityService activityService = new ActivityService(activityRepo);
         ActivityScheduleService activityScheduleService = new ActivityScheduleService(activityScheduleRepo);
@@ -252,6 +273,7 @@ public class Main {
                 ticketService,
                 wishlistService
         );
+
         UserController userController = new UserController(
                 activityService,
                 userService,
@@ -277,11 +299,16 @@ public class Main {
 
 
 
+
+
+
     public static void main(String[] args) {
 //              startInMemory();
 //                startInFile();
-                startInDb();
-            }
-        }
+        startInDb();
+    }
+}
+
+
 
 

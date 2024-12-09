@@ -106,4 +106,17 @@ public class Booking implements Identifiable {
     public void setNumberOfPeople(int numberOfPeople) {
         this.numberOfPeople = numberOfPeople;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Booking Details:\n" +
+                        "- ID: %d\n" +
+                        "- Schedule: %s\n" +
+                        "- Customer Name: %s\n" +
+                        "- Number of People: %d",
+                id, schedule, customerName, numberOfPeople
+        );
+    }
+
 }

@@ -163,4 +163,19 @@ public class ActivitySchedule implements Identifiable {
             throw new IllegalArgumentException("Insufficient capacity for booking!");
         }
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Activity Schedule Details:\n" +
+                        "- ID: %d\n" +
+                        "- Activity: %s\n" +
+                        "- Date: %s\n" +
+                        "- Start Time: %s\n" +
+                        "- End Time: %s\n" +
+                        "- Available Capacity: %d",
+                id, activity, date, startTime, endTime, availableCapacity
+        );
+    }
+
 }

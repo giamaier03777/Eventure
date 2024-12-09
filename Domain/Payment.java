@@ -131,5 +131,17 @@ public class Payment implements Identifiable {
         this.paymentMethod = paymentMethod;
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+                "Payment Details:\n" +
+                        "- ID: %d\n" +
+                        "- Amount: %.2f\n" +
+                        "- Date: %s\n" +
+                        "- User: %s\n" +
+                        "- Payment Method: %s\n",
+                id, amount, date, user, paymentMethod
+        );
+    }
 
 }

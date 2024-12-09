@@ -163,11 +163,14 @@ public class Activity extends ReviewableEntity implements Identifiable{
      */
     @Override
     public String toString() {
-        return "Activity{" +
-                "description='" + description + '\'' +
-                ", capacity=" + capacity +
-                ", price=" + price +
-                '}';
+        return String.format(
+                "Activity Details:\n" +
+                        "- Description: %s\n" +
+                        "- Capacity: %d\n" +
+                        "- Price: %.2f euros",
+                description, capacity, price
+        );
     }
+
 
 }

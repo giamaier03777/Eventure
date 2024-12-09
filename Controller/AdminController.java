@@ -6,6 +6,7 @@ import Service.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller class for administrative operations.
@@ -965,6 +966,60 @@ public class AdminController {
         } catch (NumberFormatException e) {
             System.out.println("ID must be a valid number.");
         }
+    }
+
+    /**
+     * Retrieves events sorted by price in ascending order.
+     *
+     * @return a list of events sorted by price (ascending)
+     */
+    public List<Event> getEventsSortedByPriceAsc() {
+        return eventService.getEventsSortedByPriceAsc();
+    }
+
+    /**
+     * Retrieves events sorted by price in descending order.
+     *
+     * @return a list of events sorted by price (descending)
+     */
+    public List<Event> getEventsSortedByPriceDesc() {
+        return eventService.getEventsSortedByPriceDesc();
+    }
+
+    /**
+     * Retrieves events sorted by name.
+     *
+     * @return a list of events sorted by name
+     */
+    public List<Event> getEventsSortedByName() {
+        return eventService.getEventsSortedByName();
+    }
+
+    /**
+     * Retrieves activities sorted by name.
+     *
+     * @return a list of activities sorted by name
+     */
+    public List<Activity> getActivitiesSortedByName() {
+        return activityService.getActivitiesSortedByName();
+    }
+
+    /**
+     * Retrieves free activities sorted by name.
+     *
+     * @return a list of free activities sorted by name
+     */
+    public List<FreeActivity> getFreeActivitiesSortedByName() {
+        return freeActivityService.getFreeActivitiesSortedByName();
+    }
+
+    /**
+     * Retrieves the most popular entities based on booking counts.
+     *
+     * @return a map of reviewable entities to their popularity counts
+     */
+    public Map<ReviewableEntity, Integer> getMostPopularEntities() {
+        return bookingService.getMostPopularEntities();
     }
 
 

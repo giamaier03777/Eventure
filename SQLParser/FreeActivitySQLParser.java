@@ -42,7 +42,7 @@ public class FreeActivitySQLParser implements SQLParser<FreeActivity> {
         stmt.setString(2, activity.getLocation());
         stmt.setString(3, activity.getEventType().name());
         stmt.setString(4, activity.getProgram());
-        stmt.setInt(5, activity.getId()); //  WHERE clause
+        stmt.setInt(5, activity.getId());
     }
 
     @Override

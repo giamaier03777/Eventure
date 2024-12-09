@@ -1,6 +1,7 @@
 package SQLParser;
 
 import Domain.*;
+import Repository.DBRepository;
 import Repository.SQLParser;
 
 import java.sql.PreparedStatement;
@@ -12,15 +13,15 @@ import java.sql.SQLException;
  */
 public class BookingSQLParser implements SQLParser<Booking> {
 
-    private final ActivityScheduleSQLParser activityScheduleSQLParser;
+    private final DBRepository<ActivitySchedule> activityScheduleRepo;
 
     /**
      * Constructs a {@link BookingSQLParser} with its dependencies.
      *
-     * @param activityScheduleSQLParser the parser for {@link ActivitySchedule} objects.
+     * @param activityScheduleRepo the repository for {@link ActivitySchedule} objects.
      */
-    public BookingSQLParser(ActivityScheduleSQLParser activityScheduleSQLParser) {
-        this.activityScheduleSQLParser = activityScheduleSQLParser;
+    public BookingSQLParser(DBRepository<ActivitySchedule> activityScheduleRepo) {
+        this.activityScheduleRepo = activityScheduleRepo;
     }
 
     @Override
@@ -51,7 +52,7 @@ public class BookingSQLParser implements SQLParser<Booking> {
         stmt.setInt(1, booking.getSchedule().getId());
         stmt.setString(2, booking.getCustomerName());
         stmt.setInt(3, booking.getNumberOfPeople());
-        stmt.setInt(4, booking.getId()); // WHERE clause
+        stmt.setInt(4, booking.getId());
     }
 
     @Override
@@ -61,8 +62,10 @@ public class BookingSQLParser implements SQLParser<Booking> {
         String customerName = rs.getString("customer_name");
         int numberOfPeople = rs.getInt("number_of_people");
 
-        ActivitySchedule schedule = new ActivitySchedule();
-        schedule.setId(scheduleId);
+        ActivitySchedule schedule = activityScheduleRepo.read(scheduleId);
+        if (schedule == null) {
+            throw new SQLException("ActivitySchedule with ID " + scheduleId + " not found in the database.");
+        }
 
         Booking booking = new Booking(schedule, customerName, numberOfPeople);
         booking.setId(id);
@@ -74,4 +77,3 @@ public class BookingSQLParser implements SQLParser<Booking> {
         return 3;
     }
 }
-

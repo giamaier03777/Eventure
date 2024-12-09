@@ -1,6 +1,7 @@
 package SQLParser;
 
 import Domain.*;
+import Repository.DBRepository;
 import Repository.SQLParser;
 
 import java.sql.PreparedStatement;
@@ -13,27 +14,27 @@ import java.time.LocalDateTime;
  */
 public class ReviewSQLParser implements SQLParser<Review> {
 
-    private final UserSQLParser userSQLParser;
-    private final ActivitySQLParser activitySQLParser;
-    private final EventSQLParser eventSQLParser;
-    private final FreeActivitySQLParser freeActivitySQLParser;
+    private final DBRepository<User> userRepo;
+    private final DBRepository<Activity> activityRepo;
+    private final DBRepository<Event> eventRepo;
+    private final DBRepository<FreeActivity> freeActivityRepo;
 
     /**
      * Constructs a {@link ReviewSQLParser} with its dependencies.
      *
-     * @param userSQLParser           the parser for {@link User} objects.
-     * @param activitySQLParser       the parser for {@link Activity} objects.
-     * @param eventSQLParser          the parser for {@link Event} objects.
-     * @param freeActivitySQLParser  the parser for {@link FreeActivity} objects.
+     * @param userRepo            the repository for {@link User} objects.
+     * @param activityRepo        the repository for {@link Activity} objects.
+     * @param eventRepo           the repository for {@link Event} objects.
+     * @param freeActivityRepo    the repository for {@link FreeActivity} objects.
      */
-    public ReviewSQLParser(UserSQLParser userSQLParser,
-                           ActivitySQLParser activitySQLParser,
-                           EventSQLParser eventSQLParser,
-                           FreeActivitySQLParser freeActivitySQLParser) {
-        this.userSQLParser = userSQLParser;
-        this.activitySQLParser = activitySQLParser;
-        this.eventSQLParser = eventSQLParser;
-        this.freeActivitySQLParser = freeActivitySQLParser;
+    public ReviewSQLParser(DBRepository<User> userRepo,
+                           DBRepository<Activity> activityRepo,
+                           DBRepository<Event> eventRepo,
+                           DBRepository<FreeActivity> freeActivityRepo) {
+        this.userRepo = userRepo;
+        this.activityRepo = activityRepo;
+        this.eventRepo = eventRepo;
+        this.freeActivityRepo = freeActivityRepo;
     }
 
     @Override
@@ -56,7 +57,6 @@ public class ReviewSQLParser implements SQLParser<Review> {
         stmt.setInt(1, review.getId());
         stmt.setInt(2, review.getUser().getId());
 
-        // Handle the reviewable entity type and ID
         setReviewableEntityParameters(stmt, 3, review);
 
         stmt.setString(5, review.getComment());
@@ -67,12 +67,11 @@ public class ReviewSQLParser implements SQLParser<Review> {
     public void fillPreparedStatementForUpdate(PreparedStatement stmt, Review review) throws SQLException {
         stmt.setInt(1, review.getUser().getId());
 
-        // Handle the reviewable entity type and ID
         setReviewableEntityParameters(stmt, 2, review);
 
         stmt.setString(4, review.getComment());
         stmt.setObject(5, review.getReviewDate());
-        stmt.setInt(6, review.getId()); // WHERE clause
+        stmt.setInt(6, review.getId());
     }
 
     @Override
@@ -80,12 +79,15 @@ public class ReviewSQLParser implements SQLParser<Review> {
         int id = rs.getInt("id");
         int userId = rs.getInt("user_id");
 
-        User user = userSQLParser.parseFromResultSet(rs);
+        User user = userRepo.read(userId);
+        if (user == null) {
+            throw new SQLException("User with ID " + userId + " not found.");
+        }
 
         String reviewableEntityType = rs.getString("reviewable_entity_type");
         int reviewableEntityId = rs.getInt("reviewable_entity_id");
 
-        ReviewableEntity reviewableEntity = parseReviewableEntityFromResultSet(reviewableEntityType, rs);
+        ReviewableEntity reviewableEntity = fetchReviewableEntityFromRepository(reviewableEntityType, reviewableEntityId);
 
         String comment = rs.getString("comment");
         LocalDateTime reviewDate = rs.getObject("review_date", LocalDateTime.class);
@@ -95,7 +97,6 @@ public class ReviewSQLParser implements SQLParser<Review> {
 
     /**
      * Sets the reviewable entity type and ID in the PreparedStatement.
-     * This reduces redundancy in the insert/update methods.
      */
     private void setReviewableEntityParameters(PreparedStatement stmt, int startIndex, Review review) throws SQLException {
         if (review.getReviewableEntity() instanceof Activity) {
@@ -113,20 +114,33 @@ public class ReviewSQLParser implements SQLParser<Review> {
     }
 
     /**
-     * Parses a {@link ReviewableEntity} from the ResultSet based on its type and ID.
+     * Fetches a {@link ReviewableEntity} from the corresponding repository.
      *
      * @param type the type of the reviewable entity (Activity, Event, or FreeActivity).
-     * @return the parsed {@link ReviewableEntity}.
-     * @throws SQLException if the entity type is unknown.
+     * @param id   the ID of the reviewable entity.
+     * @return the fetched {@link ReviewableEntity}.
+     * @throws SQLException if the entity type is unknown or not found.
      */
-    private ReviewableEntity parseReviewableEntityFromResultSet(String type, ResultSet rs) throws SQLException {
+    private ReviewableEntity fetchReviewableEntityFromRepository(String type, int id) throws SQLException {
         switch (type) {
             case "Activity":
-                return activitySQLParser.parseFromResultSet(rs);
+                Activity activity = activityRepo.read(id);
+                if (activity == null) {
+                    throw new SQLException("Activity with ID " + id + " not found.");
+                }
+                return activity;
             case "Event":
-                return eventSQLParser.parseFromResultSet(rs);
+                Event event = eventRepo.read(id);
+                if (event == null) {
+                    throw new SQLException("Event with ID " + id + " not found.");
+                }
+                return event;
             case "FreeActivity":
-                return freeActivitySQLParser.parseFromResultSet(rs);
+                FreeActivity freeActivity = freeActivityRepo.read(id);
+                if (freeActivity == null) {
+                    throw new SQLException("FreeActivity with ID " + id + " not found.");
+                }
+                return freeActivity;
             default:
                 throw new SQLException("Unknown ReviewableEntity type: " + type);
         }

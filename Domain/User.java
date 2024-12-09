@@ -134,4 +134,18 @@ public class User implements Identifiable {
     public void setBalance(double amount) {
         this.balance = amount;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "User Details:\n" +
+                        "- ID: %d\n" +
+                        "- Username: %s\n" +
+                        "- Balance: %.2f\n",
+                id,
+                username != null ? username : "No username",
+                balance
+        );
+    }
+
 }

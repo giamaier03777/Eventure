@@ -130,4 +130,20 @@ public class Reservation implements Identifiable {
         this.reservationDate = reservationDate;
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+                "Reservation Details:\n" +
+                        "- ID: %d\n" +
+                        "- User: %s\n" +
+                        "- Activity Schedule: %s\n" +
+                        "- Number of People: %d\n" +
+                        "- Reservation Date: %s\n",
+                id,
+                user != null ? user.toString() : "No user",
+                activitySchedule != null ? activitySchedule.toString() : "No activity schedule",
+                numberOfPeople,
+                reservationDate != null ? reservationDate.toString() : "No reservation date"
+        );
+    }
 }

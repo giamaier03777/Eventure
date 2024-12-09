@@ -1,6 +1,7 @@
 package SQLParser;
 
 import Domain.*;
+import Repository.DBRepository;
 import Repository.SQLParser;
 
 import java.sql.PreparedStatement;
@@ -13,15 +14,15 @@ import java.time.LocalDateTime;
  */
 public class PaymentSQLParser implements SQLParser<Payment> {
 
-    private final UserSQLParser userSQLParser;
+    private final DBRepository<User> userRepo;
 
     /**
      * Constructs a {@link PaymentSQLParser} with its dependencies.
      *
-     * @param userSQLParser the parser for {@link User} objects.
+     * @param userRepo the repository for {@link User} objects.
      */
-    public PaymentSQLParser(UserSQLParser userSQLParser) {
-        this.userSQLParser = userSQLParser;
+    public PaymentSQLParser(DBRepository<User> userRepo) {
+        this.userRepo = userRepo;
     }
 
     @Override
@@ -54,7 +55,7 @@ public class PaymentSQLParser implements SQLParser<Payment> {
         stmt.setObject(2, payment.getDate());
         stmt.setInt(3, payment.getUser().getId());
         stmt.setString(4, payment.getPaymentMethod());
-        stmt.setInt(5, payment.getId()); // WHERE clause
+        stmt.setInt(5, payment.getId());
     }
 
     @Override
@@ -65,9 +66,11 @@ public class PaymentSQLParser implements SQLParser<Payment> {
         String paymentMethod = rs.getString("payment_method");
 
         int userId = rs.getInt("user_id");
-        User user = userSQLParser.parseFromResultSet(rs);
+        User user = userRepo.read(userId);
 
-        user.setBalance(rs.getDouble("balance"));
+        if (user == null) {
+            throw new SQLException("User with ID " + userId + " not found in the database.");
+        }
 
         return new Payment(id, amount, date, user, paymentMethod);
     }
@@ -77,4 +80,3 @@ public class PaymentSQLParser implements SQLParser<Payment> {
         return 4;
     }
 }
-

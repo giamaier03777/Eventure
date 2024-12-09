@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -67,7 +68,13 @@ public class PresentationAdmin {
      */
     private void adminMenu() {
         while (true) {
-            System.out.println("Admin Menu:\n1. Activity\n2. Activity Schedule\n3. Booking\n4. Event\n5. Free Activity\n6. Payment\n7. Reservation\n8. Review\n9. Ticket\n10. User\n11. Wishlist\n12. Back to Main Menu");
+            System.out.println("Admin Menu:" +
+                    "\n1. Activity\n2. Activity Schedule\n3. Booking\n4. Event\n5. Free Activity\n6. Payment\n7. Reservation\n8. Review\n9. Ticket\n10. User\n11. Wishlist\n12. Sort Events by price (asc)\n" +
+                    "13. Sort Events by price (desc)\n" +
+                    "14. Sort Events Alphabetical\n" +
+                    "15. Find the favorite tourist-spot\n" +
+                    "16. View balance\n"+
+                    "17. Add balance\n" + "18. Back to Main Menu");
             int choice = Integer.parseInt(scanner.nextLine());
 
             switch (choice) {
@@ -77,12 +84,18 @@ public class PresentationAdmin {
                 case 4 -> eventAdminMenu();
                 case 5 -> freeActivityAdminMenu();
                 case 6 -> paymentAdminMenu();
-                case 7 -> reviewAdminMenu();
+                case 7 -> reservationAdminMenu();
                 case 8 -> reviewAdminMenu();
                 case 9 -> ticketAdminMenu();
                 case 10 -> userAdminMenu();
                 case 11 -> wishlistAdminMenu();
-                case 12 -> {
+                case 12 -> sortByPriceAsc();
+                case 13 -> sortByPriceDesc();
+                case 14 -> sortEntitiesAlphabetically();
+                case 15 -> showMostPopularEntities();
+                case 16 -> viewBalance();
+                case 17 -> addMoney();
+                case 18 -> {
                     return;
                 }
                 default -> System.out.println("Invalid choice, please try again.");
@@ -199,6 +212,69 @@ public class PresentationAdmin {
                 default -> System.out.println("Invalid choice, please try again.");
             }
         }
+    }
+
+    public void reservationAdminMenu() {
+        while (true) {
+            System.out.println("Reservation Management:\n1. Add\n2. View\n3. Update\n4. Delete\n5. Back");
+            int choice = Integer.parseInt(scanner.nextLine());
+            switch (choice) {
+                case 1 -> addReservation();
+                case 2 -> viewReservation();
+                case 3 -> updateReservation();
+                case 4 -> deleteReservation();
+                case 5 -> {
+                    return;
+                }
+                default -> System.out.println("Invalid choice, please try again.");
+            }
+        }
+    }
+    private void addReservation() {
+        System.out.print("Enter Reservation ID: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        int userId = currentUser.getId();
+        User user = adminController.getUserById(String.valueOf(userId));
+        System.out.print("Enter Activity Schedule ID: ");
+        int activityScheduleId = Integer.parseInt(scanner.nextLine());
+        ActivitySchedule activitySchedule = adminController.getActivityScheduleById(String.valueOf(activityScheduleId));
+        System.out.print("Enter Number of People: ");
+        int numberOfPeople = Integer.parseInt(scanner.nextLine());
+        System.out.print("Enter Reservation Date (YYYY-MM-DDTHH:MM:SS): ");
+        String dateInput = scanner.nextLine();
+        adminController.addReservation(String.valueOf(id), user, activitySchedule,
+                String.valueOf(numberOfPeople), dateInput);
+    }
+    private void viewReservation() {
+        System.out.print("Enter Reservation ID to View: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        Reservation reservation = adminController.getReservationById(String.valueOf(id));
+        if (reservation != null) {
+            System.out.println("Reservation Details: " + reservation);
+        } else {
+            System.out.println("Reservation not found.");
+        }
+    }
+    private void updateReservation() {
+        System.out.print("Enter Reservation ID to Update: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        System.out.print("Enter new User ID: ");
+        int userId = Integer.parseInt(scanner.nextLine());
+        User user = adminController.getUserById(String.valueOf(userId));
+        System.out.print("Enter new Activity Schedule ID: ");
+        int activityScheduleId = Integer.parseInt(scanner.nextLine());
+        ActivitySchedule activitySchedule = adminController.getActivityScheduleById(String.valueOf(activityScheduleId));
+        System.out.print("Enter new Number of People: ");
+        int numberOfPeople = Integer.parseInt(scanner.nextLine());
+        System.out.print("Enter new Reservation Date (YYYY-MM-DDTHH:MM:SS): ");
+        String dateInput = scanner.nextLine();
+        adminController.updateReservation(String.valueOf(id), user, activitySchedule,
+                String.valueOf(numberOfPeople), dateInput);
+    }
+    private void deleteReservation() {
+        System.out.print("Enter Reservation ID to Delete: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        adminController.deleteReservation(String.valueOf(id));
     }
 
     /**
@@ -623,7 +699,8 @@ public class PresentationAdmin {
             System.out.print("Enter Amount: ");
             double amount = Double.parseDouble(scanner.nextLine());
             System.out.print("Enter Payment Date (e.g., 2023-12-31T10:15:30): ");
-            String dateString = scanner.nextLine();
+            LocalDateTime paymentDate = LocalDateTime.now();
+            String dateString = paymentDate.toString();
 
             String paymentMethod = "PAYPAL";
             adminController.addPayment(String.valueOf(id), String.valueOf(amount), dateString, user, paymentMethod);
@@ -796,10 +873,8 @@ public class PresentationAdmin {
 
             System.out.print("Enter Comment: ");
             String comment = scanner.nextLine();
-            System.out.print("Enter Review Date (e.g., 2023-12-31T10:15): ");
-            String dateString = scanner.nextLine();
-
-            adminController.addReview(id, user, reviewableEntity, comment, dateString);
+            LocalDateTime reviewDate = LocalDateTime.now();
+            adminController.addReview(id, user, reviewableEntity, comment, reviewDate.toString());
             System.out.println("Review added successfully.");
 
         } catch (NumberFormatException e) {
@@ -1343,7 +1418,6 @@ public class PresentationAdmin {
         String ticketId = scanner.nextLine();
         System.out.print("Enter number of tickets to book: ");
         String numTickets = scanner.nextLine();
-        // Booking logic is missing in the provided snippet.
     }
 
     /**
@@ -1358,4 +1432,128 @@ public class PresentationAdmin {
         }
     }
 
+    /**
+     * Sorts events by price in ascending order and displays the results.
+     */
+    private void sortByPriceAsc() {
+        List<Event> events = adminController.getEventsSortedByPriceAsc();
+
+        if (events.isEmpty()) {
+            System.out.println("No events available to sort.");
+            return;
+        }
+
+        System.out.println("Events sorted by price (ascending):");
+        for (Event event : events) {
+            System.out.println("Event: " + event.getName() + " | Price: " + event.getPrice() + " | Date: " + event.getStartDate());
+        }
+    }
+
+    /**
+     * Sorts events by price in descending order and displays the results.
+     */
+    private void sortByPriceDesc() {
+        List<Event> events = adminController.getEventsSortedByPriceDesc();
+
+        if (events.isEmpty()) {
+            System.out.println("No events available to sort.");
+            return;
+        }
+
+        System.out.println("Events sorted by price (descending):");
+        for (Event event : events) {
+            System.out.println("Event: " + event.getName() + " | Price: " + event.getPrice() + " | Date: " + event.getStartDate());
+        }
+    }
+
+    /**
+     * Sorts entities alphabetically and displays the results.
+     */
+    private void sortEntitiesAlphabetically() {
+        System.out.println("Choose the type of entity to sort:");
+        System.out.println("1. Events");
+        System.out.println("2. Activities");
+        System.out.println("3. Free Activities");
+        System.out.print("Enter choice (1, 2, or 3): ");
+        int choice = Integer.parseInt(scanner.nextLine());
+
+        switch (choice) {
+            case 1 -> displaySortedEvents(adminController.getEventsSortedByName());
+            case 2 -> displaySortedActivities(adminController.getActivitiesSortedByName());
+            case 3 -> displaySortedFreeActivities(adminController.getFreeActivitiesSortedByName());
+            default -> System.out.println("Invalid choice. Please enter 1, 2, or 3.");
+        }
+    }
+
+
+    /**
+     * Displays sorted events.
+     *
+     * @param events the list of events
+     */
+    private void displaySortedEvents(List<Event> events) {
+        if (events.isEmpty()) {
+            System.out.println("No events available to sort.");
+        } else {
+            System.out.println("Events sorted alphabetically:");
+            events.forEach(event -> System.out.println(event.getName() + " | Price: " + event.getPrice()));
+        }
+    }
+
+    /**
+     * Displays sorted activities.
+     *
+     * @param activities the list of activities
+     */
+    private void displaySortedActivities(List<Activity> activities) {
+        if (activities.isEmpty()) {
+            System.out.println("No activities available to sort.");
+        } else {
+            System.out.println("Activities sorted alphabetically:");
+            activities.forEach(activity -> System.out.println(activity.getName() + " | Price: " + activity.getPrice()));
+        }
+    }
+
+    /**
+     * Displays sorted free activities.
+     *
+     * @param freeActivities the list of free activities
+     */
+    private void displaySortedFreeActivities(List<FreeActivity> freeActivities) {
+        if (freeActivities.isEmpty()) {
+            System.out.println("No free activities available to sort.");
+        } else {
+            System.out.println("Free Activities sorted alphabetically:");
+            freeActivities.forEach(freeActivity -> System.out.println(freeActivity.getName()));
+        }
+    }
+
+    /**
+     * Displays the user's current balance.
+     */
+    private void viewBalance() {
+        System.out.println(currentUser.getBalance());
+    }
+
+    private void addMoney() {
+        System.out.println("Enter the amount to add to balance");
+        double amount = Double.parseDouble(scanner.nextLine());
+        currentUser.increaseBalance(amount);
+    }
+
+    /**
+     * Displays the most popular events and activities based on participant count.
+     */
+    private void showMostPopularEntities() {
+        Map<ReviewableEntity, Integer> popularEntities = adminController.getMostPopularEntities();
+
+        if (popularEntities.isEmpty()) {
+            System.out.println("No data available for popular entities.");
+        } else {
+            System.out.println("Most Popular Entities:");
+            for (Map.Entry<ReviewableEntity, Integer> entry : popularEntities.entrySet()) {
+                System.out.println("Entity: " + entry.getKey().getName() + ", Total Participants: " + entry.getValue());
+            }
+        }
+    }
 }

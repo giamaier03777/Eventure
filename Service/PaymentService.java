@@ -38,10 +38,6 @@ public class PaymentService {
         double amount = Double.parseDouble(amountString);
         LocalDateTime date = LocalDateTime.parse(dateString);
 
-        if (paymentRepo.read(id) != null) {
-            throw new IllegalArgumentException("A payment with this ID already exists.");
-        }
-
         if (amount <= 0) {
             throw new IllegalArgumentException("Amount must be a positive value.");
         }

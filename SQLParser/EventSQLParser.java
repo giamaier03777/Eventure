@@ -51,7 +51,7 @@ public class EventSQLParser implements SQLParser<Event> {
         stmt.setObject(6, event.getStartDate());
         stmt.setObject(7, event.getEndDate());
         stmt.setDouble(8, event.getPrice());
-        stmt.setInt(9, event.getId()); // WHERE clause
+        stmt.setInt(9, event.getId());
     }
 
     @Override

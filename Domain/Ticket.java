@@ -105,4 +105,20 @@ public class Ticket implements Identifiable {
     public void setParticipantName(String participantName) {
         this.participantName = participantName;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Ticket Details:\n" +
+                        "- ID: %d\n" +
+                        "- Event: %s\n" +
+                        "- Owner: %s\n" +
+                        "- Participant Name: %s\n",
+                id,
+                event != null ? event.toString() : "No event",
+                owner != null ? owner.toString() : "No owner",
+                participantName != null ? participantName : "No participant name"
+        );
+    }
+
 }

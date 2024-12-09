@@ -136,12 +136,19 @@ public class Review implements Identifiable {
      */
     @Override
     public String toString() {
-        return "Review{" +
-                "id=" + id +
-                ", user=" + user +
-                ", reviewableEntity=" + reviewableEntity +
-                ", comment='" + comment + '\'' +
-                ", reviewDate=" + reviewDate +
-                '}';
+        return String.format(
+                "Review Details:\n" +
+                        "- ID: %d\n" +
+                        "- User: %s\n" +
+                        "- Reviewable Entity: %s\n" +
+                        "- Comment: %s\n" +
+                        "- Review Date: %s\n",
+                id,
+                user != null ? user.toString() : "No user",
+                reviewableEntity != null ? reviewableEntity.toString() : "No reviewable entity",
+                comment != null ? comment : "No comment",
+                reviewDate != null ? reviewDate.toString() : "No review date"
+        );
     }
+
 }

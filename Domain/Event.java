@@ -155,12 +155,17 @@ public class Event extends ReviewableEntity implements Identifiable {
      */
     @Override
     public String toString() {
-        return "Id: " + this.getId() +
-                ", Event name: " + this.getName() +
-                ", Location: " + this.getLocation() +
-                ", Event type: " + this.getEventType() +
-                ", price: " + price + "\n";
+        return String.format(
+                "Event Details:\n" +
+                        "- ID: %d\n" +
+                        "- Name: %s\n" +
+                        "- Location: %s\n" +
+                        "- Type: %s\n" +
+                        "- Price: %.2f\n",
+                this.getId(), this.getName(), this.getLocation(), this.getEventType(), this.price
+        );
     }
+
 
     @Override
     public String toCSV() {

@@ -46,7 +46,7 @@ public class ActivitySQLParser implements SQLParser<Activity> {
         stmt.setString(4, activity.getCategory().name());
         stmt.setString(5, activity.getDescription());
         stmt.setDouble(6, activity.getPrice());
-        stmt.setInt(7, activity.getId()); //WHERE clause
+        stmt.setInt(7, activity.getId());
     }
 
     @Override

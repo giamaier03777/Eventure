@@ -1,7 +1,9 @@
 package SQLParser;
 
+import Repository.DBRepository;
 import Repository.SQLParser;
 import Domain.*;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,15 +15,15 @@ import java.time.LocalTime;
  */
 public class ActivityScheduleSQLParser implements SQLParser<ActivitySchedule> {
 
-    private final ActivitySQLParser activitySQLParser;
+    private final DBRepository repository;
 
     /**
      * Constructs a new {@code ActivityScheduleSQLParser} with a dependency on {@code ActivitySQLParser}.
      *
      * @param activitySQLParser the parser for {@link Activity} entities.
      */
-    public ActivityScheduleSQLParser(ActivitySQLParser activitySQLParser) {
-        this.activitySQLParser = activitySQLParser;
+    public ActivityScheduleSQLParser(ActivitySQLParser activitySQLParser, DBRepository repository) {
+        this.repository = repository;
     }
 
     @Override
@@ -56,34 +58,30 @@ public class ActivityScheduleSQLParser implements SQLParser<ActivitySchedule> {
         stmt.setTime(3, java.sql.Time.valueOf(schedule.getStartTime()));
         stmt.setTime(4, java.sql.Time.valueOf(schedule.getEndTime()));
         stmt.setInt(5, schedule.getAvailableCapacity());
-        stmt.setInt(6, schedule.getId()); //WHERE clause
+        stmt.setInt(6, schedule.getId());
     }
 
     @Override
     public ActivitySchedule parseFromResultSet(ResultSet rs) throws SQLException {
-        int id = rs.getInt("schedule_id");
+        int id = rs.getInt("id");
 
-        Activity activity = new Activity();
-        activity.setId(rs.getInt("activity_id"));
-        activity.setName(rs.getString("activity_name"));
-        activity.setCapacity(rs.getInt("activity_capacity"));
-        activity.setLocation(rs.getString("activity_location"));
-        activity.setCategory(EventType.valueOf(rs.getString("activity_category").toUpperCase()));
-        activity.setDescription(rs.getString("activity_description"));
-        activity.setPrice(rs.getDouble("activity_price"));
+        int activityId = rs.getInt("activity_id");
 
-        LocalDate date = rs.getDate("schedule_date").toLocalDate();
-        LocalTime startTime = rs.getTime("schedule_start_time").toLocalTime();
-        LocalTime endTime = rs.getTime("schedule_end_time").toLocalTime();
-        int availableCapacity = rs.getInt("schedule_capacity");
+        Activity activity = (Activity) repository.read(activityId);
+        if (activity == null) {
+            throw new SQLException("Activity with ID " + activityId + " not found in the database.");
+        }
+
+        LocalDate date = rs.getDate("date").toLocalDate();
+        LocalTime startTime = rs.getTime("start_time").toLocalTime();
+        LocalTime endTime = rs.getTime("end_time").toLocalTime();
+        int availableCapacity = rs.getInt("available_capacity");
 
         ActivitySchedule schedule = new ActivitySchedule(activity, date, startTime, endTime, availableCapacity);
         schedule.setId(id);
 
         return schedule;
     }
-
-
 
 
     @Override
