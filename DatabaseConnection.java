@@ -1,3 +1,4 @@
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -38,6 +39,11 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             throw new RuntimeException("Error connecting to the database", e);
         }
+    }
+
+    public DataSource getDataSource() {
+        // de implementat
+        return null;
     }
 }
 
