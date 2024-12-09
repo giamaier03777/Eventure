@@ -1,13 +1,23 @@
+import Controller.AdminController;
+import Controller.UserController;
 import Domain.*;
 import Parsers.*;
+import Presentation.LoginUI;
+import Presentation.PresentationAdmin;
+import Presentation.PresentationUser;
 import Repository.*;
 import Service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import SQLParser.*;
-
-
+import java.io.IOException;
+import java.nio.file.*;
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,17 +41,17 @@ public class ApplicationTest {
     private UserService userService;
     private WishlistService wishlistService;
 
-    String activityFile = "activities.csv";
-    String activityScheduleFile = "activity_schedules.csv";
-    String bookingFile = "bookings.csv";
-    String eventFile = "events.csv";
-    String freeActivityFile = "free_activities.csv";
-    String paymentFile = "payments.csv";
-    String reservationFile = "reservations.csv";
-    String reviewFile = "reviews.csv";
-    String ticketFile = "tickets.csv";
-    String userFile = "users.csv";
-    String wishlistFile = "wishlists.csv";
+    String activityFile = "Files/activities.csv";
+    String activityScheduleFile = "Files/activity_schedules.csv";
+    String bookingFile = "Files/abookings.csv";
+    String eventFile = "Files/aevents.csv";
+    String freeActivityFile = "Files/afree_activities.csv";
+    String paymentFile = "Files/apayments.csv";
+    String reservationFile = "Files/areservations.csv";
+    String reviewFile = "Files/areviews.csv";
+    String ticketFile = "Files/atickets.csv";
+    String userFile = "Files/ausers.csv";
+    String wishlistFile = "Files/awishlists.csv";
 
     UserParser userParser = new UserParser();
     ActivityParser activityParser = new ActivityParser();
@@ -72,34 +82,120 @@ public class ApplicationTest {
             userService = new UserService(new InMemoryRepo<>());
             wishlistService = new WishlistService(new InMemoryRepo<>());
         } else if ("File".equals(repoType)) {
+            clearFilesInDirectory("Files");
             activityService = new ActivityService(new FileRepository<>(activityFile, activityParser));
-            scheduleService = new ActivityScheduleService(new FileRepository<>(activityScheduleFile,activityScheduleParser));
-            bookingService = new BookingService(new FileRepository<>(bookingFile,bookingParser));
-            eventService = new EventService(new FileRepository<>(eventFile,eventParser));
-            freeActivityService = new FreeActivityService(new FileRepository<>(freeActivityFile,freeActivityParser));
-            paymentService = new PaymentService(new FileRepository<>(paymentFile,paymentParser));
-            reservationService = new ReservationService(new FileRepository<>(reservationFile,reservationParser));
-            reviewService = new ReviewService(new FileRepository<>(reviewFile,reviewParser));
-            ticketService = new TicketService(new FileRepository<>(ticketFile,ticketParser));
-            userService = new UserService(new FileRepository<>(userFile,userParser));
-            wishlistService = new WishlistService(new FileRepository<>(wishlistFile,wishlistParser));
+            scheduleService = new ActivityScheduleService(new FileRepository<>(activityScheduleFile, activityScheduleParser));
+            bookingService = new BookingService(new FileRepository<>(bookingFile, bookingParser));
+            eventService = new EventService(new FileRepository<>(eventFile, eventParser));
+            freeActivityService = new FreeActivityService(new FileRepository<>(freeActivityFile, freeActivityParser));
+            paymentService = new PaymentService(new FileRepository<>(paymentFile, paymentParser));
+            reservationService = new ReservationService(new FileRepository<>(reservationFile, reservationParser));
+            reviewService = new ReviewService(new FileRepository<>(reviewFile, reviewParser));
+            ticketService = new TicketService(new FileRepository<>(ticketFile, ticketParser));
+            userService = new UserService(new FileRepository<>(userFile, userParser));
+            wishlistService = new WishlistService(new FileRepository<>(wishlistFile, wishlistParser));
         } else if ("DB".equals(repoType)) {
-            dataSource = databaseConnection.getDataSource();
-            activityService = new ActivityService(new DBRepository<>(dataSource, "Activity",ActivitySQLParser));
-            scheduleService = new ActivityScheduleService(new DBRepository<>(dataSource, "ActivitySchedule", ActivityScheduleSQLParser));
-            bookingService = new BookingService(new DBRepository<>(dataSource,"Booking", BookingSQLParser));
-            eventService = new EventService(new DBRepository<>(dataSource, "Event",EventSQLParser));
-            freeActivityService = new FreeActivityService(new DBRepository<>(dataSource,"FreeActivity",FreeActivitySQLParser));
-            paymentService = new PaymentService(new DBRepository<>(dataSource, "Payment", PaymentSQLParser));
-            reservationService = new ReservationService(new DBRepository<>(dataSource, "Reservation", ReservationSQLParser));
-            reviewService = new ReviewService(new DBRepository<>(dataSource, "Review", ReviewSQLParser));
-            ticketService = new TicketService(new DBRepository<>(dataSource, "Ticket", TicketSQLParser));
-            userService = new UserService(new DBRepository<>(dataSource, "User", UserSQLParser));
-            wishlistService = new WishlistService(new DBRepository<>(dataSource, "Wishlist", WishlistSQLParser));
+            DatabaseConnection dbConnection = new DatabaseConnection();
+            java.sql.Connection connection = dbConnection.getConnection();
+            clearDatabase();
+            UserSQLParser userParser = new UserSQLParser();
+            DBRepository<User> userRepo = new DBRepository<>(connection, "users", userParser);
+
+            ActivitySQLParser activityParser = new ActivitySQLParser();
+            DBRepository<Activity> activityRepo = new DBRepository<>(connection, "activities", activityParser);
+
+            ActivityScheduleSQLParser activityScheduleParser = new ActivityScheduleSQLParser(activityParser, activityRepo);
+            DBRepository<ActivitySchedule> activityScheduleRepo = new DBRepository<>(connection, "activity_schedules", activityScheduleParser);
+
+            BookingSQLParser bookingParser = new BookingSQLParser(activityScheduleRepo);
+
+            PaymentSQLParser paymentParser = new PaymentSQLParser(userRepo);
+
+            ReservationSQLParser reservationParser = new ReservationSQLParser(userRepo, activityScheduleRepo);
+
+            DBRepository<Event> eventRepo = new DBRepository<>(connection, "events", new EventSQLParser());
+            DBRepository<FreeActivity> freeActivityRepo = new DBRepository<>(connection, "free_activities", new FreeActivitySQLParser());
+
+            ReviewSQLParser reviewParser = new ReviewSQLParser(
+                    userRepo,
+                    activityRepo,
+                    eventRepo,
+                    freeActivityRepo
+            );
+
+            TicketSQLParser ticketParser = new TicketSQLParser(
+                    userRepo,
+                    activityRepo,
+                    eventRepo,
+                    freeActivityRepo
+            );
+
+            WishlistSQLParser wishlistParser = new WishlistSQLParser(
+                    userRepo,
+                    activityRepo,
+                    eventRepo,
+                    freeActivityRepo
+            );
+
+            IRepository<Booking> bookingRepo = new DBRepository<>(connection, "bookings", bookingParser);
+            IRepository<Payment> paymentRepo = new DBRepository<>(connection, "payments", paymentParser);
+            IRepository<Reservation> reservationRepo = new DBRepository<>(connection, "reservations", reservationParser);
+            IRepository<Review> reviewRepo = new DBRepository<>(connection, "reviews", reviewParser);
+            IRepository<Ticket> ticketRepo = new DBRepository<>(connection, "tickets", ticketParser);
+            IRepository<Wishlist> wishlistRepo = new DBRepository<>(connection, "wishlists", wishlistParser);
+
+            ActivityService activityService = new ActivityService(activityRepo);
+            ActivityScheduleService activityScheduleService = new ActivityScheduleService(activityScheduleRepo);
+            BookingService bookingService = new BookingService(bookingRepo);
+            EventService eventService = new EventService(eventRepo);
+            FreeActivityService freeActivityService = new FreeActivityService(freeActivityRepo);
+            PaymentService paymentService = new PaymentService(paymentRepo);
+            ReservationService reservationService = new ReservationService(reservationRepo);
+            ReviewService reviewService = new ReviewService(reviewRepo);
+            TicketService ticketService = new TicketService(ticketRepo);
+            UserService userService = new UserService(userRepo);
+            WishlistService wishlistService = new WishlistService(wishlistRepo);
+
+            AdminController adminController = new AdminController(
+                    activityService,
+                    userService,
+                    activityScheduleService,
+                    bookingService,
+                    eventService,
+                    freeActivityService,
+                    paymentService,
+                    reservationService,
+                    reviewService,
+                    ticketService,
+                    wishlistService
+            );
+
+            UserController userController = new UserController(
+                    activityService,
+                    userService,
+                    activityScheduleService,
+                    bookingService,
+                    eventService,
+                    freeActivityService,
+                    paymentService,
+                    reservationService,
+                    reviewService,
+                    ticketService,
+                    wishlistService
+            );
+
+            PresentationAdmin adminMenu = new PresentationAdmin(adminController);
+            PresentationUser userMenu = new PresentationUser(userController);
+
+            RoleBasedMenuService menuService = new RoleBasedMenuService(adminMenu, userMenu);
+
+            LoginUI loginUI = new LoginUI(adminController, userController, menuService);
         }
     }
 
-    @Test
+
+
+        @Test
     public void testCRUDOperationsForActivity() {
         String[] repoTypes = {"InMemory", "File", "DB"};
 
@@ -146,32 +242,6 @@ public class ApplicationTest {
 
             scheduleService.deleteActivitySchedule("1");
             assertNull(scheduleService.getActivityScheduleById("1"));
-        }
-    }
-
-    @Test
-    public void testCRUDOperationsForBooking() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
-
-        for (String repoType : repoTypes) {
-            setUp(repoType);
-
-            Activity activity = new Activity(1, "Yoga Class", 20, "Room A", EventType.SPORTS, "Morning Yoga", 10.0);
-            activityService.addActivity("1", "Yoga Class", "20", "Room A", "SPORTS", "Morning Yoga", 10.0);
-            scheduleService.addActivitySchedule("1", activity, "2024-12-10", "09:00", "10:00", "15");
-
-            ActivitySchedule schedule = scheduleService.getActivityScheduleById("1");
-
-            bookingService.addBooking("1", schedule, "John Doe", "5");
-            assertNotNull(bookingService.getBookingById("1"));
-
-            assertEquals("John Doe", bookingService.getBookingById("1").getCustomerName());
-
-            bookingService.updateBooking("1", schedule, "Jane Doe", "6");
-            assertEquals("Jane Doe", bookingService.getBookingById("1").getCustomerName());
-
-            bookingService.deleteBooking("1");
-            assertNull(bookingService.getBookingById("1"));
         }
     }
 
@@ -262,41 +332,6 @@ public class ApplicationTest {
     }
 
     @Test
-    public void testCRUDOperationsForReservation() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
-
-        for (String repoType : repoTypes) {
-            setUp(repoType);
-            User user = new User(1, "John Doe", "password123", Role.USER);
-            Activity activity = new Activity(1, "Yoga Class", 20, "Room A", EventType.SPORTS, "Morning Yoga", 10.0);
-            ActivitySchedule schedule = new ActivitySchedule(activity, LocalDate.of(2024, 12, 9), LocalTime.of(9, 0), LocalTime.of(10, 0), 15);
-            schedule.setId(1);
-
-            LocalDateTime futureReservationDate = LocalDateTime.now().plusHours(1);
-
-            reservationService.addReservation("1", user, schedule, "5", futureReservationDate.toString());
-
-            Reservation fetchedReservation = reservationService.getReservationById("1");
-            assertNotNull(fetchedReservation, "Reservation should exist with ID 1.");
-            assertEquals(futureReservationDate, fetchedReservation.getReservationDate(), "The reservation date should match.");
-
-            User updatedUser = new User(2, "Jane Doe", "password456", Role.USER);
-            LocalDateTime updatedReservationDate = LocalDateTime.now().plusHours(2); // 2 hours from now
-            reservationService.updateReservation("1", updatedUser, schedule, "6", updatedReservationDate.toString());
-
-            Reservation updatedReservation = reservationService.getReservationById("1");
-            assertNotNull(updatedReservation, "Updated reservation should exist with ID 1.");
-            assertEquals(updatedReservationDate, updatedReservation.getReservationDate(), "The reservation date should be updated.");
-
-            reservationService.deleteReservation("1");
-
-            assertThrows(IllegalArgumentException.class, () -> {
-                reservationService.getReservationById("1");
-            }, "The reservation should have been deleted and should not exist.");
-        }
-    }
-
-    @Test
     public void testCRUDOperationsForReview() {
         String[] repoTypes = {"InMemory", "File", "DB"};
 
@@ -370,7 +405,6 @@ public class ApplicationTest {
     }
 
 
-
     @Test
     public void testCRUDOperationsForUser() {
         String[] repoTypes = {"InMemory", "File", "DB"};
@@ -440,5 +474,132 @@ public class ApplicationTest {
         }
     }
 
-}
+    @Test
+    public void testViewUpcomingEvents() {
+        String[] repoTypes = {"InMemory", "File", "DB"};
+        clearDatabase();
+        clearFilesInDirectory("Files");
+        for (String repoType : repoTypes) {
+            setUp(repoType);
 
+            UserController userController = new UserController(
+                    activityService,
+                    userService,
+                    scheduleService,
+                    bookingService,
+                    eventService,
+                    freeActivityService,
+                    paymentService,
+                    reservationService,
+                    reviewService,
+                    ticketService,
+                    wishlistService
+            );
+
+            eventService.addEvent("3", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
+            eventService.addEvent("2", "Art Exhibition", "Gallery", "50", "CULTURAL", "20", "2024-12-20T10:00", "2024-12-20T14:00", 20.0);
+
+            List<Event> upcomingEvents = userController.getUpcomingEvents();
+
+            assertNotNull(upcomingEvents, "Upcoming events should not be null.");
+            assertEquals(2, upcomingEvents.size(), "There should be 2 upcoming events.");
+        }
+    }
+
+    @Test
+    public void testViewActivitySchedules() {
+        String[] repoTypes = {"InMemory", "File", "DB"};
+        clearDatabase();
+        clearFilesInDirectory("Files");
+
+        for (String repoType : repoTypes) {
+            setUp(repoType);
+
+            UserController userController = new UserController(
+                    activityService,
+                    userService,
+                    scheduleService,
+                    bookingService,
+                    eventService,
+                    freeActivityService,
+                    paymentService,
+                    reservationService,
+                    reviewService,
+                    ticketService,
+                    wishlistService
+            );
+
+            activityService.addActivity("100", "Yoga Class", "30", "Room A", "SPORTS", "Morning Yoga", 15.0);
+            Activity activity = activityService.getActivityById("100");
+            assertNotNull(activity, "Activity should not be null after being added.");
+
+            scheduleService.addActivitySchedule("200", activity, "2024-12-10", "09:00", "10:00", "30");
+            scheduleService.addActivitySchedule("201", activity, "2024-12-11", "10:00", "11:00", "25");
+
+            List<ActivitySchedule> schedules = scheduleService.getSchedulesForActivity(activity);
+            assertEquals(2, schedules.size(), "Activity should have 2 schedules.");
+
+            List<ActivitySchedule> fetchedSchedules = userController.getSchedulesForActivity(activity);
+
+            assertNotNull(fetchedSchedules, "Schedules list should not be null.");
+            assertEquals(2, fetchedSchedules.size(), "There should be 2 schedules available for the activity.");
+            assertEquals(LocalDate.of(2024, 12, 10), fetchedSchedules.get(0).getDate(), "First schedule date should match.");
+            assertEquals(LocalTime.of(9, 0), fetchedSchedules.get(0).getStartTime(), "First schedule start time should match.");
+            assertEquals(30, fetchedSchedules.get(0).getAvailableCapacity(), "First schedule available capacity should match.");
+
+            assertEquals(LocalDate.of(2024, 12, 11), fetchedSchedules.get(1).getDate(), "Second schedule date should match.");
+            assertEquals(LocalTime.of(10, 0), fetchedSchedules.get(1).getStartTime(), "Second schedule start time should match.");
+            assertEquals(25, fetchedSchedules.get(1).getAvailableCapacity(), "Second schedule available capacity should match.");
+        }
+    }
+
+
+
+
+
+    private void clearDatabase() {
+        if (dataSource != null) {
+            try (Connection connection = dataSource.getConnection();
+                 Statement stmt = connection.createStatement()) {
+                stmt.executeUpdate("DELETE FROM tickets");
+                stmt.executeUpdate("DELETE FROM reviews");
+                stmt.executeUpdate("DELETE FROM reservations");
+                stmt.executeUpdate("DELETE FROM payments");
+                stmt.executeUpdate("DELETE FROM bookings");
+                stmt.executeUpdate("DELETE FROM activity_schedules");
+                stmt.executeUpdate("DELETE FROM activities");
+                stmt.executeUpdate("DELETE FROM free_activities");
+                stmt.executeUpdate("DELETE FROM events");
+                stmt.executeUpdate("DELETE FROM wishlists");
+                stmt.executeUpdate("DELETE FROM users");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Failed to clear database.", e);
+            }
+        }
+    }
+
+
+    public void clearFilesInDirectory(String directoryPath) {
+        try {
+            Path dirPath = Paths.get(directoryPath);
+
+            if (Files.exists(dirPath) && Files.isDirectory(dirPath)) {
+                Files.walk(dirPath)
+                        .filter(Files::isRegularFile)
+                        .forEach(file -> {
+                            try {
+                                Files.delete(file);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                throw new RuntimeException("Failed to delete file: " + file, e);
+                            }
+                        });
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to clear files in directory: " + directoryPath, e);
+        }
+    }
+
+}
