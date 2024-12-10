@@ -3,6 +3,8 @@ package Repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import Exception.*;
+
 
 /**
  * A database-backed repository for managing entities that implement Identifiable and EntityParser.
@@ -24,7 +26,7 @@ public class DBRepository<T extends Identifiable> implements IRepository<T> {
     public DBRepository(Connection connection, String tableName, SQLParser<T> parser) {
         this.connection = connection;
         this.tableName = tableName;
-        this.parser = (SQLParser<T>) parser;
+        this.parser = parser;
     }
 
     @Override
@@ -37,7 +39,7 @@ public class DBRepository<T extends Identifiable> implements IRepository<T> {
             parser.fillPreparedStatementForInsert(stmt, entity);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to create entity", e);
+            throw new DatabaseException("Failed to create entity: " + entity.getId(), e);
         }
     }
 
@@ -49,12 +51,13 @@ public class DBRepository<T extends Identifiable> implements IRepository<T> {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return parser.parseFromResultSet(rs);
+                } else {
+                    throw new EntityNotFoundException("Entity with ID " + id + " not found.");
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to read entity", e);
+            throw new DatabaseException("Failed to read entity with ID " + id, e);
         }
-        return null;
     }
 
     @Override
@@ -67,10 +70,10 @@ public class DBRepository<T extends Identifiable> implements IRepository<T> {
             stmt.setInt(parser.getUpdateParametersCount() + 1, entity.getId());
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) {
-                throw new IllegalArgumentException("Entity with ID " + entity.getId() + " not found.");
+                throw new EntityNotFoundException("Entity with ID " + entity.getId() + " not found.");
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to update entity", e);
+            throw new DatabaseException("Failed to update entity: " + entity.getId(), e);
         }
     }
 
@@ -81,10 +84,10 @@ public class DBRepository<T extends Identifiable> implements IRepository<T> {
             stmt.setInt(1, id);
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) {
-                throw new IllegalArgumentException("Entity with ID " + id + " not found.");
+                throw new EntityNotFoundException("Entity with ID " + id + " not found.");
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to delete entity", e);
+            throw new DatabaseException("Failed to delete entity with ID " + id, e);
         }
     }
 
@@ -98,9 +101,8 @@ public class DBRepository<T extends Identifiable> implements IRepository<T> {
                 entities.add(parser.parseFromResultSet(rs));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to find all entities", e);
+            throw new DatabaseException("Failed to find all entities", e);
         }
         return entities;
     }
 }
-

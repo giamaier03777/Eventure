@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import Exception.*;
+
 
 /**
  * In-memory implementation of the IRepository interface.
@@ -19,38 +21,44 @@ public class InMemoryRepo<T extends Identifiable> implements IRepository<T> {
      * Adds a new entity to the repository.
      *
      * @param entity the entity to be created.
+     * @throws EntityAlreadyExistsException if an entity with the same ID already exists.
      */
     @Override
     public void create(T entity) {
         if (entities.containsKey(entity.getId())) {
-            throw new IllegalArgumentException("Entity with ID " + entity.getId() + " already exists.");
+            throw new EntityAlreadyExistsException("Entity with ID " + entity.getId() + " already exists.");
         }
         entities.put(entity.getId(), entity);
     }
-
 
     /**
      * Retrieves an entity by its unique identifier.
      *
      * @param id the unique identifier of the entity.
-     * @return the entity with the specified ID, or {@code null} if not found.
+     * @return the entity with the specified ID.
+     * @throws EntityNotFoundException if the entity with the specified ID is not found.
      */
     @Override
     public T read(int id) {
-        return entities.get(id);
+        T entity = entities.get(id);
+        if (entity == null) {
+            throw new EntityNotFoundException("Entity with ID " + id + " not found.");
+        }
+        return entity;
     }
 
     /**
      * Updates an existing entity in the repository.
      *
      * @param entity the entity with updated values.
+     * @throws EntityNotFoundException if the entity with the specified ID does not exist.
      */
     @Override
     public void update(T entity) {
         if (entities.containsKey(entity.getId())) {
             entities.put(entity.getId(), entity);
         } else {
-            throw new IllegalArgumentException("Entity with ID " + entity.getId() + " not found.");
+            throw new EntityNotFoundException("Entity with ID " + entity.getId() + " not found.");
         }
     }
 
@@ -58,13 +66,14 @@ public class InMemoryRepo<T extends Identifiable> implements IRepository<T> {
      * Deletes an entity from the repository by its unique identifier.
      *
      * @param id the unique identifier of the entity to be deleted.
+     * @throws EntityNotFoundException if the entity with the specified ID does not exist.
      */
     @Override
     public void delete(int id) {
         if (entities.containsKey(id)) {
             entities.remove(id);
         } else {
-            throw new IllegalArgumentException("Entity with ID " + id + " not found.");
+            throw new EntityNotFoundException("Entity with ID " + id + " not found.");
         }
     }
 

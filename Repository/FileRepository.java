@@ -3,6 +3,8 @@ package Repository;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import Exception.*;
+
 
 /**
  * A file-based repository for managing entities that implement Identifiable and EntityParser.
@@ -41,7 +43,7 @@ public class FileRepository<T extends Identifiable> implements IRepository<T> {
         return findAll().stream()
                 .filter(entity -> entity.getId() == id)
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new EntityNotFoundException("Entity with ID " + id + " not found."));
     }
 
     @Override
@@ -58,7 +60,7 @@ public class FileRepository<T extends Identifiable> implements IRepository<T> {
         }
 
         if (!updated) {
-            throw new IllegalArgumentException("Entity with ID " + entity.getId() + " not found.");
+            throw new EntityNotFoundException("Entity with ID " + entity.getId() + " not found.");
         }
 
         saveToFile(entities);
@@ -68,7 +70,7 @@ public class FileRepository<T extends Identifiable> implements IRepository<T> {
     public void delete(int id) {
         List<T> entities = findAll();
         if (!entities.removeIf(entity -> entity.getId() == id)) {
-            throw new IllegalArgumentException("Entity with ID " + id + " not found.");
+            throw new EntityNotFoundException("Entity with ID " + id + " not found.");
         }
         saveToFile(entities);
     }
@@ -88,7 +90,7 @@ public class FileRepository<T extends Identifiable> implements IRepository<T> {
                 entities.add(parser.parseFromCSV(line));
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read file", e);
+            throw new FileRepositoryException("Failed to read file: " + filePath, e);
         }
 
         return entities;
@@ -101,7 +103,7 @@ public class FileRepository<T extends Identifiable> implements IRepository<T> {
                 writer.newLine();
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write to file", e);
+            throw new FileRepositoryException("Failed to write to file: " + filePath, e);
         }
     }
 }
