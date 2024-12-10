@@ -2,6 +2,7 @@ package Domain;
 
 import Repository.EntityParser;
 import Repository.Identifiable;
+import Exception.*;
 
 import java.time.LocalDateTime;
 
@@ -24,20 +25,40 @@ public class Reservation implements Identifiable {
      * @param activitySchedule the activity schedule being reserved
      * @param numberOfPeople   the number of people included in the reservation
      * @param reservationDate  the date and time of the reservation
+     * @throws ValidationException if any input parameter is invalid
+     * @throws BusinessLogicException if there is insufficient capacity in the activity schedule
      */
     public Reservation(int id, User user, ActivitySchedule activitySchedule, int numberOfPeople, LocalDateTime reservationDate) {
+        if (user == null) {
+            throw new ValidationException("User cannot be null.");
+        }
+        if (activitySchedule == null) {
+            throw new ValidationException("Activity schedule cannot be null.");
+        }
+        if (numberOfPeople <= 0) {
+            throw new ValidationException("Number of people must be greater than 0.");
+        }
+        if (reservationDate == null || reservationDate.isAfter(LocalDateTime.now())) {
+            throw new ValidationException("Reservation date cannot be null or in the future.");
+        }
+        if (activitySchedule.getAvailableCapacity() < numberOfPeople) {
+            throw new BusinessLogicException("Insufficient capacity in the activity schedule for the requested number of people.");
+        }
+
         this.id = id;
         this.user = user;
         this.activitySchedule = activitySchedule;
         this.numberOfPeople = numberOfPeople;
         this.reservationDate = reservationDate;
+
+        // Update the capacity of the activity schedule
+        this.activitySchedule.reduceCapacity(numberOfPeople);
     }
 
     /**
      * Default constructor for creating an empty {@link Reservation} object.
      */
     public Reservation() {
-
     }
 
     /**
@@ -71,8 +92,12 @@ public class Reservation implements Identifiable {
      * Sets the user associated with the reservation.
      *
      * @param user the new user who made the reservation
+     * @throws ValidationException if the user is null
      */
     public void setUser(User user) {
+        if (user == null) {
+            throw new ValidationException("User cannot be null.");
+        }
         this.user = user;
     }
 
@@ -89,8 +114,12 @@ public class Reservation implements Identifiable {
      * Sets the activity schedule being reserved.
      *
      * @param activitySchedule the new activity schedule
+     * @throws ValidationException if the activity schedule is null
      */
     public void setActivitySchedule(ActivitySchedule activitySchedule) {
+        if (activitySchedule == null) {
+            throw new ValidationException("Activity schedule cannot be null.");
+        }
         this.activitySchedule = activitySchedule;
     }
 
@@ -107,9 +136,22 @@ public class Reservation implements Identifiable {
      * Sets the number of people included in the reservation.
      *
      * @param numberOfPeople the new number of people
+     * @throws ValidationException if the number of people is less than or equal to 0
+     * @throws BusinessLogicException if the activity schedule does not have sufficient capacity
      */
     public void setNumberOfPeople(int numberOfPeople) {
+        if (numberOfPeople <= 0) {
+            throw new ValidationException("Number of people must be greater than 0.");
+        }
+        if (activitySchedule != null && activitySchedule.getAvailableCapacity() < numberOfPeople) {
+            throw new BusinessLogicException("Insufficient capacity in the activity schedule for the requested number of people.");
+        }
         this.numberOfPeople = numberOfPeople;
+
+        // Update the activity schedule capacity
+        if (activitySchedule != null) {
+            activitySchedule.reduceCapacity(numberOfPeople);
+        }
     }
 
     /**
@@ -125,8 +167,12 @@ public class Reservation implements Identifiable {
      * Sets the date and time of the reservation.
      *
      * @param reservationDate the new reservation date and time
+     * @throws ValidationException if the reservation date is null or in the future
      */
     public void setReservationDate(LocalDateTime reservationDate) {
+        if (reservationDate == null || reservationDate.isAfter(LocalDateTime.now())) {
+            throw new ValidationException("Reservation date cannot be null or in the future.");
+        }
         this.reservationDate = reservationDate;
     }
 

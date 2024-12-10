@@ -12,16 +12,16 @@ public class TicketParser implements EntityParser<Ticket> {
 
     @Override
     public String toCSV(Ticket ticket) {
-        return ticket.getId() + "," +
-                ticket.getEvent().getClass().getSimpleName() + "," +
-                ticket.getEvent().toCSV() + "," +
-                userParser.toCSV(ticket.getOwner()) + "," +
+        return ticket.getId() + ";" +
+                ticket.getEvent().getClass().getSimpleName() + ";" +
+                ticket.getEvent().toCSV() + ";" +
+                userParser.toCSV(ticket.getOwner()) + ";" +
                 ticket.getParticipantName();
     }
 
     @Override
     public Ticket parseFromCSV(String csv) {
-        String[] fields = csv.split(",", 5);
+        String[] fields = csv.split(";");
         int id = Integer.parseInt(fields[0]);
         String eventType = fields[1];
         String eventCSV = fields[2];

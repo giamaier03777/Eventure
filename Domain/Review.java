@@ -2,6 +2,7 @@ package Domain;
 
 import Repository.EntityParser;
 import Repository.Identifiable;
+import Exception.*;
 
 import java.time.LocalDateTime;
 
@@ -24,8 +25,22 @@ public class Review implements Identifiable {
      * @param reviewableEntity the entity (activity, event, etc.) being reviewed
      * @param comment          the textual content of the review
      * @param reviewDate       the date and time the review was made
+     * @throws ValidationException if any parameter is invalid
      */
     public Review(int id, User user, ReviewableEntity reviewableEntity, String comment, LocalDateTime reviewDate) {
+        if (user == null) {
+            throw new ValidationException("User cannot be null.");
+        }
+        if (reviewableEntity == null) {
+            throw new ValidationException("Reviewable entity cannot be null.");
+        }
+        if (comment == null || comment.trim().isEmpty()) {
+            throw new ValidationException("Comment cannot be null or empty.");
+        }
+        if (reviewDate == null || reviewDate.isAfter(LocalDateTime.now())) {
+            throw new ValidationException("Review date cannot be null or in the future.");
+        }
+
         this.id = id;
         this.user = user;
         this.reviewableEntity = reviewableEntity;
@@ -70,8 +85,12 @@ public class Review implements Identifiable {
      * Sets the user who created the review.
      *
      * @param user the new user
+     * @throws ValidationException if the user is null
      */
     public void setUser(User user) {
+        if (user == null) {
+            throw new ValidationException("User cannot be null.");
+        }
         this.user = user;
     }
 
@@ -88,8 +107,12 @@ public class Review implements Identifiable {
      * Sets the entity being reviewed.
      *
      * @param reviewableEntity the new reviewed entity
+     * @throws ValidationException if the reviewable entity is null
      */
     public void setReviewableEntity(ReviewableEntity reviewableEntity) {
+        if (reviewableEntity == null) {
+            throw new ValidationException("Reviewable entity cannot be null.");
+        }
         this.reviewableEntity = reviewableEntity;
     }
 
@@ -106,8 +129,12 @@ public class Review implements Identifiable {
      * Sets the textual content of the review.
      *
      * @param comment the new comment
+     * @throws ValidationException if the comment is null or empty
      */
     public void setComment(String comment) {
+        if (comment == null || comment.trim().isEmpty()) {
+            throw new ValidationException("Comment cannot be null or empty.");
+        }
         this.comment = comment;
     }
 
@@ -124,8 +151,12 @@ public class Review implements Identifiable {
      * Sets the date and time when the review was made.
      *
      * @param reviewDate the new review date
+     * @throws ValidationException if the review date is null or in the future
      */
     public void setReviewDate(LocalDateTime reviewDate) {
+        if (reviewDate == null || reviewDate.isAfter(LocalDateTime.now())) {
+            throw new ValidationException("Review date cannot be null or in the future.");
+        }
         this.reviewDate = reviewDate;
     }
 
@@ -150,5 +181,4 @@ public class Review implements Identifiable {
                 reviewDate != null ? reviewDate.toString() : "No review date"
         );
     }
-
 }

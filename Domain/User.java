@@ -2,6 +2,8 @@ package Domain;
 
 import Repository.EntityParser;
 import Repository.Identifiable;
+import Exception.*;
+
 
 /**
  * Represents a user within the system.
@@ -21,8 +23,19 @@ public class User implements Identifiable {
      * @param username the username of the user.
      * @param password the password of the user.
      * @param role     the role of the user (e.g., USER or ADMIN).
+     * @throws ValidationException if any parameter is invalid
      */
     public User(int id, String username, String password, Role role) {
+        if (username == null || username.trim().isEmpty()) {
+            throw new ValidationException("Username cannot be null or empty.");
+        }
+        if (password == null || password.trim().isEmpty()) {
+            throw new ValidationException("Password cannot be null or empty.");
+        }
+        if (role == null) {
+            throw new ValidationException("Role cannot be null.");
+        }
+
         this.id = id;
         this.username = username;
         this.password = password;
@@ -67,8 +80,12 @@ public class User implements Identifiable {
      * Sets the username of the user.
      *
      * @param username the username.
+     * @throws ValidationException if the username is null or empty
      */
     public void setUsername(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            throw new ValidationException("Username cannot be null or empty.");
+        }
         this.username = username;
     }
 
@@ -85,8 +102,12 @@ public class User implements Identifiable {
      * Sets the password of the user.
      *
      * @param password the password.
+     * @throws ValidationException if the password is null or empty
      */
     public void setPassword(String password) {
+        if (password == null || password.trim().isEmpty()) {
+            throw new ValidationException("Password cannot be null or empty.");
+        }
         this.password = password;
     }
 
@@ -103,8 +124,12 @@ public class User implements Identifiable {
      * Sets the role of the user.
      *
      * @param role the user role.
+     * @throws ValidationException if the role is null
      */
     public void setRole(Role role) {
+        if (role == null) {
+            throw new ValidationException("Role cannot be null.");
+        }
         this.role = role;
     }
 
@@ -121,8 +146,12 @@ public class User implements Identifiable {
      * Increases the user's balance by a specified amount.
      *
      * @param amount the amount to add to the balance.
+     * @throws ValidationException if the amount is negative
      */
     public void increaseBalance(double amount) {
+        if (amount < 0) {
+            throw new ValidationException("Amount to increase must be non-negative.");
+        }
         this.balance += amount;
     }
 
@@ -130,8 +159,12 @@ public class User implements Identifiable {
      * Sets the user's balance to a specified amount.
      *
      * @param amount the new balance amount.
+     * @throws ValidationException if the amount is negative
      */
     public void setBalance(double amount) {
+        if (amount < 0) {
+            throw new ValidationException("Balance cannot be negative.");
+        }
         this.balance = amount;
     }
 
@@ -147,5 +180,4 @@ public class User implements Identifiable {
                 balance
         );
     }
-
 }

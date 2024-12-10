@@ -3,6 +3,7 @@ package Parsers;
 import Domain.*;
 import Repository.EntityParser;
 
+
 /**
  * A parser for {@link User} entities to enable CSV serialization and deserialization.
  */
@@ -19,7 +20,7 @@ public class UserParser implements EntityParser<User> {
 
     @Override
     public User parseFromCSV(String csv) {
-        String[] fields = csv.split(",", -1);
+        String[] fields = csv.split(",");
 
         int id = Integer.parseInt(fields[0]);
         String username = fields[1];
@@ -33,3 +34,4 @@ public class UserParser implements EntityParser<User> {
         return user;
     }
 }
+

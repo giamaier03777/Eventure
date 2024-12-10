@@ -23,26 +23,26 @@ public class ActivityScheduleParser implements EntityParser<ActivitySchedule> {
 
     @Override
     public String toCSV(ActivitySchedule schedule) {
-        return schedule.getId() + "," +
-                activityParser.toCSV(schedule.getActivity()) + "," +
-                schedule.getDate() + "," +
-                schedule.getStartTime() + "," +
-                schedule.getEndTime() + "," +
+        return schedule.getId() + ";" +
+                activityParser.toCSV(schedule.getActivity()) + ";" +
+                schedule.getDate() + ";" +
+                schedule.getStartTime() + ";" +
+                schedule.getEndTime() + ";" +
                 schedule.getAvailableCapacity();
     }
 
     @Override
     public ActivitySchedule parseFromCSV(String csv) {
-        String[] fields = csv.split(",", -1);
-
+        String[] fields = csv.split(";");
+        System.out.println(fields);
         int id = Integer.parseInt(fields[0]);
 
-        Activity activity = activityParser.parseFromCSV(String.join(",", fields[1], fields[2], fields[3], fields[4], fields[5], fields[6], fields[7]));
+        Activity activity = activityParser.parseFromCSV(fields[1]);
 
-        LocalDate date = LocalDate.parse(fields[8]);
-        LocalTime startTime = LocalTime.parse(fields[9]);
-        LocalTime endTime = LocalTime.parse(fields[10]);
-        int availableCapacity = Integer.parseInt(fields[11]);
+        LocalDate date = LocalDate.parse(fields[2]);
+        LocalTime startTime = LocalTime.parse(fields[3]);
+        LocalTime endTime = LocalTime.parse(fields[4]);
+        int availableCapacity = Integer.parseInt(fields[5]);
 
         ActivitySchedule schedule = new ActivitySchedule(activity, date, startTime, endTime, availableCapacity);
         schedule.setId(id);

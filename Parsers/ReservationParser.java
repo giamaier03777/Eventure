@@ -28,19 +28,18 @@ public class ReservationParser implements EntityParser<Reservation> {
 
     @Override
     public String toCSV(Reservation reservation) {
-        return reservation.getId() + "," +
-                userParser.toCSV(reservation.getUser()) + "," +
-                activityScheduleParser.toCSV(reservation.getActivitySchedule()) + "," +
-                reservation.getNumberOfPeople() + "," +
+        return reservation.getId() + "|" +
+                userParser.toCSV(reservation.getUser()) + "|" +
+                activityScheduleParser.toCSV(reservation.getActivitySchedule()) + "|" +
+                reservation.getNumberOfPeople() + "|" +
                 reservation.getReservationDate();
     }
 
     @Override
     public Reservation parseFromCSV(String csv) {
-        String[] fields = csv.split(",", 5);
+        String[] fields = csv.split("\\|");
 
         int id = Integer.parseInt(fields[0]);
-
         User user = userParser.parseFromCSV(fields[1]);
         ActivitySchedule activitySchedule = activityScheduleParser.parseFromCSV(fields[2]);
         int numberOfPeople = Integer.parseInt(fields[3]);

@@ -11,30 +11,22 @@ public class EventParser implements EntityParser<Event> {
 
     @Override
     public String toCSV(Event event) {
-        return event.getId() + "," +
-                event.getName() + "," +
-                event.getLocation() + "," +
-                event.getCapacity() + "," +
-                event.getEventType() + "," +
-                event.getCurrentSize() + "," +
-                event.getStartDate() + "," +
-                event.getEndDate() + "," +
-                event.getPrice();
+        return event.toCSV();
     }
 
     @Override
     public Event parseFromCSV(String csv) {
-        String[] fields = csv.split(",", -1);
+        String[] fields = csv.split(",");
 
-        int id = Integer.parseInt(fields[0]);
-        String name = fields[1];
-        String location = fields[2];
-        int capacity = Integer.parseInt(fields[3]);
-        EventType eventType = EventType.valueOf(fields[4].toUpperCase());
-        int currentSize = Integer.parseInt(fields[5]);
-        LocalDateTime startDate = LocalDateTime.parse(fields[6]);
-        LocalDateTime endDate = LocalDateTime.parse(fields[7]);
-        double price = Double.parseDouble(fields[8]);
+        int id = Integer.parseInt(fields[1]);
+        String name = fields[2];
+        String location = fields[3];
+        int capacity = Integer.parseInt(fields[4]);
+        EventType eventType = EventType.valueOf(fields[5].toUpperCase());
+        int currentSize = Integer.parseInt(fields[6]);
+        LocalDateTime startDate = LocalDateTime.parse(fields[7]);
+        LocalDateTime endDate = LocalDateTime.parse(fields[8]);
+        double price = Double.parseDouble(fields[9]);
 
         return new Event(id, name, location, capacity, eventType, currentSize, startDate, endDate, price);
     }

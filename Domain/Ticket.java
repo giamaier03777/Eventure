@@ -2,6 +2,8 @@ package Domain;
 
 import Repository.EntityParser;
 import Repository.Identifiable;
+import Exception.*;
+
 
 /**
  * Represents a ticket for an event or activity within the system.
@@ -20,8 +22,19 @@ public class Ticket implements Identifiable {
      * @param event           the event or activity associated with the ticket.
      * @param owner           the user who owns the ticket.
      * @param participantName the name of the participant for whom the ticket is reserved.
+     * @throws ValidationException if any parameter is invalid
      */
     public Ticket(int id, ReviewableEntity event, User owner, String participantName) {
+        if (event == null) {
+            throw new ValidationException("Event cannot be null.");
+        }
+        if (owner == null) {
+            throw new ValidationException("Owner cannot be null.");
+        }
+        if (participantName == null || participantName.trim().isEmpty()) {
+            throw new ValidationException("Participant name cannot be null or empty.");
+        }
+
         this.id = id;
         this.event = event;
         this.owner = owner;
@@ -65,8 +78,12 @@ public class Ticket implements Identifiable {
      * Sets the event or activity associated with the ticket.
      *
      * @param event the associated event or activity.
+     * @throws ValidationException if the event is null
      */
     public void setEvent(ReviewableEntity event) {
+        if (event == null) {
+            throw new ValidationException("Event cannot be null.");
+        }
         this.event = event;
     }
 
@@ -83,8 +100,12 @@ public class Ticket implements Identifiable {
      * Sets the user who owns the ticket.
      *
      * @param owner the ticket owner.
+     * @throws ValidationException if the owner is null
      */
     public void setOwner(User owner) {
+        if (owner == null) {
+            throw new ValidationException("Owner cannot be null.");
+        }
         this.owner = owner;
     }
 
@@ -101,8 +122,12 @@ public class Ticket implements Identifiable {
      * Sets the name of the participant for whom the ticket is reserved.
      *
      * @param participantName the participant's name.
+     * @throws ValidationException if the participant name is null or empty
      */
     public void setParticipantName(String participantName) {
+        if (participantName == null || participantName.trim().isEmpty()) {
+            throw new ValidationException("Participant name cannot be null or empty.");
+        }
         this.participantName = participantName;
     }
 
@@ -120,5 +145,4 @@ public class Ticket implements Identifiable {
                 participantName != null ? participantName : "No participant name"
         );
     }
-
 }

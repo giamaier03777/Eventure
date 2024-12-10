@@ -22,22 +22,19 @@ public class BookingParser implements EntityParser<Booking> {
 
     @Override
     public String toCSV(Booking booking) {
-        return booking.getId() + "," +
-                activityScheduleParser.toCSV(booking.getSchedule()) + "," +
-                booking.getCustomerName() + "," +
+        return booking.getId() + "|" +
+                activityScheduleParser.toCSV(booking.getSchedule()) + "|" +
+                booking.getCustomerName() + "|" +
                 booking.getNumberOfPeople();
     }
 
     @Override
     public Booking parseFromCSV(String csv) {
-        String[] fields = csv.split(",", 4);
+        String[] fields = csv.split("\\|");
 
         int id = Integer.parseInt(fields[0]);
-
         ActivitySchedule schedule = activityScheduleParser.parseFromCSV(fields[1]);
-
         String customerName = fields[2];
-
         int numberOfPeople = Integer.parseInt(fields[3]);
 
         Booking booking = new Booking(schedule, customerName, numberOfPeople);

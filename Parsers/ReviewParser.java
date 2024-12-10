@@ -15,25 +15,21 @@ public class ReviewParser implements EntityParser<Review> {
 
     @Override
     public String toCSV(Review review) {
-        return review.getId() + "," +
-                userParser.toCSV(review.getUser()) + "," +
-                review.getReviewableEntity().toCSV() + "," +
-                review.getComment().replace(",", ";") + "," +
+        return review.getId() + ";" +
+                userParser.toCSV(review.getUser()) + ";" +
+                review.getReviewableEntity().toCSV() + ";" +
+                review.getComment() + ";" +
                 review.getReviewDate();
     }
 
     @Override
     public Review parseFromCSV(String csv) {
-        String[] fields = csv.split(",", 5);
+        String[] fields = csv.split(";");
 
         int id = Integer.parseInt(fields[0]);
-
         User user = userParser.parseFromCSV(fields[1]);
-
         ReviewableEntity reviewableEntity = parseReviewableEntityFromCSV(fields[2]);
-
-        String comment = fields[3].replace(";", ",");
-
+        String comment = fields[3];
         LocalDateTime reviewDate = LocalDateTime.parse(fields[4]);
 
         return new Review(id, user, reviewableEntity, comment, reviewDate);

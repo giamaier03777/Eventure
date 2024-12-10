@@ -6,6 +6,7 @@ import Repository.Identifiable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import Exception.*;
 
 /**
  * Represents an event, which is a type of reviewable entity.
@@ -31,9 +32,24 @@ public class Event extends ReviewableEntity implements Identifiable {
      * @param startDate   the start date and time of the event
      * @param endDate     the end date and time of the event
      * @param price       the price per ticket for the event
+     * @throws ValidationException if any input parameter is invalid
      */
     public Event(int id, String eventName, String location, int capacity, EventType eventType, int currentSize, LocalDateTime startDate, LocalDateTime endDate, double price) {
         super(id, eventName, eventType, location);
+
+        if (capacity <= 0) {
+            throw new ValidationException("Capacity must be greater than 0.");
+        }
+        if (currentSize < 0) {
+            throw new ValidationException("Current size cannot be negative.");
+        }
+        if (startDate == null || endDate == null || startDate.isAfter(endDate)) {
+            throw new ValidationException("Start date must be before end date, and both cannot be null.");
+        }
+        if (price < 0) {
+            throw new ValidationException("Price cannot be negative.");
+        }
+
         this.capacity = capacity;
         this.currentSize = currentSize;
         this.startDate = startDate;
@@ -61,8 +77,15 @@ public class Event extends ReviewableEntity implements Identifiable {
      * Sets the current size (number of attendees) of the event.
      *
      * @param currentSize the new current size
+     * @throws ValidationException if the current size is negative or exceeds capacity
      */
     public void setCurrentSize(int currentSize) {
+        if (currentSize < 0) {
+            throw new ValidationException("Current size cannot be negative.");
+        }
+        if (currentSize > capacity) {
+            throw new BusinessLogicException("Current size cannot exceed event capacity.");
+        }
         this.currentSize = currentSize;
     }
 
@@ -79,8 +102,12 @@ public class Event extends ReviewableEntity implements Identifiable {
      * Sets the start date and time of the event.
      *
      * @param startDate the new start date and time
+     * @throws ValidationException if the start date is null or after the end date
      */
     public void setStartDate(LocalDateTime startDate) {
+        if (startDate == null || (endDate != null && startDate.isAfter(endDate))) {
+            throw new ValidationException("Start date must be before end date, and cannot be null.");
+        }
         this.startDate = startDate;
     }
 
@@ -97,8 +124,12 @@ public class Event extends ReviewableEntity implements Identifiable {
      * Sets the end date and time of the event.
      *
      * @param endDate the new end date and time
+     * @throws ValidationException if the end date is null or before the start date
      */
     public void setEndDate(LocalDateTime endDate) {
+        if (endDate == null || (startDate != null && endDate.isBefore(startDate))) {
+            throw new ValidationException("End date must be after start date, and cannot be null.");
+        }
         this.endDate = endDate;
     }
 
@@ -115,8 +146,15 @@ public class Event extends ReviewableEntity implements Identifiable {
      * Sets the total capacity of the event.
      *
      * @param capacity the new capacity
+     * @throws ValidationException if the capacity is less than or equal to 0
      */
     public void setCapacity(int capacity) {
+        if (capacity <= 0) {
+            throw new ValidationException("Capacity must be greater than 0.");
+        }
+        if (currentSize > capacity) {
+            throw new BusinessLogicException("Capacity cannot be less than the current size.");
+        }
         this.capacity = capacity;
     }
 
@@ -143,8 +181,12 @@ public class Event extends ReviewableEntity implements Identifiable {
      * Sets the price per ticket for the event.
      *
      * @param price the new ticket price
+     * @throws ValidationException if the price is negative
      */
     public void setPrice(double price) {
+        if (price < 0) {
+            throw new ValidationException("Price cannot be negative.");
+        }
         this.price = price;
     }
 
@@ -166,7 +208,6 @@ public class Event extends ReviewableEntity implements Identifiable {
         );
     }
 
-
     @Override
     public String toCSV() {
         return "Event," + getId() + "," +
@@ -179,5 +220,4 @@ public class Event extends ReviewableEntity implements Identifiable {
                 getEndDate() + "," +
                 getPrice();
     }
-
 }
