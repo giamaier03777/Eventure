@@ -32,7 +32,6 @@ public class ReservationService {
      * @param activitySchedule     the activity schedule being reserved.
      * @param numberOfPeopleString the number of people included in the reservation as a string.
      * @param reservationDateString the date and time of the reservation as a string in ISO-8601 format.
-     * @throws EntityAlreadyExistsException if the reservation already exists.
      * @throws ValidationException if validation fails.
      */
     public void addReservation(String idString, User user, ActivitySchedule activitySchedule, String numberOfPeopleString, String reservationDateString) {
@@ -40,10 +39,6 @@ public class ReservationService {
             int id = Integer.parseInt(idString);
             int numberOfPeople = Integer.parseInt(numberOfPeopleString);
             LocalDateTime reservationDate = LocalDateTime.parse(reservationDateString);
-
-            if (reservationRepo.read(id) != null) {
-                throw new EntityAlreadyExistsException("A reservation with this ID already exists.");
-            }
 
             validateReservationInputs(user, activitySchedule, numberOfPeople, reservationDate);
 

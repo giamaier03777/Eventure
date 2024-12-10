@@ -33,7 +33,6 @@ public class BookingService {
      * @param schedule       the activity schedule associated with the booking.
      * @param customerName   the name of the customer making the booking.
      * @param numberOfPeople the number of people included in the booking as a string.
-     * @throws EntityAlreadyExistsException if the booking already exists.
      * @throws ValidationException if validation fails.
      */
     public void addBooking(String id, ActivitySchedule schedule, String customerName, String numberOfPeople) {
@@ -41,9 +40,6 @@ public class BookingService {
             int bookingId = Integer.parseInt(id);
             int peopleCount = Integer.parseInt(numberOfPeople);
 
-            if (bookingRepo.read(bookingId) != null) {
-                throw new EntityAlreadyExistsException("A booking with this ID already exists.");
-            }
 
             validateBookingInputs(schedule, customerName, peopleCount);
 

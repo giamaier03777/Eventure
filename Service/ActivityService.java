@@ -36,7 +36,6 @@ public class ActivityService {
      * @param eventType_s  the type of event as a string.
      * @param description  the description of the activity.
      * @param price        the price of the activity.
-     * @throws EntityAlreadyExistsException if the activity already exists.
      * @throws ValidationException if validation of input data fails.
      */
     public void addActivity(String id_s, String activityName, String capacity_s, String location, String eventType_s, String description, double price) {
@@ -44,10 +43,6 @@ public class ActivityService {
             int id = Integer.parseInt(id_s);
             int capacity = Integer.parseInt(capacity_s);
             EventType eventType = EventType.valueOf(eventType_s.toUpperCase());
-
-            if (activityRepo.read(id) != null) {
-                throw new EntityAlreadyExistsException("An activity with this ID already exists.");
-            }
 
             validateActivityInputs(activityName, capacity, location);
 

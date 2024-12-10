@@ -35,7 +35,6 @@ public class ActivityScheduleService {
      * @param startTimeString the start time of the schedule in ISO format.
      * @param endTimeString   the end time of the schedule in ISO format.
      * @param capacityString  the available capacity for the schedule as a string.
-     * @throws EntityAlreadyExistsException if a schedule with the same ID already exists.
      * @throws ValidationException if validation of input data fails.
      */
     public void addActivitySchedule(String idString, Activity activity, String dateString, String startTimeString, String endTimeString, String capacityString) {
@@ -45,10 +44,6 @@ public class ActivityScheduleService {
             LocalDate date = LocalDate.parse(dateString);
             LocalTime startTime = LocalTime.parse(startTimeString);
             LocalTime endTime = LocalTime.parse(endTimeString);
-
-            if (activityScheduleRepo.read(id) != null) {
-                throw new EntityAlreadyExistsException("An ActivitySchedule with this ID already exists.");
-            }
 
             validateActivityScheduleInputs(activity, date, startTime, endTime, availableCapacity);
 

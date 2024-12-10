@@ -95,8 +95,8 @@ public class Main {
         activityScheduleService.addActivitySchedule(
                 "202", cookingActivity, LocalDate.now().plusDays(2).toString(), LocalTime.of(14, 0).toString(), LocalTime.of(16, 0).toString(), "15");
 
-        ActivitySchedule yogaSchedule = activityScheduleService.getScheduleById("201");
-        ActivitySchedule cookingSchedule = activityScheduleService.getScheduleById("202");
+        ActivitySchedule yogaSchedule = activityScheduleService.getActivityScheduleById("201");
+        ActivitySchedule cookingSchedule = activityScheduleService.getActivityScheduleById("202");
 
         bookingService.addBooking("501", yogaSchedule, "Alice", "2");
         bookingService.addBooking("502", yogaSchedule, "Bob", "3");

@@ -32,13 +32,9 @@ public class FreeActivityService {
      * @param location  the location where the activity will take place.
      * @param eventType the type of the activity (e.g., WORKSHOP, RELAXATION).
      * @param program   the program details or description of the activity.
-     * @throws EntityAlreadyExistsException if the activity already exists.
      * @throws ValidationException if validation fails.
      */
     public void addFreeActivity(int id, String name, String location, EventType eventType, String program) {
-        if (freeActivityRepo.read(id) != null) {
-            throw new EntityAlreadyExistsException("A free activity with this ID already exists.");
-        }
 
         validateFreeActivityInputs(name, location, program);
 

@@ -31,7 +31,6 @@ public class PaymentService {
      * @param dateString    the date of the payment as a string in ISO-8601 format.
      * @param user          the user who made the payment.
      * @param paymentMethod the method of payment (e.g., "CASH", "CARD").
-     * @throws EntityAlreadyExistsException if the payment already exists.
      * @throws ValidationException if validation fails.
      */
     public void addPayment(String idString, String amountString, String dateString, User user, String paymentMethod) {
@@ -39,10 +38,6 @@ public class PaymentService {
             int id = Integer.parseInt(idString);
             double amount = Double.parseDouble(amountString);
             LocalDateTime date = LocalDateTime.parse(dateString);
-
-            if (paymentRepo.read(id) != null) {
-                throw new EntityAlreadyExistsException("A payment with this ID already exists.");
-            }
 
             validatePaymentInputs(amount, date, user, paymentMethod);
 

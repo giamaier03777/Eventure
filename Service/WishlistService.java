@@ -30,16 +30,12 @@ public class WishlistService {
      * @param id    the unique identifier of the wishlist.
      * @param user  the user associated with the wishlist.
      * @param items the list of reviewable entities to include in the wishlist.
-     * @throws EntityAlreadyExistsException if the wishlist ID already exists.
      * @throws ValidationException          if the user is null.
      */
     public void addWishlist(String id, User user, List<ReviewableEntity> items) {
         try {
             int wishlistId = Integer.parseInt(id);
 
-            if (wishlistRepo.read(wishlistId) != null) {
-                throw new EntityAlreadyExistsException("A wishlist with this ID already exists.");
-            }
 
             if (user == null) {
                 throw new ValidationException("User cannot be null.");

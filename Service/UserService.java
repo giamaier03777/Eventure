@@ -28,16 +28,12 @@ public class UserService {
      * @param username the username of the user.
      * @param password the password of the user.
      * @param role     the role of the user (e.g., USER or ADMIN).
-     * @throws EntityAlreadyExistsException if the user ID already exists.
      * @throws ValidationException          if username or password is empty, or the role is null.
      */
     public void addUser(String id, String username, String password, Role role) {
         try {
             int userId = Integer.parseInt(id);
 
-            if (userRepo.read(userId) != null) {
-                throw new EntityAlreadyExistsException("A user with this ID already exists.");
-            }
 
             validateUserInputs(username, password, role);
 

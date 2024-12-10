@@ -34,17 +34,12 @@ public class ReviewService {
      * @param reviewableEntity the entity being reviewed (e.g., activity, event).
      * @param comment          the text content of the review.
      * @param reviewDateString the date and time of the review as a string in ISO-8601 format.
-     * @throws EntityAlreadyExistsException if the review already exists.
      * @throws ValidationException if validation fails.
      */
     public void addReview(String idString, User user, ReviewableEntity reviewableEntity, String comment, String reviewDateString) {
         try {
             int id = Integer.parseInt(idString);
             LocalDateTime reviewDate = LocalDateTime.parse(reviewDateString);
-
-            if (reviewRepo.read(id) != null) {
-                throw new EntityAlreadyExistsException("A review with this ID already exists.");
-            }
 
             validateReviewInputs(user, reviewableEntity, comment, reviewDate);
 

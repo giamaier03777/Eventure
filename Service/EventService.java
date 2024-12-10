@@ -38,7 +38,6 @@ public class EventService {
      * @param startDateString   the start date and time of the event as a string.
      * @param endDateString     the end date and time of the event as a string.
      * @param price             the price per ticket for the event.
-     * @throws EntityAlreadyExistsException if the event already exists.
      * @throws ValidationException if validation fails.
      */
     public void addEvent(String idString, String eventName, String location, String capacityString, String eventTypeString, String currentSizeString, String startDateString, String endDateString, double price) {
@@ -50,9 +49,6 @@ public class EventService {
             LocalDateTime startDate = LocalDateTime.parse(startDateString);
             LocalDateTime endDate = LocalDateTime.parse(endDateString);
 
-            if (eventRepo.read(id) != null) {
-                throw new EntityAlreadyExistsException("An event with this ID already exists.");
-            }
 
             validateEventInputs(eventName, location, capacity, currentSize, startDate, endDate);
 
