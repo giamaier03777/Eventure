@@ -3,8 +3,7 @@ package Service;
 import Domain.User;
 import Domain.Role;
 import Repository.IRepository;
-import Repository.InMemoryRepo;
-
+import Exception.*;
 
 /**
  * Service class for managing users in the system.
@@ -29,28 +28,24 @@ public class UserService {
      * @param username the username of the user.
      * @param password the password of the user.
      * @param role     the role of the user (e.g., USER or ADMIN).
-     * @throws IllegalArgumentException if the user ID already exists, username or password is empty,
-     *                                  or the role is null.
+     * @throws EntityAlreadyExistsException if the user ID already exists.
+     * @throws ValidationException          if username or password is empty, or the role is null.
      */
     public void addUser(String id, String username, String password, Role role) {
-        if (userRepo.read(Integer.parseInt(id)) != null) {
-            throw new IllegalArgumentException("A user with this ID already exists.");
-        }
+        try {
+            int userId = Integer.parseInt(id);
 
-        if (username == null || username.trim().isEmpty()) {
-            throw new IllegalArgumentException("Username cannot be empty.");
-        }
+            if (userRepo.read(userId) != null) {
+                throw new EntityAlreadyExistsException("A user with this ID already exists.");
+            }
 
-        if (password == null || password.trim().isEmpty()) {
-            throw new IllegalArgumentException("Password cannot be empty.");
-        }
+            validateUserInputs(username, password, role);
 
-        if (role == null) {
-            throw new IllegalArgumentException("Role cannot be null.");
+            User user = new User(userId, username, password, role);
+            userRepo.create(user);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }
-
-        User user = new User(Integer.parseInt(id), username, password, role);
-        userRepo.create(user);
     }
 
     /**
@@ -58,14 +53,19 @@ public class UserService {
      *
      * @param id the unique ID of the user.
      * @return the user with the specified ID.
-     * @throws IllegalArgumentException if the user with the specified ID does not exist.
+     * @throws EntityNotFoundException if the user with the specified ID does not exist.
      */
     public User getUserById(String id) {
-        User user = userRepo.read(Integer.parseInt(id));
-        if (user == null) {
-            throw new IllegalArgumentException("User with the specified ID does not exist.");
+        try {
+            int userId = Integer.parseInt(id);
+            User user = userRepo.read(userId);
+            if (user == null) {
+                throw new EntityNotFoundException("User with ID " + id + " not found.");
+            }
+            return user;
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }
-        return user;
     }
 
     /**
@@ -75,45 +75,46 @@ public class UserService {
      * @param username the updated username of the user.
      * @param password the updated password of the user.
      * @param role     the updated role of the user.
-     * @throws IllegalArgumentException if the user does not exist, or any of the parameters are invalid.
+     * @throws EntityNotFoundException if the user does not exist.
+     * @throws ValidationException     if any of the parameters are invalid.
      */
     public void updateUser(String id, String username, String password, Role role) {
-        User existingUser = userRepo.read(Integer.parseInt(id));
+        try {
+            int userId = Integer.parseInt(id);
 
-        if (existingUser == null) {
-            throw new IllegalArgumentException("User with the specified ID does not exist.");
+            User existingUser = userRepo.read(userId);
+            if (existingUser == null) {
+                throw new EntityNotFoundException("User with ID " + id + " not found.");
+            }
+
+            validateUserInputs(username, password, role);
+
+            existingUser.setUsername(username);
+            existingUser.setPassword(password);
+            existingUser.setRole(role);
+            userRepo.update(existingUser);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }
-
-        if (username == null || username.trim().isEmpty()) {
-            throw new IllegalArgumentException("Username cannot be empty.");
-        }
-
-        if (password == null || password.trim().isEmpty()) {
-            throw new IllegalArgumentException("Password cannot be empty.");
-        }
-
-        if (role == null) {
-            throw new IllegalArgumentException("Role cannot be null.");
-        }
-
-        existingUser.setUsername(username);
-        existingUser.setPassword(password);
-        existingUser.setRole(role);
-        userRepo.update(existingUser);
     }
 
     /**
      * Deletes a user by their unique ID.
      *
      * @param id the unique ID of the user to delete.
-     * @throws IllegalArgumentException if the user does not exist.
+     * @throws EntityNotFoundException if the user does not exist.
      */
     public void deleteUser(String id) {
-        User user = userRepo.read(Integer.parseInt(id));
-        if (user == null) {
-            throw new IllegalArgumentException("User with the specified ID does not exist.");
+        try {
+            int userId = Integer.parseInt(id);
+            User user = userRepo.read(userId);
+            if (user == null) {
+                throw new EntityNotFoundException("User with ID " + id + " not found.");
+            }
+            userRepo.delete(userId);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }
-        userRepo.delete(Integer.parseInt(id));
     }
 
     /**
@@ -149,5 +150,17 @@ public class UserService {
      */
     public int getUserId(User user) {
         return user.getId();
+    }
+
+    private void validateUserInputs(String username, String password, Role role) {
+        if (username == null || username.trim().isEmpty()) {
+            throw new ValidationException("Username cannot be empty.");
+        }
+        if (password == null || password.trim().isEmpty()) {
+            throw new ValidationException("Password cannot be empty.");
+        }
+        if (role == null) {
+            throw new ValidationException("Role cannot be null.");
+        }
     }
 }

@@ -3,7 +3,8 @@ package Service;
 import Domain.Activity;
 import Domain.EventType;
 import Repository.IRepository;
-import Repository.InMemoryRepo;
+import Exception.*;
+
 
 import java.util.Comparator;
 import java.util.List;
@@ -35,41 +36,48 @@ public class ActivityService {
      * @param eventType_s  the type of event as a string.
      * @param description  the description of the activity.
      * @param price        the price of the activity.
-     * @throws IllegalArgumentException if validation fails or the activity already exists.
+     * @throws EntityAlreadyExistsException if the activity already exists.
+     * @throws ValidationException if validation of input data fails.
      */
     public void addActivity(String id_s, String activityName, String capacity_s, String location, String eventType_s, String description, double price) {
-        int id = Integer.parseInt(id_s);
-        int capacity = Integer.parseInt(capacity_s);
-        EventType eventType = EventType.valueOf(eventType_s.toUpperCase());
+        try {
+            int id = Integer.parseInt(id_s);
+            int capacity = Integer.parseInt(capacity_s);
+            EventType eventType = EventType.valueOf(eventType_s.toUpperCase());
 
-        if (activityRepo.read(id) != null) {
-            throw new IllegalArgumentException("An activity with this ID already exists.");
+            if (activityRepo.read(id) != null) {
+                throw new EntityAlreadyExistsException("An activity with this ID already exists.");
+            }
+
+            validateActivityInputs(activityName, capacity, location);
+
+            Activity activity = new Activity(id, activityName, capacity, location, eventType, description, price);
+            activityRepo.create(activity);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid number format for ID or capacity.", e);
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Invalid event type: " + eventType_s, e);
         }
-
-        if (capacity <= 0) {
-            throw new IllegalArgumentException("Capacity must be a positive number.");
-        }
-
-        if (activityName == null || activityName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Activity name cannot be empty.");
-        }
-
-        if (location == null || location.trim().isEmpty()) {
-            throw new IllegalArgumentException("Activity location cannot be empty.");
-        }
-
-        Activity activity = new Activity(id, activityName, capacity, location, eventType, description, price);
-        activityRepo.create(activity);
     }
 
     /**
      * Retrieves an activity by its ID.
      *
      * @param id the unique identifier of the activity as a string.
-     * @return the {@code Activity} object if found, or {@code null} if not found.
+     * @return the {@code Activity} object if found.
+     * @throws EntityNotFoundException if the activity does not exist.
      */
     public Activity getActivityById(String id) {
-        return activityRepo.read(Integer.parseInt(id));
+        try {
+            int activityId = Integer.parseInt(id);
+            Activity activity = activityRepo.read(activityId);
+            if (activity == null) {
+                throw new EntityNotFoundException("Activity with ID " + id + " not found.");
+            }
+            return activity;
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
+        }
     }
 
     /**
@@ -82,43 +90,47 @@ public class ActivityService {
      * @param eventType    the updated event type as a string.
      * @param description  the updated description of the activity.
      * @param price        the updated price of the activity.
-     * @throws IllegalArgumentException if the activity does not exist or validation fails.
+     * @throws EntityNotFoundException if the activity does not exist.
+     * @throws ValidationException if validation of input data fails.
      */
     public void updateActivity(String id, String activityName, String capacity, String location, String eventType, String description, double price) {
+        try {
+            int activityId = Integer.parseInt(id);
+            int updatedCapacity = Integer.parseInt(capacity);
+            EventType updatedEventType = EventType.valueOf(eventType.toUpperCase());
 
-        Activity existingActivity = activityRepo.read(Integer.parseInt(id));
-        if (existingActivity == null) {
-            throw new IllegalArgumentException("Activity with the specified ID does not exist.");
+            Activity existingActivity = activityRepo.read(activityId);
+            if (existingActivity == null) {
+                throw new EntityNotFoundException("Activity with ID " + id + " not found.");
+            }
+
+            validateActivityInputs(activityName, updatedCapacity, location);
+
+            Activity updatedActivity = new Activity(activityId, activityName, updatedCapacity, location, updatedEventType, description, price);
+            activityRepo.update(updatedActivity);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid number format for ID or capacity.", e);
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Invalid event type: " + eventType, e);
         }
-
-        if (Integer.parseInt(capacity) <= 0) {
-            throw new IllegalArgumentException("Capacity must be a positive number.");
-        }
-
-        if (activityName == null || activityName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Activity name cannot be empty.");
-        }
-
-        if (location == null || location.trim().isEmpty()) {
-            throw new IllegalArgumentException("Activity location cannot be empty.");
-        }
-
-        Activity updatedActivity = new Activity(Integer.parseInt(id), activityName, Integer.parseInt(capacity), location, EventType.valueOf(eventType.toUpperCase()), description, price);
-        activityRepo.update(updatedActivity);
     }
 
     /**
      * Deletes an activity by its ID.
      *
      * @param id the unique identifier of the activity as a string.
-     * @throws IllegalArgumentException if the activity does not exist.
+     * @throws EntityNotFoundException if the activity does not exist.
      */
     public void deleteActivity(String id) {
-        if (activityRepo.read(Integer.parseInt(id)) == null) {
-            throw new IllegalArgumentException("Activity with the specified ID does not exist.");
+        try {
+            int activityId = Integer.parseInt(id);
+            if (activityRepo.read(activityId) == null) {
+                throw new EntityNotFoundException("Activity with ID " + id + " not found.");
+            }
+            activityRepo.delete(activityId);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }
-
-        activityRepo.delete(Integer.parseInt(id));
     }
 
     /**
@@ -163,5 +175,17 @@ public class ActivityService {
         List<Activity> activities = activityRepo.findAll();
         activities.sort(Comparator.comparing(Activity::getName));
         return activities;
+    }
+
+    private void validateActivityInputs(String activityName, int capacity, String location) {
+        if (activityName == null || activityName.trim().isEmpty()) {
+            throw new ValidationException("Activity name cannot be empty.");
+        }
+        if (capacity <= 0) {
+            throw new ValidationException("Capacity must be a positive number.");
+        }
+        if (location == null || location.trim().isEmpty()) {
+            throw new ValidationException("Activity location cannot be empty.");
+        }
     }
 }

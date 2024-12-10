@@ -3,7 +3,7 @@ package Service;
 import Domain.FreeActivity;
 import Domain.EventType;
 import Repository.IRepository;
-import Repository.InMemoryRepo;
+import Exception.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -27,29 +27,20 @@ public class FreeActivityService {
     /**
      * Adds a new free activity to the repository.
      *
-     * @param id       the unique identifier of the activity.
-     * @param name     the name of the activity.
-     * @param location the location where the activity will take place.
+     * @param id        the unique identifier of the activity.
+     * @param name      the name of the activity.
+     * @param location  the location where the activity will take place.
      * @param eventType the type of the activity (e.g., WORKSHOP, RELAXATION).
-     * @param program  the program details or description of the activity.
-     * @throws IllegalArgumentException if validation fails or the activity already exists.
+     * @param program   the program details or description of the activity.
+     * @throws EntityAlreadyExistsException if the activity already exists.
+     * @throws ValidationException if validation fails.
      */
     public void addFreeActivity(int id, String name, String location, EventType eventType, String program) {
         if (freeActivityRepo.read(id) != null) {
-            throw new IllegalArgumentException("A free activity with this ID already exists.");
+            throw new EntityAlreadyExistsException("A free activity with this ID already exists.");
         }
 
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Activity name cannot be empty.");
-        }
-
-        if (location == null || location.trim().isEmpty()) {
-            throw new IllegalArgumentException("Activity location cannot be empty.");
-        }
-
-        if (program == null || program.trim().isEmpty()) {
-            throw new IllegalArgumentException("Program details cannot be empty.");
-        }
+        validateFreeActivityInputs(name, location, program);
 
         FreeActivity freeActivity = new FreeActivity(id, name, location, eventType, program);
         freeActivityRepo.create(freeActivity);
@@ -59,59 +50,65 @@ public class FreeActivityService {
      * Retrieves a free activity by its ID.
      *
      * @param id the unique identifier of the activity.
-     * @return the {@code FreeActivity} object if found, or {@code null} if not found.
+     * @return the {@code FreeActivity} object if found.
+     * @throws EntityNotFoundException if the activity does not exist.
      */
     public FreeActivity getFreeActivityById(int id) {
-        return freeActivityRepo.read(id);
+        FreeActivity activity = freeActivityRepo.read(id);
+        if (activity == null) {
+            throw new EntityNotFoundException("Free activity with ID " + id + " not found.");
+        }
+        return activity;
     }
 
     /**
      * Updates an existing free activity in the repository.
      *
-     * @param idString   the unique identifier of the activity as a string.
-     * @param name       the updated name of the activity.
-     * @param location   the updated location of the activity.
+     * @param idString        the unique identifier of the activity as a string.
+     * @param name            the updated name of the activity.
+     * @param location        the updated location of the activity.
      * @param eventTypeString the updated type of the activity.
-     * @param program    the updated program details or description.
-     * @throws IllegalArgumentException if the activity does not exist or validation fails.
+     * @param program         the updated program details or description.
+     * @throws EntityNotFoundException if the activity does not exist.
+     * @throws ValidationException if validation fails.
      */
     public void updateFreeActivity(String idString, String name, String location, String eventTypeString, String program) {
-        int id = Integer.parseInt(idString);
-        EventType eventType = EventType.valueOf(eventTypeString.toUpperCase());
-        FreeActivity existingActivity = freeActivityRepo.read(id);
+        try {
+            int id = Integer.parseInt(idString);
+            EventType eventType = EventType.valueOf(eventTypeString.toUpperCase());
 
-        if (existingActivity == null) {
-            throw new IllegalArgumentException("Free activity with the specified ID does not exist.");
+            FreeActivity existingActivity = freeActivityRepo.read(id);
+            if (existingActivity == null) {
+                throw new EntityNotFoundException("Free activity with ID " + id + " not found.");
+            }
+
+            validateFreeActivityInputs(name, location, program);
+
+            FreeActivity updatedFreeActivity = new FreeActivity(id, name, location, eventType, program);
+            freeActivityRepo.update(updatedFreeActivity);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + idString, e);
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Invalid event type: " + eventTypeString, e);
         }
-
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Activity name cannot be empty.");
-        }
-
-        if (location == null || location.trim().isEmpty()) {
-            throw new IllegalArgumentException("Activity location cannot be empty.");
-        }
-
-        if (program == null || program.trim().isEmpty()) {
-            throw new IllegalArgumentException("Program details cannot be empty.");
-        }
-
-        FreeActivity updatedFreeActivity = new FreeActivity(id, name, location, eventType, program);
-        freeActivityRepo.update(updatedFreeActivity);
     }
 
     /**
      * Deletes a free activity by its ID.
      *
      * @param id the unique identifier of the activity as a string.
-     * @throws IllegalArgumentException if the activity does not exist.
+     * @throws EntityNotFoundException if the activity does not exist.
      */
     public void deleteFreeActivity(String id) {
-        if (freeActivityRepo.read(Integer.parseInt(id)) == null) {
-            throw new IllegalArgumentException("Free activity with the specified ID does not exist.");
+        try {
+            int activityId = Integer.parseInt(id);
+            if (freeActivityRepo.read(activityId) == null) {
+                throw new EntityNotFoundException("Free activity with ID " + id + " not found.");
+            }
+            freeActivityRepo.delete(activityId);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }
-
-        freeActivityRepo.delete(Integer.parseInt(id));
     }
 
     /**
@@ -132,5 +129,17 @@ public class FreeActivityService {
         List<FreeActivity> freeActivities = freeActivityRepo.findAll();
         freeActivities.sort(Comparator.comparing(FreeActivity::getName));
         return freeActivities;
+    }
+
+    private void validateFreeActivityInputs(String name, String location, String program) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new ValidationException("Activity name cannot be empty.");
+        }
+        if (location == null || location.trim().isEmpty()) {
+            throw new ValidationException("Activity location cannot be empty.");
+        }
+        if (program == null || program.trim().isEmpty()) {
+            throw new ValidationException("Program details cannot be empty.");
+        }
     }
 }

@@ -1,11 +1,10 @@
 package Service;
 
-import Domain.Event;
 import Domain.Review;
 import Domain.User;
 import Domain.ReviewableEntity;
 import Repository.IRepository;
-import Repository.InMemoryRepo;
+import Exception.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,34 +34,25 @@ public class ReviewService {
      * @param reviewableEntity the entity being reviewed (e.g., activity, event).
      * @param comment          the text content of the review.
      * @param reviewDateString the date and time of the review as a string in ISO-8601 format.
-     * @throws IllegalArgumentException if validation fails or the review already exists.
+     * @throws EntityAlreadyExistsException if the review already exists.
+     * @throws ValidationException if validation fails.
      */
     public void addReview(String idString, User user, ReviewableEntity reviewableEntity, String comment, String reviewDateString) {
-        int id = Integer.parseInt(idString);
-        LocalDateTime reviewDate = LocalDateTime.parse(reviewDateString);
+        try {
+            int id = Integer.parseInt(idString);
+            LocalDateTime reviewDate = LocalDateTime.parse(reviewDateString);
 
-        if (reviewRepo.read(id) != null) {
-            throw new IllegalArgumentException("A review with this ID already exists.");
+            if (reviewRepo.read(id) != null) {
+                throw new EntityAlreadyExistsException("A review with this ID already exists.");
+            }
+
+            validateReviewInputs(user, reviewableEntity, comment, reviewDate);
+
+            Review review = new Review(id, user, reviewableEntity, comment, reviewDate);
+            reviewRepo.create(review);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid number format for ID.", e);
         }
-
-        if (user == null) {
-            throw new IllegalArgumentException("User cannot be null.");
-        }
-
-        if (reviewableEntity == null) {
-            throw new IllegalArgumentException("Reviewable entity cannot be null.");
-        }
-
-        if (comment == null || comment.trim().isEmpty()) {
-            throw new IllegalArgumentException("Comment cannot be empty.");
-        }
-
-        if (reviewDate == null || reviewDate.isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Review date must be valid and cannot be in the future.");
-        }
-
-        Review review = new Review(id, user, reviewableEntity, comment, reviewDate);
-        reviewRepo.create(review);
     }
 
     /**
@@ -70,53 +60,61 @@ public class ReviewService {
      *
      * @param id the unique identifier of the review.
      * @return the {@link Review} object if found.
+     * @throws EntityNotFoundException if the review does not exist.
      */
     public Review getReviewById(int id) {
-        return reviewRepo.read(id);
+        Review review = reviewRepo.read(id);
+        if (review == null) {
+            throw new EntityNotFoundException("Review with ID " + id + " not found.");
+        }
+        return review;
     }
 
     /**
      * Updates an existing review in the repository.
      *
-     * @param idString         the unique identifier of the review as a string.
-     * @param newComment       the updated comment for the review.
+     * @param idString          the unique identifier of the review as a string.
+     * @param newComment        the updated comment for the review.
      * @param newReviewDateString the updated date and time of the review as a string in ISO-8601 format.
-     * @throws IllegalArgumentException if validation fails or the review does not exist.
+     * @throws EntityNotFoundException if the review does not exist.
+     * @throws ValidationException if validation fails.
      */
     public void updateReview(String idString, String newComment, String newReviewDateString) {
-        int id = Integer.parseInt(idString);
-        LocalDateTime newReviewDate = LocalDateTime.parse(newReviewDateString);
+        try {
+            int id = Integer.parseInt(idString);
+            LocalDateTime newReviewDate = LocalDateTime.parse(newReviewDateString);
 
-        Review review = reviewRepo.read(id);
-        if (review == null) {
-            throw new IllegalArgumentException("Review with the specified ID does not exist.");
+            Review review = reviewRepo.read(id);
+            if (review == null) {
+                throw new EntityNotFoundException("Review with ID " + id + " not found.");
+            }
+
+            validateReviewInputs(review.getUser(), review.getReviewableEntity(), newComment, newReviewDate);
+
+            review.setComment(newComment);
+            review.setReviewDate(newReviewDate);
+            reviewRepo.update(review);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid number format for ID.", e);
         }
-
-        if (newComment == null || newComment.trim().isEmpty()) {
-            throw new IllegalArgumentException("Comment cannot be empty.");
-        }
-
-        if (newReviewDate == null || newReviewDate.isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Review date must be valid and cannot be in the future.");
-        }
-
-        review.setComment(newComment);
-        review.setReviewDate(newReviewDate);
-        reviewRepo.update(review);
     }
 
     /**
      * Deletes a review by its ID.
      *
      * @param id the unique identifier of the review as a string.
-     * @throws IllegalArgumentException if the review does not exist.
+     * @throws EntityNotFoundException if the review does not exist.
      */
     public void deleteReview(String id) {
-        Review review = reviewRepo.read(Integer.parseInt(id));
-        if (review == null) {
-            throw new IllegalArgumentException("Review with the specified ID does not exist.");
+        try {
+            int reviewId = Integer.parseInt(id);
+            if (reviewRepo.read(reviewId) == null) {
+                throw new EntityNotFoundException("Review with ID " + id + " not found.");
+            }
+            reviewRepo.delete(reviewId);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }
-        reviewRepo.delete(Integer.parseInt(id));
     }
 
     /**
@@ -129,5 +127,20 @@ public class ReviewService {
         return reviewRepo.findAll().stream()
                 .filter(review -> review.getReviewableEntity().equals(entity))
                 .collect(Collectors.toList());
+    }
+
+    private void validateReviewInputs(User user, ReviewableEntity reviewableEntity, String comment, LocalDateTime reviewDate) {
+        if (user == null) {
+            throw new ValidationException("User cannot be null.");
+        }
+        if (reviewableEntity == null) {
+            throw new ValidationException("Reviewable entity cannot be null.");
+        }
+        if (comment == null || comment.trim().isEmpty()) {
+            throw new ValidationException("Comment cannot be empty.");
+        }
+        if (reviewDate == null || reviewDate.isAfter(LocalDateTime.now())) {
+            throw new ValidationException("Review date must be valid and cannot be in the future.");
+        }
     }
 }

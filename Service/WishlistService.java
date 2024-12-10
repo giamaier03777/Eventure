@@ -4,7 +4,7 @@ import Domain.ReviewableEntity;
 import Domain.Wishlist;
 import Domain.User;
 import Repository.IRepository;
-import Repository.InMemoryRepo;
+import Exception.*;
 
 import java.util.List;
 
@@ -30,19 +30,26 @@ public class WishlistService {
      * @param id    the unique identifier of the wishlist.
      * @param user  the user associated with the wishlist.
      * @param items the list of reviewable entities to include in the wishlist.
-     * @throws IllegalArgumentException if the wishlist ID already exists or the user is null.
+     * @throws EntityAlreadyExistsException if the wishlist ID already exists.
+     * @throws ValidationException          if the user is null.
      */
     public void addWishlist(String id, User user, List<ReviewableEntity> items) {
-        if (wishlistRepo.read(Integer.parseInt(id)) != null) {
-            throw new IllegalArgumentException("A wishlist with this ID already exists.");
-        }
+        try {
+            int wishlistId = Integer.parseInt(id);
 
-        if (user == null) {
-            throw new IllegalArgumentException("User cannot be null.");
-        }
+            if (wishlistRepo.read(wishlistId) != null) {
+                throw new EntityAlreadyExistsException("A wishlist with this ID already exists.");
+            }
 
-        Wishlist wishlist = new Wishlist(Integer.parseInt(id), user, items);
-        wishlistRepo.create(wishlist);
+            if (user == null) {
+                throw new ValidationException("User cannot be null.");
+            }
+
+            Wishlist wishlist = new Wishlist(wishlistId, user, items);
+            wishlistRepo.create(wishlist);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
+        }
     }
 
     /**
@@ -50,14 +57,19 @@ public class WishlistService {
      *
      * @param id the unique identifier of the wishlist.
      * @return the wishlist with the specified ID.
-     * @throws IllegalArgumentException if the wishlist does not exist.
+     * @throws EntityNotFoundException if the wishlist does not exist.
      */
     public Wishlist getWishlistById(String id) {
-        Wishlist wishlist = wishlistRepo.read(Integer.parseInt(id));
-        if (wishlist == null) {
-            throw new IllegalArgumentException("Wishlist with the specified ID does not exist.");
+        try {
+            int wishlistId = Integer.parseInt(id);
+            Wishlist wishlist = wishlistRepo.read(wishlistId);
+            if (wishlist == null) {
+                throw new EntityNotFoundException("Wishlist with ID " + id + " not found.");
+            }
+            return wishlist;
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }
-        return wishlist;
     }
 
     /**
@@ -66,36 +78,47 @@ public class WishlistService {
      * @param id    the unique identifier of the wishlist to update.
      * @param user  the updated user associated with the wishlist.
      * @param items the updated list of reviewable entities in the wishlist.
-     * @throws IllegalArgumentException if the wishlist does not exist or the user is null.
+     * @throws EntityNotFoundException if the wishlist does not exist.
+     * @throws ValidationException     if the user is null.
      */
     public void updateWishlist(String id, User user, List<ReviewableEntity> items) {
-        Wishlist existingWishlist = wishlistRepo.read(Integer.parseInt(id));
+        try {
+            int wishlistId = Integer.parseInt(id);
+            Wishlist existingWishlist = wishlistRepo.read(wishlistId);
 
-        if (existingWishlist == null) {
-            throw new IllegalArgumentException("Wishlist with the specified ID does not exist.");
+            if (existingWishlist == null) {
+                throw new EntityNotFoundException("Wishlist with ID " + id + " not found.");
+            }
+
+            if (user == null) {
+                throw new ValidationException("User cannot be null.");
+            }
+
+            existingWishlist.setUser(user);
+            existingWishlist.setItems(items);
+            wishlistRepo.update(existingWishlist);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }
-
-        if (user == null) {
-            throw new IllegalArgumentException("User cannot be null.");
-        }
-
-        existingWishlist.setUser(user);
-        existingWishlist.setItems(items);
-        wishlistRepo.update(existingWishlist);
     }
 
     /**
      * Deletes a wishlist by its unique ID.
      *
      * @param id the unique identifier of the wishlist to delete.
-     * @throws IllegalArgumentException if the wishlist does not exist.
+     * @throws EntityNotFoundException if the wishlist does not exist.
      */
     public void deleteWishlist(String id) {
-        Wishlist wishlist = wishlistRepo.read(Integer.parseInt(id));
-        if (wishlist == null) {
-            throw new IllegalArgumentException("Wishlist with the specified ID does not exist.");
+        try {
+            int wishlistId = Integer.parseInt(id);
+            Wishlist wishlist = wishlistRepo.read(wishlistId);
+            if (wishlist == null) {
+                throw new EntityNotFoundException("Wishlist with ID " + id + " not found.");
+            }
+            wishlistRepo.delete(wishlistId);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }
-        wishlistRepo.delete(Integer.parseInt(id));
     }
 
     /**
@@ -103,16 +126,21 @@ public class WishlistService {
      *
      * @param wishlistId the ID of the wishlist.
      * @param item       the reviewable entity to add to the wishlist.
-     * @throws IllegalArgumentException if the wishlist does not exist.
+     * @throws EntityNotFoundException if the wishlist does not exist.
      */
     public void addItemToWishlist(String wishlistId, ReviewableEntity item) {
-        Wishlist wishlist = wishlistRepo.read(Integer.parseInt(wishlistId));
-        if (wishlist == null) {
-            throw new IllegalArgumentException("Wishlist not found with ID: " + wishlistId);
-        }
+        try {
+            int id = Integer.parseInt(wishlistId);
+            Wishlist wishlist = wishlistRepo.read(id);
+            if (wishlist == null) {
+                throw new EntityNotFoundException("Wishlist with ID " + wishlistId + " not found.");
+            }
 
-        wishlist.addItem(item);
-        wishlistRepo.update(wishlist);
+            wishlist.addItem(item);
+            wishlistRepo.update(wishlist);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + wishlistId, e);
+        }
     }
 
     /**
@@ -120,15 +148,20 @@ public class WishlistService {
      *
      * @param wishlistId the ID of the wishlist.
      * @param item       the reviewable entity to remove from the wishlist.
-     * @throws IllegalArgumentException if the wishlist does not exist.
+     * @throws EntityNotFoundException if the wishlist does not exist.
      */
     public void removeItemFromWishlist(String wishlistId, ReviewableEntity item) {
-        Wishlist wishlist = wishlistRepo.read(Integer.parseInt(wishlistId));
-        if (wishlist == null) {
-            throw new IllegalArgumentException("Wishlist not found with ID: " + wishlistId);
-        }
+        try {
+            int id = Integer.parseInt(wishlistId);
+            Wishlist wishlist = wishlistRepo.read(id);
+            if (wishlist == null) {
+                throw new EntityNotFoundException("Wishlist with ID " + wishlistId + " not found.");
+            }
 
-        wishlist.removeItem(item);
-        wishlistRepo.update(wishlist);
+            wishlist.removeItem(item);
+            wishlistRepo.update(wishlist);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + wishlistId, e);
+        }
     }
 }

@@ -3,7 +3,7 @@ package Service;
 import Domain.Activity;
 import Domain.ActivitySchedule;
 import Repository.IRepository;
-import Repository.InMemoryRepo;
+import Exception.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -35,52 +35,49 @@ public class ActivityScheduleService {
      * @param startTimeString the start time of the schedule in ISO format.
      * @param endTimeString   the end time of the schedule in ISO format.
      * @param capacityString  the available capacity for the schedule as a string.
-     * @throws IllegalArgumentException if any validation fails.
+     * @throws EntityAlreadyExistsException if a schedule with the same ID already exists.
+     * @throws ValidationException if validation of input data fails.
      */
     public void addActivitySchedule(String idString, Activity activity, String dateString, String startTimeString, String endTimeString, String capacityString) {
-        int id = Integer.parseInt(idString);
-        int availableCapacity = Integer.parseInt(capacityString);
-        LocalDate date = LocalDate.parse(dateString);
-        LocalTime startTime = LocalTime.parse(startTimeString);
-        LocalTime endTime = LocalTime.parse(endTimeString);
+        try {
+            int id = Integer.parseInt(idString);
+            int availableCapacity = Integer.parseInt(capacityString);
+            LocalDate date = LocalDate.parse(dateString);
+            LocalTime startTime = LocalTime.parse(startTimeString);
+            LocalTime endTime = LocalTime.parse(endTimeString);
 
-        if (activityScheduleRepo.read(id) != null) {
-            throw new IllegalArgumentException("An ActivitySchedule with this ID already exists.");
+            if (activityScheduleRepo.read(id) != null) {
+                throw new EntityAlreadyExistsException("An ActivitySchedule with this ID already exists.");
+            }
+
+            validateActivityScheduleInputs(activity, date, startTime, endTime, availableCapacity);
+
+            ActivitySchedule activitySchedule = new ActivitySchedule(activity, date, startTime, endTime, availableCapacity);
+            activitySchedule.setId(id);
+            activityScheduleRepo.create(activitySchedule);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid number format for ID or capacity.", e);
         }
-
-        if (activity == null) {
-            throw new IllegalArgumentException("Activity cannot be null.");
-        }
-
-        if (date.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("Date cannot be in the past.");
-        }
-
-        if (startTime == null || endTime == null) {
-            throw new IllegalArgumentException("Start and end times cannot be null.");
-        }
-
-        if (endTime.isBefore(startTime)) {
-            throw new IllegalArgumentException("End time must be after start time.");
-        }
-
-        if (availableCapacity <= 0) {
-            throw new IllegalArgumentException("Available capacity must be a positive number.");
-        }
-
-        ActivitySchedule activitySchedule = new ActivitySchedule(activity, date, startTime, endTime, availableCapacity);
-        activitySchedule.setId(id);
-        activityScheduleRepo.create(activitySchedule);
     }
 
     /**
      * Retrieves an activity schedule by its ID.
      *
      * @param id the unique identifier for the schedule.
-     * @return the corresponding {@code ActivitySchedule} object, or {@code null} if not found.
+     * @return the corresponding {@code ActivitySchedule} object.
+     * @throws EntityNotFoundException if the schedule does not exist.
      */
     public ActivitySchedule getActivityScheduleById(String id) {
-        return activityScheduleRepo.read(Integer.parseInt(id));
+        try {
+            int scheduleId = Integer.parseInt(id);
+            ActivitySchedule schedule = activityScheduleRepo.read(scheduleId);
+            if (schedule == null) {
+                throw new EntityNotFoundException("No ActivitySchedule found with ID: " + id);
+            }
+            return schedule;
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
+        }
     }
 
     /**
@@ -92,56 +89,48 @@ public class ActivityScheduleService {
      * @param startTimeString the start time of the schedule in ISO format.
      * @param endTimeString   the end time of the schedule in ISO format.
      * @param capacityString  the available capacity for the schedule as a string.
-     * @throws IllegalArgumentException if the schedule does not exist or validation fails.
+     * @throws EntityNotFoundException if the schedule does not exist.
+     * @throws ValidationException if validation of input data fails.
      */
     public void updateActivitySchedule(String idString, Activity activity, String dateString, String startTimeString, String endTimeString, String capacityString) {
-        int id = Integer.parseInt(idString);
-        int availableCapacity = Integer.parseInt(capacityString);
-        LocalDate date = LocalDate.parse(dateString);
-        LocalTime startTime = LocalTime.parse(startTimeString);
-        LocalTime endTime = LocalTime.parse(endTimeString);
+        try {
+            int id = Integer.parseInt(idString);
+            int availableCapacity = Integer.parseInt(capacityString);
+            LocalDate date = LocalDate.parse(dateString);
+            LocalTime startTime = LocalTime.parse(startTimeString);
+            LocalTime endTime = LocalTime.parse(endTimeString);
 
-        ActivitySchedule existingSchedule = activityScheduleRepo.read(id);
-        if (existingSchedule == null) {
-            throw new IllegalArgumentException("ActivitySchedule with the specified ID does not exist.");
+            ActivitySchedule existingSchedule = activityScheduleRepo.read(id);
+            if (existingSchedule == null) {
+                throw new EntityNotFoundException("ActivitySchedule with ID " + id + " not found.");
+            }
+
+            validateActivityScheduleInputs(activity, date, startTime, endTime, availableCapacity);
+
+            ActivitySchedule updatedSchedule = new ActivitySchedule(activity, date, startTime, endTime, availableCapacity);
+            updatedSchedule.setId(id);
+            activityScheduleRepo.update(updatedSchedule);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid number format for ID or capacity.", e);
         }
-
-        if (activity == null) {
-            throw new IllegalArgumentException("Activity cannot be null.");
-        }
-
-        if (date.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("Date cannot be in the past.");
-        }
-
-        if (startTime == null || endTime == null) {
-            throw new IllegalArgumentException("Start and end times cannot be null.");
-        }
-
-        if (endTime.isBefore(startTime)) {
-            throw new IllegalArgumentException("End time must be after start time.");
-        }
-
-        if (availableCapacity <= 0) {
-            throw new IllegalArgumentException("Available capacity must be a positive number.");
-        }
-
-        ActivitySchedule updatedSchedule = new ActivitySchedule(activity, date, startTime, endTime, availableCapacity);
-        updatedSchedule.setId(id);
-        activityScheduleRepo.update(updatedSchedule);
     }
 
     /**
      * Deletes an activity schedule by its ID.
      *
      * @param id the unique identifier of the schedule.
-     * @throws IllegalArgumentException if the schedule does not exist.
+     * @throws EntityNotFoundException if the schedule does not exist.
      */
     public void deleteActivitySchedule(String id) {
-        if (activityScheduleRepo.read(Integer.parseInt(id)) == null) {
-            throw new IllegalArgumentException("ActivitySchedule with the specified ID does not exist.");
+        try {
+            int scheduleId = Integer.parseInt(id);
+            if (activityScheduleRepo.read(scheduleId) == null) {
+                throw new EntityNotFoundException("ActivitySchedule with ID " + id + " not found.");
+            }
+            activityScheduleRepo.delete(scheduleId);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }
-        activityScheduleRepo.delete(Integer.parseInt(id));
     }
 
     /**
@@ -149,11 +138,11 @@ public class ActivityScheduleService {
      *
      * @param activity the activity for which schedules are to be retrieved.
      * @return a list of {@code ActivitySchedule} objects associated with the activity.
-     * @throws IllegalArgumentException if the activity is {@code null}.
+     * @throws ValidationException if the activity is {@code null}.
      */
     public List<ActivitySchedule> getSchedulesForActivity(Activity activity) {
         if (activity == null) {
-            throw new IllegalArgumentException("Activity cannot be null.");
+            throw new ValidationException("Activity cannot be null.");
         }
 
         return activityScheduleRepo.findAll()
@@ -162,23 +151,21 @@ public class ActivityScheduleService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Retrieves an activity schedule by its ID.
-     *
-     * @param number the unique identifier of the schedule as a string.
-     * @return the corresponding {@code ActivitySchedule} object.
-     * @throws IllegalArgumentException if the ID is invalid or the schedule does not exist.
-     */
-    public ActivitySchedule getScheduleById(String number) {
-        try {
-            int id = Integer.parseInt(number);
-            ActivitySchedule schedule = activityScheduleRepo.read(id);
-            if (schedule == null) {
-                throw new IllegalArgumentException("No ActivitySchedule found with the specified ID: " + number);
-            }
-            return schedule;
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid ID format. ID must be a number: " + number, e);
+    private void validateActivityScheduleInputs(Activity activity, LocalDate date, LocalTime startTime, LocalTime endTime, int capacity) {
+        if (activity == null) {
+            throw new ValidationException("Activity cannot be null.");
+        }
+        if (date.isBefore(LocalDate.now())) {
+            throw new ValidationException("Date cannot be in the past.");
+        }
+        if (startTime == null || endTime == null) {
+            throw new ValidationException("Start and end times cannot be null.");
+        }
+        if (endTime.isBefore(startTime)) {
+            throw new ValidationException("End time must be after start time.");
+        }
+        if (capacity <= 0) {
+            throw new ValidationException("Available capacity must be a positive number.");
         }
     }
 }

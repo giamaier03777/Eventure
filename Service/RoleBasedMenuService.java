@@ -4,6 +4,7 @@ import Domain.Role;
 import Domain.User;
 import Presentation.PresentationAdmin;
 import Presentation.PresentationUser;
+import Exception.*;
 
 /**
  * Service to manage role-based navigation to different menus for users and administrators.
@@ -27,21 +28,30 @@ public class RoleBasedMenuService {
      * Starts the appropriate menu based on the user's role.
      *
      * @param user the user whose role determines the menu to be displayed.
+     * @throws ValidationException if the user or role is invalid.
      */
     public void start(User user) {
         if (user == null) {
-            System.out.println("No user logged in. Exiting...");
-            return;
+            throw new ValidationException("No user is logged in. Unable to proceed.");
         }
 
-        if (user.getRole() == Role.ADMIN) {
-            System.out.println("Welcome Admin!");
-            adminMenu.start(user);
-        } else if (user.getRole() == Role.USER) {
-            System.out.println("Welcome User!");
-            userMenu.start(user);
-        } else {
-            System.out.println("Unknown role. Access denied.");
+        if (user.getRole() == null) {
+            throw new ValidationException("The user does not have a valid role. Access denied.");
+        }
+
+        switch (user.getRole()) {
+            case ADMIN:
+                System.out.println("Welcome Admin!");
+                adminMenu.start(user);
+                break;
+
+            case USER:
+                System.out.println("Welcome User!");
+                userMenu.start(user);
+                break;
+
+            default:
+                throw new ValidationException("Unknown role. Access denied.");
         }
     }
 }

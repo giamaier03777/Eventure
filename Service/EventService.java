@@ -3,7 +3,7 @@ package Service;
 import Domain.Event;
 import Domain.EventType;
 import Repository.IRepository;
-import Repository.InMemoryRepo;
+import Exception.*;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -29,150 +29,118 @@ public class EventService {
     /**
      * Adds a new event to the repository.
      *
-     * @param idString         the unique identifier of the event as a string.
-     * @param eventName        the name of the event.
-     * @param location         the location of the event.
-     * @param capacityString   the total capacity of the event as a string.
-     * @param eventTypeString  the type of the event.
+     * @param idString          the unique identifier of the event as a string.
+     * @param eventName         the name of the event.
+     * @param location          the location of the event.
+     * @param capacityString    the total capacity of the event as a string.
+     * @param eventTypeString   the type of the event.
      * @param currentSizeString the current number of attendees as a string.
-     * @param startDateString  the start date and time of the event as a string.
-     * @param endDateString    the end date and time of the event as a string.
-     * @param price            the price per ticket for the event.
-     * @throws IllegalArgumentException if validation fails or the event already exists.
+     * @param startDateString   the start date and time of the event as a string.
+     * @param endDateString     the end date and time of the event as a string.
+     * @param price             the price per ticket for the event.
+     * @throws EntityAlreadyExistsException if the event already exists.
+     * @throws ValidationException if validation fails.
      */
     public void addEvent(String idString, String eventName, String location, String capacityString, String eventTypeString, String currentSizeString, String startDateString, String endDateString, double price) {
-        int id = Integer.parseInt(idString);
-        int capacity = Integer.parseInt(capacityString);
-        int currentSize = Integer.parseInt(currentSizeString);
-        EventType eventType = EventType.valueOf(eventTypeString.toUpperCase());
-        LocalDateTime startDate = LocalDateTime.parse(startDateString);
-        LocalDateTime endDate = LocalDateTime.parse(endDateString);
+        try {
+            int id = Integer.parseInt(idString);
+            int capacity = Integer.parseInt(capacityString);
+            int currentSize = Integer.parseInt(currentSizeString);
+            EventType eventType = EventType.valueOf(eventTypeString.toUpperCase());
+            LocalDateTime startDate = LocalDateTime.parse(startDateString);
+            LocalDateTime endDate = LocalDateTime.parse(endDateString);
 
-        if (eventRepo.read(id) != null) {
-            throw new IllegalArgumentException("An event with this ID already exists.");
+            if (eventRepo.read(id) != null) {
+                throw new EntityAlreadyExistsException("An event with this ID already exists.");
+            }
+
+            validateEventInputs(eventName, location, capacity, currentSize, startDate, endDate);
+
+            Event event = new Event(id, eventName, location, capacity, eventType, currentSize, startDate, endDate, price);
+            eventRepo.create(event);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid number format for ID, capacity, or current size.", e);
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Invalid event type: " + eventTypeString, e);
         }
-
-        if (eventName == null || eventName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Event name cannot be empty.");
-        }
-
-        if (location == null || location.trim().isEmpty()) {
-            throw new IllegalArgumentException("Event location cannot be empty.");
-        }
-
-        if (capacity <= 0) {
-            throw new IllegalArgumentException("Capacity must be a positive number.");
-        }
-
-        if (currentSize < 0) {
-            throw new IllegalArgumentException("Current size cannot be negative.");
-        }
-
-        if (currentSize > capacity) {
-            throw new IllegalArgumentException("Current size cannot exceed capacity.");
-        }
-
-        if (startDate == null || endDate == null) {
-            throw new IllegalArgumentException("Start and end dates cannot be null.");
-        }
-
-        if (endDate.isBefore(startDate)) {
-            throw new IllegalArgumentException("End date must be after start date.");
-        }
-
-        if (startDate.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Event cannot start in the past.");
-        }
-
-        Event event = new Event(id, eventName, location, capacity, eventType, currentSize, startDate, endDate, price);
-        eventRepo.create(event);
     }
 
     /**
      * Retrieves an event by its ID.
      *
      * @param id the unique identifier of the event as a string.
-     * @return the {@code Event} object if found, or {@code null} if not found.
+     * @return the {@code Event} object if found.
+     * @throws EntityNotFoundException if the event does not exist.
      */
     public Event getEventById(String id) {
-        return eventRepo.read(Integer.parseInt(id));
+        try {
+            int eventId = Integer.parseInt(id);
+            Event event = eventRepo.read(eventId);
+            if (event == null) {
+                throw new EntityNotFoundException("Event with ID " + id + " not found.");
+            }
+            return event;
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
+        }
     }
 
     /**
      * Updates an existing event in the repository.
      *
-     * @param idString         the unique identifier of the event as a string.
-     * @param eventName        the updated name of the event.
-     * @param location         the updated location of the event.
-     * @param capacityString   the updated total capacity of the event as a string.
-     * @param eventTypeString  the updated type of the event.
+     * @param idString          the unique identifier of the event as a string.
+     * @param eventName         the updated name of the event.
+     * @param location          the updated location of the event.
+     * @param capacityString    the updated total capacity of the event as a string.
+     * @param eventTypeString   the updated type of the event.
      * @param currentSizeString the updated current number of attendees as a string.
-     * @param startDateString  the updated start date and time of the event as a string.
-     * @param endDateString    the updated end date and time of the event as a string.
-     * @param price            the updated price per ticket for the event.
-     * @throws IllegalArgumentException if the event does not exist or validation fails.
+     * @param startDateString   the updated start date and time of the event as a string.
+     * @param endDateString     the updated end date and time of the event as a string.
+     * @param price             the updated price per ticket for the event.
+     * @throws EntityNotFoundException if the event does not exist.
+     * @throws ValidationException if validation fails.
      */
     public void updateEvent(String idString, String eventName, String location, String capacityString, String eventTypeString, String currentSizeString, String startDateString, String endDateString, double price) {
-        int id = Integer.parseInt(idString);
-        int capacity = Integer.parseInt(capacityString);
-        int currentSize = Integer.parseInt(currentSizeString);
-        EventType eventType = EventType.valueOf(eventTypeString.toUpperCase());
-        LocalDateTime startDate = LocalDateTime.parse(startDateString);
-        LocalDateTime endDate = LocalDateTime.parse(endDateString);
+        try {
+            int id = Integer.parseInt(idString);
+            int capacity = Integer.parseInt(capacityString);
+            int currentSize = Integer.parseInt(currentSizeString);
+            EventType eventType = EventType.valueOf(eventTypeString.toUpperCase());
+            LocalDateTime startDate = LocalDateTime.parse(startDateString);
+            LocalDateTime endDate = LocalDateTime.parse(endDateString);
 
-        Event existingEvent = eventRepo.read(id);
-        if (existingEvent == null) {
-            throw new IllegalArgumentException("Event with the specified ID does not exist.");
+            Event existingEvent = eventRepo.read(id);
+            if (existingEvent == null) {
+                throw new EntityNotFoundException("Event with ID " + id + " not found.");
+            }
+
+            validateEventInputs(eventName, location, capacity, currentSize, startDate, endDate);
+
+            Event updatedEvent = new Event(id, eventName, location, capacity, eventType, currentSize, startDate, endDate, price);
+            eventRepo.update(updatedEvent);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid number format for ID, capacity, or current size.", e);
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Invalid event type: " + eventTypeString, e);
         }
-
-        if (eventName == null || eventName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Event name cannot be empty.");
-        }
-
-        if (location == null || location.trim().isEmpty()) {
-            throw new IllegalArgumentException("Event location cannot be empty.");
-        }
-
-        if (capacity <= 0) {
-            throw new IllegalArgumentException("Capacity must be a positive number.");
-        }
-
-        if (currentSize < 0) {
-            throw new IllegalArgumentException("Current size cannot be negative.");
-        }
-
-        if (currentSize > capacity) {
-            throw new IllegalArgumentException("Current size cannot exceed capacity.");
-        }
-
-        if (startDate == null || endDate == null) {
-            throw new IllegalArgumentException("Start and end dates cannot be null.");
-        }
-
-        if (endDate.isBefore(startDate)) {
-            throw new IllegalArgumentException("End date must be after start date.");
-        }
-
-        if (startDate.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Event cannot start in the past.");
-        }
-
-        Event updatedEvent = new Event(id, eventName, location, capacity, eventType, currentSize, startDate, endDate, price);
-        eventRepo.update(updatedEvent);
     }
 
     /**
      * Deletes an event by its ID.
      *
      * @param id the unique identifier of the event as a string.
-     * @throws IllegalArgumentException if the event does not exist.
+     * @throws EntityNotFoundException if the event does not exist.
      */
     public void deleteEvent(String id) {
-        if (eventRepo.read(Integer.parseInt(id)) == null) {
-            throw new IllegalArgumentException("Event with the specified ID does not exist.");
+        try {
+            int eventId = Integer.parseInt(id);
+            if (eventRepo.read(eventId) == null) {
+                throw new EntityNotFoundException("Event with ID " + id + " not found.");
+            }
+            eventRepo.delete(eventId);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }
-
-        eventRepo.delete(Integer.parseInt(id));
     }
 
     /**
@@ -227,5 +195,32 @@ public class EventService {
         List<Event> events = eventRepo.findAll();
         events.sort(Comparator.comparing(Event::getName));
         return events;
+    }
+
+    private void validateEventInputs(String eventName, String location, int capacity, int currentSize, LocalDateTime startDate, LocalDateTime endDate) {
+        if (eventName == null || eventName.trim().isEmpty()) {
+            throw new ValidationException("Event name cannot be empty.");
+        }
+        if (location == null || location.trim().isEmpty()) {
+            throw new ValidationException("Event location cannot be empty.");
+        }
+        if (capacity <= 0) {
+            throw new ValidationException("Capacity must be a positive number.");
+        }
+        if (currentSize < 0) {
+            throw new ValidationException("Current size cannot be negative.");
+        }
+        if (currentSize > capacity) {
+            throw new ValidationException("Current size cannot exceed capacity.");
+        }
+        if (startDate == null || endDate == null) {
+            throw new ValidationException("Start and end dates cannot be null.");
+        }
+        if (endDate.isBefore(startDate)) {
+            throw new ValidationException("End date must be after start date.");
+        }
+        if (startDate.isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Event cannot start in the past.");
+        }
     }
 }
