@@ -38,7 +38,6 @@ public class Booking implements Identifiable {
         this.customerName = customerName;
         this.numberOfPeople = numberOfPeople;
 
-        // Try to reduce capacity in the schedule, may throw BusinessLogicException
         this.schedule.reduceCapacity(numberOfPeople);
     }
 

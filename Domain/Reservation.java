@@ -51,7 +51,6 @@ public class Reservation implements Identifiable {
         this.numberOfPeople = numberOfPeople;
         this.reservationDate = reservationDate;
 
-        // Update the capacity of the activity schedule
         this.activitySchedule.reduceCapacity(numberOfPeople);
     }
 
@@ -148,7 +147,6 @@ public class Reservation implements Identifiable {
         }
         this.numberOfPeople = numberOfPeople;
 
-        // Update the activity schedule capacity
         if (activitySchedule != null) {
             activitySchedule.reduceCapacity(numberOfPeople);
         }

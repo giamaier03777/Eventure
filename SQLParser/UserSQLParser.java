@@ -42,7 +42,7 @@ public class UserSQLParser implements SQLParser<User> {
         stmt.setString(2, user.getPassword());
         stmt.setString(3, user.getRole().name());
         stmt.setDouble(4, user.getBalance());
-        stmt.setInt(5, user.getId()); // WHERE clause
+        stmt.setInt(5, user.getId());
     }
 
     @Override

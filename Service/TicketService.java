@@ -33,22 +33,26 @@ public class TicketService {
      * @param participantName the name of the participant the ticket is assigned to.
      * @throws EntityAlreadyExistsException if the ticket ID already exists.
      * @throws ValidationException          if the owner is null, the participant name is empty,
-     *                                       or the entity has reached its capacity.
+     *                                      or the entity has reached its capacity.
      */
+
     public void addTicket(String id, ReviewableEntity entity, User owner, String participantName) {
         try {
             int ticketId = Integer.parseInt(id);
 
-            if (ticketRepo.read(ticketId) != null) {
-                throw new EntityAlreadyExistsException("A ticket with this ID already exists.");
+            try {
+                Ticket ticket = ticketRepo.read(ticketId);
+                if (ticket != null) {
+                    throw new EntityAlreadyExistsException("A ticket with this ID already exists.");
+                }
+            } catch (EntityNotFoundException e) {
+                validateTicketInputs(entity, owner, participantName);
+
+                Ticket ticket = new Ticket(ticketId, entity, owner, participantName);
+                ticketRepo.create(ticket);
+
+                adjustEntityCapacity(entity, 1);
             }
-
-            validateTicketInputs(entity, owner, participantName);
-
-            Ticket ticket = new Ticket(ticketId, entity, owner, participantName);
-            ticketRepo.create(ticket);
-
-            adjustEntityCapacity(entity, 1);
         } catch (NumberFormatException e) {
             throw new ValidationException("Invalid ID format. ID must be a number: " + id, e);
         }

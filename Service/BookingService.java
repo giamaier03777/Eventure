@@ -143,8 +143,7 @@ public class BookingService {
 
         for (Booking booking : bookings) {
             ReviewableEntity entity = booking.getSchedule().getActivity();
-            int currentCount = participationCount.getOrDefault(entity, 0);
-            participationCount.put(entity, currentCount + booking.getNumberOfPeople());
+            participationCount.put(entity, participationCount.getOrDefault(entity, 0) + booking.getNumberOfPeople());
         }
 
         List<Map.Entry<ReviewableEntity, Integer>> sortedEntries = new ArrayList<>(participationCount.entrySet());

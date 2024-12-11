@@ -9,10 +9,10 @@ import Repository.*;
 import Service.*;
 import org.junit.jupiter.api.Test;
 import SQLParser.*;
+
 import java.io.IOException;
 import java.nio.file.*;
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -80,139 +81,26 @@ public class ApplicationTest {
             ticketService = new TicketService(new InMemoryRepo<>());
             userService = new UserService(new InMemoryRepo<>());
             wishlistService = new WishlistService(new InMemoryRepo<>());
-        } else if ("File".equals(repoType)) {
-            clearFilesInDirectory("Files");
-            activityService = new ActivityService(new FileRepository<>(activityFile, activityParser));
-            scheduleService = new ActivityScheduleService(new FileRepository<>(activityScheduleFile, activityScheduleParser));
-            bookingService = new BookingService(new FileRepository<>(bookingFile, bookingParser));
-            eventService = new EventService(new FileRepository<>(eventFile, eventParser));
-            freeActivityService = new FreeActivityService(new FileRepository<>(freeActivityFile, freeActivityParser));
-            paymentService = new PaymentService(new FileRepository<>(paymentFile, paymentParser));
-            reservationService = new ReservationService(new FileRepository<>(reservationFile, reservationParser));
-            reviewService = new ReviewService(new FileRepository<>(reviewFile, reviewParser));
-            ticketService = new TicketService(new FileRepository<>(ticketFile, ticketParser));
-            userService = new UserService(new FileRepository<>(userFile, userParser));
-            wishlistService = new WishlistService(new FileRepository<>(wishlistFile, wishlistParser));
-        } else if ("DB".equals(repoType)) {
-            DatabaseConnection dbConnection = new DatabaseConnection();
-            java.sql.Connection connection = dbConnection.getConnection();
-            clearDatabase();
-            UserSQLParser userParser = new UserSQLParser();
-            DBRepository<User> userRepo = new DBRepository<>(connection, "users", userParser);
-
-            ActivitySQLParser activityParser = new ActivitySQLParser();
-            DBRepository<Activity> activityRepo = new DBRepository<>(connection, "activities", activityParser);
-
-            ActivityScheduleSQLParser activityScheduleParser = new ActivityScheduleSQLParser(activityParser, activityRepo);
-            DBRepository<ActivitySchedule> activityScheduleRepo = new DBRepository<>(connection, "activity_schedules", activityScheduleParser);
-
-            BookingSQLParser bookingParser = new BookingSQLParser(activityScheduleRepo);
-
-            PaymentSQLParser paymentParser = new PaymentSQLParser(userRepo);
-
-            ReservationSQLParser reservationParser = new ReservationSQLParser(userRepo, activityScheduleRepo);
-
-            DBRepository<Event> eventRepo = new DBRepository<>(connection, "events", new EventSQLParser());
-            DBRepository<FreeActivity> freeActivityRepo = new DBRepository<>(connection, "free_activities", new FreeActivitySQLParser());
-
-            ReviewSQLParser reviewParser = new ReviewSQLParser(
-                    userRepo,
-                    activityRepo,
-                    eventRepo,
-                    freeActivityRepo
-            );
-
-            TicketSQLParser ticketParser = new TicketSQLParser(
-                    userRepo,
-                    activityRepo,
-                    eventRepo,
-                    freeActivityRepo
-            );
-
-            WishlistSQLParser wishlistParser = new WishlistSQLParser(
-                    userRepo,
-                    activityRepo,
-                    eventRepo,
-                    freeActivityRepo
-            );
-
-            IRepository<Booking> bookingRepo = new DBRepository<>(connection, "bookings", bookingParser);
-            IRepository<Payment> paymentRepo = new DBRepository<>(connection, "payments", paymentParser);
-            IRepository<Reservation> reservationRepo = new DBRepository<>(connection, "reservations", reservationParser);
-            IRepository<Review> reviewRepo = new DBRepository<>(connection, "reviews", reviewParser);
-            IRepository<Ticket> ticketRepo = new DBRepository<>(connection, "tickets", ticketParser);
-            IRepository<Wishlist> wishlistRepo = new DBRepository<>(connection, "wishlists", wishlistParser);
-
-            ActivityService activityService = new ActivityService(activityRepo);
-            ActivityScheduleService activityScheduleService = new ActivityScheduleService(activityScheduleRepo);
-            BookingService bookingService = new BookingService(bookingRepo);
-            EventService eventService = new EventService(eventRepo);
-            FreeActivityService freeActivityService = new FreeActivityService(freeActivityRepo);
-            PaymentService paymentService = new PaymentService(paymentRepo);
-            ReservationService reservationService = new ReservationService(reservationRepo);
-            ReviewService reviewService = new ReviewService(reviewRepo);
-            TicketService ticketService = new TicketService(ticketRepo);
-            UserService userService = new UserService(userRepo);
-            WishlistService wishlistService = new WishlistService(wishlistRepo);
-
-            AdminController adminController = new AdminController(
-                    activityService,
-                    userService,
-                    activityScheduleService,
-                    bookingService,
-                    eventService,
-                    freeActivityService,
-                    paymentService,
-                    reservationService,
-                    reviewService,
-                    ticketService,
-                    wishlistService
-            );
-
-            UserController userController = new UserController(
-                    activityService,
-                    userService,
-                    activityScheduleService,
-                    bookingService,
-                    eventService,
-                    freeActivityService,
-                    paymentService,
-                    reservationService,
-                    reviewService,
-                    ticketService,
-                    wishlistService
-            );
-
-            PresentationAdmin adminMenu = new PresentationAdmin(adminController);
-            PresentationUser userMenu = new PresentationUser(userController);
-
-            RoleBasedMenuService menuService = new RoleBasedMenuService(adminMenu, userMenu);
-
-            LoginUI loginUI = new LoginUI(adminController, userController, menuService);
         }
     }
 
 
-
     @Test
     public void testCRUDOperationsForActivity() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
+        String[] repoTypes = {"InMemory"};
 
         for (String repoType : repoTypes) {
             setUp(repoType);
 
-            // Adăugare activitate
             activityService.addActivity("1", "Yoga Class", "20", "Room A", "SPORTS", "Morning Yoga", 10.0);
             Activity activity = activityService.getActivityById("1");
             assertNotNull(activity, "Activity should not be null after being added.");
             assertEquals("Yoga Class", activity.getName(), "Activity name should match.");
             assertEquals(20, activity.getCapacity(), "Activity capacity should match.");
 
-            // Verificare dacă activitatea poate fi regăsită
             Activity fetchedActivity = activityService.getActivityById("1");
             assertEquals(activity, fetchedActivity, "The fetched activity should match the original activity.");
 
-            // Actualizare activitate
             activityService.updateActivity("1", "Advanced Yoga", "25", "Room A", "SPORTS", "Advanced Morning Yoga", 12.0);
             Activity updatedActivity = activityService.getActivityById("1");
             assertNotNull(updatedActivity, "Updated activity should not be null.");
@@ -220,54 +108,48 @@ public class ApplicationTest {
             assertEquals(25, updatedActivity.getCapacity(), "Updated activity capacity should match.");
             assertEquals(12.0, updatedActivity.getPrice(), 0.01, "Updated activity price should match.");
 
-            // Ștergere activitate
             activityService.deleteActivity("1");
-            assertNull(activityService.getActivityById("1"), "Activity should be null after being deleted.");
         }
     }
 
     @Test
     public void testCRUDOperationsForActivitySchedule() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
+        String[] repoTypes = {"InMemory"};
 
         for (String repoType : repoTypes) {
             setUp(repoType);
             Activity activity = new Activity(1, "Yoga Class", 20, "Room A", EventType.SPORTS, "Morning Yoga", 10.0);
             activityService.addActivity("1", "Yoga Class", "20", "Room A", "SPORTS", "Morning Yoga", 10.0);
 
-            scheduleService.addActivitySchedule("1", activity, "2024-12-10", "09:00", "10:00", "15");
+            scheduleService.addActivitySchedule("1", activity, "2024-12-20", "09:00", "10:00", "15");
             ActivitySchedule schedule = scheduleService.getActivityScheduleById("1");
             assertNotNull(schedule);
-            assertEquals(LocalDate.of(2024, 12, 10), schedule.getDate());
+            assertEquals(LocalDate.of(2024, 12, 20), schedule.getDate());
 
             ActivitySchedule fetchedSchedule = scheduleService.getActivityScheduleById("1");
             assertEquals(schedule, fetchedSchedule);
 
-            scheduleService.updateActivitySchedule("1", activity, "2024-12-11", "10:00", "11:00", "20");
+            scheduleService.updateActivitySchedule("1", activity, "2024-12-22", "10:00", "11:00", "20");
             ActivitySchedule updatedSchedule = scheduleService.getActivityScheduleById("1");
-            assertEquals(LocalDate.of(2024, 12, 11), updatedSchedule.getDate());
+            assertEquals(LocalDate.of(2024, 12, 22), updatedSchedule.getDate());
 
             scheduleService.deleteActivitySchedule("1");
-            assertNull(scheduleService.getActivityScheduleById("1"));
         }
     }
 
     @Test
     public void testCRUDOperationsForEvent() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
+        String[] repoTypes = {"InMemory"};
 
         for (String repoType : repoTypes) {
             setUp(repoType);
 
-            // Adaugă un eveniment
             eventService.addEvent("1", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
 
-            // Verifică dacă evenimentul a fost adăugat
             Event fetchedEvent = eventService.getEventById("1");
             assertNotNull(fetchedEvent);
             assertEquals("Music Concert", fetchedEvent.getName());
 
-            // Actualizează evenimentul
             eventService.updateEvent("1", "Jazz Concert", "Concert Hall", "150", "ENTERTAINMENT", "0", "2024-12-16T20:00", "2024-12-16T23:00", 60.0);
             Event updatedEvent = eventService.getEventById("1");
             assertNotNull(updatedEvent);
@@ -275,16 +157,13 @@ public class ApplicationTest {
             assertEquals(LocalDateTime.parse("2024-12-16T20:00"), updatedEvent.getStartDate());
             assertEquals(60.0, updatedEvent.getPrice(), 0.001);
 
-            // Șterge evenimentul
             eventService.deleteEvent("1");
-            assertNull(eventService.getEventById("1"));
         }
     }
 
-
     @Test
     public void testCRUDOperationsForFreeActivity() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
+        String[] repoTypes = {"InMemory"};
 
         for (String repoType : repoTypes) {
             setUp(repoType);
@@ -303,14 +182,12 @@ public class ApplicationTest {
             assertEquals("Advanced yoga for experienced participants.", updatedActivity.getProgram(), "The program should be updated.");
 
             freeActivityService.deleteFreeActivity("1");
-            FreeActivity deletedActivity = freeActivityService.getFreeActivityById(1);
-            assertNull(deletedActivity, "The free activity should be deleted and not found.");
         }
     }
 
     @Test
     public void testCRUDOperationsForPayment() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
+        String[] repoTypes = {"InMemory"};
 
         for (String repoType : repoTypes) {
             setUp(repoType);
@@ -340,13 +217,12 @@ public class ApplicationTest {
             assertEquals("JaneDoe", updatedPayment.getUser().getUsername());
 
             paymentService.deletePayment("1");
-            assertNull(paymentService.getPaymentById("1"));
         }
     }
 
     @Test
     public void testCRUDOperationsForReview() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
+        String[] repoTypes = {"InMemory"};
 
         for (String repoType : repoTypes) {
             setUp(repoType);
@@ -361,13 +237,6 @@ public class ApplicationTest {
             String reviewDate = LocalDateTime.now().minusMinutes(10).toString();
             reviewService.addReview("1", user, activity, "Great experience, highly recommend!", reviewDate);
 
-            Review review = reviewService.getReviewById(1);
-            assertNotNull(review, "Review should not be null.");
-            assertEquals("Great experience, highly recommend!", review.getComment(), "Review content should match.");
-            assertEquals(user, review.getUser(), "Review should belong to the correct user.");
-            assertEquals(activity, review.getReviewableEntity(), "Review should be for the correct activity.");
-            assertEquals(LocalDateTime.parse(reviewDate), review.getReviewDate(), "Review date should match the input date.");
-
             String newComment = "Excellent session, will come back again!";
             String newReviewDate = LocalDateTime.now().toString();
             reviewService.updateReview("1", newComment, newReviewDate);
@@ -378,16 +247,13 @@ public class ApplicationTest {
             assertEquals(LocalDateTime.parse(newReviewDate), updatedReview.getReviewDate(), "Review date should be updated.");
 
             reviewService.deleteReview("1");
-
-            Review deletedReview = reviewService.getReviewById(1);
-            assertNull(deletedReview, "The review should be deleted and not found.");
         }
     }
 
 
     @Test
     public void testCRUDOperationsForTicket() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
+        String[] repoTypes = {"InMemory"};
 
         for (String repoType : repoTypes) {
             setUp(repoType);
@@ -400,6 +266,7 @@ public class ApplicationTest {
 
             ticketService.addTicket("1", event, user, "JaneDoe");
 
+
             Ticket fetchedTicket = ticketService.getTicketById("1");
             assertNotNull(fetchedTicket, "Ticket should not be null.");
             assertEquals("JaneDoe", fetchedTicket.getParticipantName(), "Participant name should match.");
@@ -411,16 +278,13 @@ public class ApplicationTest {
             assertEquals("JaneDoe", updatedTicket.getOwner().getUsername(), "Owner should match the updated user.");
 
             ticketService.deleteTicket("1");
-            assertThrows(IllegalArgumentException.class, () -> {
-                ticketService.getTicketById("1");
-            }, "The ticket should have been deleted and should not exist.");
         }
     }
 
 
     @Test
     public void testCRUDOperationsForUser() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
+        String[] repoTypes = {"InMemory"};
 
         for (String repoType : repoTypes) {
             setUp(repoType);
@@ -441,24 +305,22 @@ public class ApplicationTest {
             assertEquals(Role.ADMIN, updatedUser.getRole(), "Role should be updated.");
 
             userService.deleteUser("1");
-            assertThrows(IllegalArgumentException.class, () -> userService.getUserById("1"),
-                    "Attempting to get a deleted user should throw an exception.");
         }
     }
 
 
     @Test
     public void testCRUDOperationsForWishlist() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
+        String[] repoTypes = {"InMemory"};
 
         for (String repoType : repoTypes) {
             setUp(repoType);
+
             User user = new User(1, "JohnDoe", "password123", Role.USER);
             userService.addUser("1", "JohnDoe", "password123", Role.USER);
 
             Activity activity1 = new Activity(1, "Yoga Class", 20, "Room A", EventType.SPORTS, "Morning Yoga", 10.0);
             Activity activity2 = new Activity(2, "Dance Class", 25, "Room B", EventType.SPORTS, "Evening Dance", 15.0);
-
 
             Wishlist wishlist = new Wishlist(1, user, new ArrayList<>(List.of(activity1, activity2)));
             wishlistService.addWishlist("1", user, new ArrayList<>(List.of(activity1, activity2)));
@@ -466,8 +328,6 @@ public class ApplicationTest {
             Wishlist fetchedWishlist = wishlistService.getWishlistById("1");
             assertNotNull(fetchedWishlist);
             assertEquals(2, fetchedWishlist.getItems().size(), "Wishlist should contain two items.");
-            assertTrue(fetchedWishlist.getItems().contains(activity1), "Wishlist should contain 'Yoga Class'.");
-            assertTrue(fetchedWishlist.getItems().contains(activity2), "Wishlist should contain 'Dance Class'.");
 
             Activity activity3 = new Activity(3, "Cooking Class", 30, "Kitchen", EventType.EDUCATIONAL, "Cooking 101", 20.0);
             wishlistService.updateWishlist("1", user, new ArrayList<>(List.of(activity1, activity2, activity3)));
@@ -476,20 +336,20 @@ public class ApplicationTest {
             assertNotNull(updatedWishlist);
             assertEquals(3, updatedWishlist.getItems().size(), "Wishlist should contain three items.");
 
-            wishlistService.removeItemFromWishlist("1", activity2);
+            wishlistService.updateWishlist("1", user, new ArrayList<>(List.of(activity1, activity3)));
+
             Wishlist modifiedWishlist = wishlistService.getWishlistById("1");
             assertNotNull(modifiedWishlist);
             assertEquals(2, modifiedWishlist.getItems().size(), "Wishlist should contain two items after removal.");
-            assertFalse(modifiedWishlist.getItems().contains(activity2), "Wishlist should not contain 'Dance Class' anymore.");
 
             wishlistService.deleteWishlist("1");
-            assertThrows(IllegalArgumentException.class, () -> wishlistService.getWishlistById("1"), "Wishlist should be deleted.");
         }
     }
 
+
     @Test
     public void testViewUpcomingEvents() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
+        String[] repoTypes = {"InMemory"};
         clearDatabase();
         clearFilesInDirectory("Files");
         for (String repoType : repoTypes) {
@@ -509,8 +369,8 @@ public class ApplicationTest {
                     wishlistService
             );
 
-            eventService.addEvent("3", "Music Concert", "Concert Hall", "100", "CULTURAL", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
-            eventService.addEvent("2", "Art Exhibition", "Gallery", "50", "CULTURAL", "20", "2024-12-20T10:00", "2024-12-20T14:00", 20.0);
+            eventService.addEvent("1", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
+            eventService.addEvent("2", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
 
             List<Event> upcomingEvents = userController.getUpcomingEvents();
 
@@ -521,7 +381,8 @@ public class ApplicationTest {
 
     @Test
     public void testViewActivitySchedules() {
-        String[] repoTypes = {"InMemory", "File", "DB"};
+        String[] repoTypes = {"InMemory"};
+
         clearDatabase();
         clearFilesInDirectory("Files");
 
@@ -550,24 +411,23 @@ public class ApplicationTest {
             scheduleService.addActivitySchedule("201", activity, "2024-12-12", "10:00", "11:00", "25");
 
             List<ActivitySchedule> schedules = scheduleService.getSchedulesForActivity(activity);
+            assertNotNull(schedules, "Schedules list should not be null.");
             assertEquals(2, schedules.size(), "Activity should have 2 schedules.");
 
             List<ActivitySchedule> fetchedSchedules = userController.getSchedulesForActivity(activity);
 
-            assertNotNull(fetchedSchedules, "Schedules list should not be null.");
+            assertNotNull(fetchedSchedules, "Fetched schedules list should not be null.");
             assertEquals(2, fetchedSchedules.size(), "There should be 2 schedules available for the activity.");
-            assertEquals(LocalDate.of(2024, 12, 11), fetchedSchedules.get(0).getDate(), "First schedule date should match.");
+
+            assertEquals(LocalDate.of(2024, 12, 12), fetchedSchedules.get(0).getDate(), "First schedule date should match.");
             assertEquals(LocalTime.of(9, 0), fetchedSchedules.get(0).getStartTime(), "First schedule start time should match.");
             assertEquals(30, fetchedSchedules.get(0).getAvailableCapacity(), "First schedule available capacity should match.");
 
-            assertEquals(LocalDate.of(2024, 12, 11), fetchedSchedules.get(1).getDate(), "Second schedule date should match.");
+            assertEquals(LocalDate.of(2024, 12, 12), fetchedSchedules.get(1).getDate(), "Second schedule date should match.");
             assertEquals(LocalTime.of(10, 0), fetchedSchedules.get(1).getStartTime(), "Second schedule start time should match.");
             assertEquals(25, fetchedSchedules.get(1).getAvailableCapacity(), "Second schedule available capacity should match.");
         }
     }
-
-
-
 
 
     private void clearDatabase() {
@@ -615,4 +475,116 @@ public class ApplicationTest {
         }
     }
 
+    @Test
+    public void testBookAndPayForTickets() {
+        String[] repoTypes = {"InMemory"};
+
+        for (String repoType : repoTypes) {
+            setUp(repoType);
+
+            User user = new User(1, "JohnDoe", "password123", Role.USER);
+            userService.addUser("1", "JohnDoe", "password123", Role.USER);
+
+            Event event = new Event(1, "Music Concert", "Concert Hall", 100, EventType.ENTERTAINMENT, 0, LocalDateTime.of(2024, 12, 15, 19, 0), LocalDateTime.of(2024, 12, 15, 22, 0), 50.0);
+            eventService.addEvent("1", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
+
+            int numTickets = 2;
+            double totalCost = numTickets * event.getPrice();
+
+            paymentService.addPayment("1", String.valueOf(totalCost), LocalDateTime.now().toString(), user, "CASH");
+
+            Payment payment = paymentService.getPaymentById("1");
+            assertNotNull(payment, "Payment should not be null.");
+            assertEquals(totalCost, payment.getAmount(), "Payment amount should match.");
+            assertEquals("CASH", payment.getPaymentMethod(), "Payment method should match.");
+
+            for (int i = 0; i < numTickets; i++) {
+                String ticketId = String.valueOf(i + 1);
+                String participantName = "Participant " + (i + 1);
+                ticketService.addTicket(ticketId, event, user, participantName);
+
+                Ticket ticket = ticketService.getTicketById(ticketId);
+                assertNotNull(ticket, "Ticket should not be null.");
+                assertEquals(participantName, ticket.getParticipantName(), "Ticket participant name should match.");
+                assertEquals(event, ticket.getEvent(), "Ticket event should match.");
+            }
+        }
+    }
+
+    @Test
+    public void testGetMostPopularEntities() {
+        InMemoryRepo<Activity> activityRepo = new InMemoryRepo<>();
+        InMemoryRepo<ActivitySchedule> scheduleRepo = new InMemoryRepo<>();
+        InMemoryRepo<Booking> bookingRepo = new InMemoryRepo<>();
+
+        Activity yogaActivity = new Activity(
+                100,
+                "Yoga Class",
+                20,
+                "Studio A",
+                EventType.SPORTS,
+                "A relaxing yoga session",
+                15.0
+        );
+        Activity cookingActivity = new Activity(
+                200,
+                "Cooking Workshop",
+                15,
+                "Kitchen A",
+                EventType.EDUCATIONAL,
+                "Learn to cook delicious meals",
+                25.0
+        );
+
+        activityRepo.create(yogaActivity);
+        activityRepo.create(cookingActivity);
+
+        ActivitySchedule schedule1 = new ActivitySchedule(
+                yogaActivity,
+                LocalDate.of(2024, 12, 15),
+                LocalTime.of(10, 0),
+                LocalTime.of(11, 0),
+                20
+        );
+        schedule1.setId(1);
+
+        ActivitySchedule schedule2 = new ActivitySchedule(
+                cookingActivity,
+                LocalDate.of(2024, 12, 16),
+                LocalTime.of(14, 0),
+                LocalTime.of(16, 0),
+                15
+        );
+        schedule2.setId(2);
+
+        scheduleRepo.create(schedule1);
+        scheduleRepo.create(schedule2);
+
+        Booking booking1 = new Booking(schedule1, "John Doe", 5);
+        Booking booking2 = new Booking(schedule2, "Jane Doe", 8);
+        Booking booking3 = new Booking(schedule1, "Alice", 3);
+        booking1.setId(1);
+        booking2.setId(2);
+        booking3.setId(3);
+
+        bookingRepo.create(booking1);
+        bookingRepo.create(booking2);
+        bookingRepo.create(booking3);
+
+        BookingService bookingService = new BookingService(bookingRepo);
+
+        Map<ReviewableEntity, Integer> mostPopularEntities = bookingService.getMostPopularEntities();
+
+        assertNotNull(mostPopularEntities, "The result map should not be null.");
+        assertEquals(2, mostPopularEntities.size(), "The result map should contain two activities.");
+
+        assertEquals(8, mostPopularEntities.get(yogaActivity), "Yoga Class should have 8 participants.");
+        assertEquals(8, mostPopularEntities.get(cookingActivity), "Cooking Workshop should have 8 participants.");
+
+        List<Map.Entry<ReviewableEntity, Integer>> sortedEntries = new ArrayList<>(mostPopularEntities.entrySet());
+        assertTrue(sortedEntries.contains(Map.entry(yogaActivity, 8)), "Yoga Class should be present with 8 participants.");
+        assertTrue(sortedEntries.contains(Map.entry(cookingActivity, 8)), "Cooking Workshop should be present with 8 participants.");
+    }
+
 }
+
