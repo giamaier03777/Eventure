@@ -779,7 +779,7 @@ public class AdminController {
      */
     public void updateTicket(String idString, Event event, User owner, String participantName, double price) {
         try {
-            ticketService.updateTicket(idString, event, owner, participantName, price);
+            ticketService.updateTicket(idString, event, owner, participantName);
             System.out.println("Ticket updated successfully.");
         } catch (NumberFormatException e) {
             System.out.println("ID must be a valid number.");

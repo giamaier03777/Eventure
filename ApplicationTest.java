@@ -194,27 +194,35 @@ public class ApplicationTest {
 
 
 
-        @Test
+    @Test
     public void testCRUDOperationsForActivity() {
         String[] repoTypes = {"InMemory", "File", "DB"};
 
         for (String repoType : repoTypes) {
             setUp(repoType);
+
+            // Adăugare activitate
             activityService.addActivity("1", "Yoga Class", "20", "Room A", "SPORTS", "Morning Yoga", 10.0);
             Activity activity = activityService.getActivityById("1");
-            assertNotNull(activity);
-            assertEquals("Yoga Class", activity.getName());
+            assertNotNull(activity, "Activity should not be null after being added.");
+            assertEquals("Yoga Class", activity.getName(), "Activity name should match.");
+            assertEquals(20, activity.getCapacity(), "Activity capacity should match.");
 
+            // Verificare dacă activitatea poate fi regăsită
             Activity fetchedActivity = activityService.getActivityById("1");
-            assertEquals(activity, fetchedActivity);
+            assertEquals(activity, fetchedActivity, "The fetched activity should match the original activity.");
 
+            // Actualizare activitate
             activityService.updateActivity("1", "Advanced Yoga", "25", "Room A", "SPORTS", "Advanced Morning Yoga", 12.0);
             Activity updatedActivity = activityService.getActivityById("1");
-            assertEquals("Advanced Yoga", updatedActivity.getName());
-            assertEquals(25, updatedActivity.getCapacity());
+            assertNotNull(updatedActivity, "Updated activity should not be null.");
+            assertEquals("Advanced Yoga", updatedActivity.getName(), "Updated activity name should match.");
+            assertEquals(25, updatedActivity.getCapacity(), "Updated activity capacity should match.");
+            assertEquals(12.0, updatedActivity.getPrice(), 0.01, "Updated activity price should match.");
 
+            // Ștergere activitate
             activityService.deleteActivity("1");
-            assertNull(activityService.getActivityById("1"));
+            assertNull(activityService.getActivityById("1"), "Activity should be null after being deleted.");
         }
     }
 
@@ -251,22 +259,28 @@ public class ApplicationTest {
         for (String repoType : repoTypes) {
             setUp(repoType);
 
+            // Adaugă un eveniment
             eventService.addEvent("1", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
 
+            // Verifică dacă evenimentul a fost adăugat
             Event fetchedEvent = eventService.getEventById("1");
             assertNotNull(fetchedEvent);
             assertEquals("Music Concert", fetchedEvent.getName());
 
+            // Actualizează evenimentul
             eventService.updateEvent("1", "Jazz Concert", "Concert Hall", "150", "ENTERTAINMENT", "0", "2024-12-16T20:00", "2024-12-16T23:00", 60.0);
             Event updatedEvent = eventService.getEventById("1");
+            assertNotNull(updatedEvent);
             assertEquals("Jazz Concert", updatedEvent.getName());
-            assertEquals(LocalDate.of(2024, 12, 16), updatedEvent.getStartDate().toLocalDate());
-            assertEquals(LocalTime.of(20, 0), updatedEvent.getStartDate().toLocalTime());
+            assertEquals(LocalDateTime.parse("2024-12-16T20:00"), updatedEvent.getStartDate());
+            assertEquals(60.0, updatedEvent.getPrice(), 0.001);
 
+            // Șterge evenimentul
             eventService.deleteEvent("1");
             assertNull(eventService.getEventById("1"));
         }
     }
+
 
     @Test
     public void testCRUDOperationsForFreeActivity() {
@@ -391,7 +405,7 @@ public class ApplicationTest {
             assertEquals("JaneDoe", fetchedTicket.getParticipantName(), "Participant name should match.");
             assertEquals("Music Concert", fetchedTicket.getEvent().getName(), "Event name should match.");
 
-            ticketService.updateTicket("1", event, new User(2, "JaneDoe", "password456", Role.USER), "JohnSmith", 0);
+            ticketService.updateTicket("1", event, new User(2, "JaneDoe", "password456", Role.USER), "JohnSmith");
             Ticket updatedTicket = ticketService.getTicketById("1");
             assertEquals("JohnSmith", updatedTicket.getParticipantName(), "Participant name should be updated.");
             assertEquals("JaneDoe", updatedTicket.getOwner().getUsername(), "Owner should match the updated user.");
@@ -495,7 +509,7 @@ public class ApplicationTest {
                     wishlistService
             );
 
-            eventService.addEvent("3", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
+            eventService.addEvent("3", "Music Concert", "Concert Hall", "100", "CULTURAL", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
             eventService.addEvent("2", "Art Exhibition", "Gallery", "50", "CULTURAL", "20", "2024-12-20T10:00", "2024-12-20T14:00", 20.0);
 
             List<Event> upcomingEvents = userController.getUpcomingEvents();
@@ -532,8 +546,8 @@ public class ApplicationTest {
             Activity activity = activityService.getActivityById("100");
             assertNotNull(activity, "Activity should not be null after being added.");
 
-            scheduleService.addActivitySchedule("200", activity, "2024-12-10", "09:00", "10:00", "30");
-            scheduleService.addActivitySchedule("201", activity, "2024-12-11", "10:00", "11:00", "25");
+            scheduleService.addActivitySchedule("200", activity, "2024-12-12", "09:00", "10:00", "30");
+            scheduleService.addActivitySchedule("201", activity, "2024-12-12", "10:00", "11:00", "25");
 
             List<ActivitySchedule> schedules = scheduleService.getSchedulesForActivity(activity);
             assertEquals(2, schedules.size(), "Activity should have 2 schedules.");
@@ -542,7 +556,7 @@ public class ApplicationTest {
 
             assertNotNull(fetchedSchedules, "Schedules list should not be null.");
             assertEquals(2, fetchedSchedules.size(), "There should be 2 schedules available for the activity.");
-            assertEquals(LocalDate.of(2024, 12, 10), fetchedSchedules.get(0).getDate(), "First schedule date should match.");
+            assertEquals(LocalDate.of(2024, 12, 11), fetchedSchedules.get(0).getDate(), "First schedule date should match.");
             assertEquals(LocalTime.of(9, 0), fetchedSchedules.get(0).getStartTime(), "First schedule start time should match.");
             assertEquals(30, fetchedSchedules.get(0).getAvailableCapacity(), "First schedule available capacity should match.");
 
