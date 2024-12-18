@@ -144,17 +144,17 @@ public class ApplicationTest {
         for (String repoType : repoTypes) {
             setUp(repoType);
 
-            eventService.addEvent("1", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
+            eventService.addEvent("1", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-18T19:00", "2024-12-20T22:00", 50.0);
 
             Event fetchedEvent = eventService.getEventById("1");
             assertNotNull(fetchedEvent);
             assertEquals("Music Concert", fetchedEvent.getName());
 
-            eventService.updateEvent("1", "Jazz Concert", "Concert Hall", "150", "ENTERTAINMENT", "0", "2024-12-16T20:00", "2024-12-16T23:00", 60.0);
+            eventService.updateEvent("1", "Jazz Concert", "Concert Hall", "150", "ENTERTAINMENT", "0", "2024-12-20T20:00", "2024-12-21T23:00", 60.0);
             Event updatedEvent = eventService.getEventById("1");
             assertNotNull(updatedEvent);
             assertEquals("Jazz Concert", updatedEvent.getName());
-            assertEquals(LocalDateTime.parse("2024-12-16T20:00"), updatedEvent.getStartDate());
+            assertEquals(LocalDateTime.parse("2024-12-20T20:00"), updatedEvent.getStartDate());
             assertEquals(60.0, updatedEvent.getPrice(), 0.001);
 
             eventService.deleteEvent("1");
@@ -261,7 +261,7 @@ public class ApplicationTest {
             Event event = new Event(1, "Music Concert", "Concert Hall", 100, EventType.ENTERTAINMENT, 0, LocalDateTime.of(2024, 12, 15, 19, 0), LocalDateTime.of(2024, 12, 15, 22, 0), 50.0);
             User user = new User(1, "JohnDoe", "password123", Role.USER);
 
-            eventService.addEvent("1", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
+            eventService.addEvent("1", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-20T19:00", "2024-12-22T22:00", 50.0);
             userService.addUser("1", "JohnDoe", "password123", Role.USER);
 
             ticketService.addTicket("1", event, user, "JaneDoe");
@@ -350,8 +350,6 @@ public class ApplicationTest {
     @Test
     public void testViewUpcomingEvents() {
         String[] repoTypes = {"InMemory"};
-        clearDatabase();
-        clearFilesInDirectory("Files");
         for (String repoType : repoTypes) {
             setUp(repoType);
 
@@ -369,8 +367,8 @@ public class ApplicationTest {
                     wishlistService
             );
 
-            eventService.addEvent("1", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
-            eventService.addEvent("2", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
+            eventService.addEvent("1", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-20T19:00", "2024-12-25T22:00", 50.0);
+            eventService.addEvent("2", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-20T19:00", "2024-12-25T22:00", 50.0);
 
             List<Event> upcomingEvents = userController.getUpcomingEvents();
 
@@ -382,9 +380,6 @@ public class ApplicationTest {
     @Test
     public void testViewActivitySchedules() {
         String[] repoTypes = {"InMemory"};
-
-        clearDatabase();
-        clearFilesInDirectory("Files");
 
         for (String repoType : repoTypes) {
             setUp(repoType);
@@ -407,8 +402,8 @@ public class ApplicationTest {
             Activity activity = activityService.getActivityById("100");
             assertNotNull(activity, "Activity should not be null after being added.");
 
-            scheduleService.addActivitySchedule("200", activity, "2024-12-12", "09:00", "10:00", "30");
-            scheduleService.addActivitySchedule("201", activity, "2024-12-12", "10:00", "11:00", "25");
+            scheduleService.addActivitySchedule("200", activity, "2024-12-20", "09:00", "10:00", "30");
+            scheduleService.addActivitySchedule("201", activity, "2024-12-20", "10:00", "11:00", "25");
 
             List<ActivitySchedule> schedules = scheduleService.getSchedulesForActivity(activity);
             assertNotNull(schedules, "Schedules list should not be null.");
@@ -419,59 +414,13 @@ public class ApplicationTest {
             assertNotNull(fetchedSchedules, "Fetched schedules list should not be null.");
             assertEquals(2, fetchedSchedules.size(), "There should be 2 schedules available for the activity.");
 
-            assertEquals(LocalDate.of(2024, 12, 12), fetchedSchedules.get(0).getDate(), "First schedule date should match.");
+            assertEquals(LocalDate.of(2024, 12, 20), fetchedSchedules.get(0).getDate(), "First schedule date should match.");
             assertEquals(LocalTime.of(9, 0), fetchedSchedules.get(0).getStartTime(), "First schedule start time should match.");
             assertEquals(30, fetchedSchedules.get(0).getAvailableCapacity(), "First schedule available capacity should match.");
 
-            assertEquals(LocalDate.of(2024, 12, 12), fetchedSchedules.get(1).getDate(), "Second schedule date should match.");
+            assertEquals(LocalDate.of(2024, 12, 20), fetchedSchedules.get(1).getDate(), "Second schedule date should match.");
             assertEquals(LocalTime.of(10, 0), fetchedSchedules.get(1).getStartTime(), "Second schedule start time should match.");
             assertEquals(25, fetchedSchedules.get(1).getAvailableCapacity(), "Second schedule available capacity should match.");
-        }
-    }
-
-
-    private void clearDatabase() {
-        if (dataSource != null) {
-            try (Connection connection = dataSource.getConnection();
-                 Statement stmt = connection.createStatement()) {
-                stmt.executeUpdate("DELETE FROM tickets");
-                stmt.executeUpdate("DELETE FROM reviews");
-                stmt.executeUpdate("DELETE FROM reservations");
-                stmt.executeUpdate("DELETE FROM payments");
-                stmt.executeUpdate("DELETE FROM bookings");
-                stmt.executeUpdate("DELETE FROM activity_schedules");
-                stmt.executeUpdate("DELETE FROM activities");
-                stmt.executeUpdate("DELETE FROM free_activities");
-                stmt.executeUpdate("DELETE FROM events");
-                stmt.executeUpdate("DELETE FROM wishlists");
-                stmt.executeUpdate("DELETE FROM users");
-            } catch (SQLException e) {
-                e.printStackTrace();
-                throw new RuntimeException("Failed to clear database.", e);
-            }
-        }
-    }
-
-
-    public void clearFilesInDirectory(String directoryPath) {
-        try {
-            Path dirPath = Paths.get(directoryPath);
-
-            if (Files.exists(dirPath) && Files.isDirectory(dirPath)) {
-                Files.walk(dirPath)
-                        .filter(Files::isRegularFile)
-                        .forEach(file -> {
-                            try {
-                                Files.delete(file);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                throw new RuntimeException("Failed to delete file: " + file, e);
-                            }
-                        });
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to clear files in directory: " + directoryPath, e);
         }
     }
 
@@ -486,7 +435,7 @@ public class ApplicationTest {
             userService.addUser("1", "JohnDoe", "password123", Role.USER);
 
             Event event = new Event(1, "Music Concert", "Concert Hall", 100, EventType.ENTERTAINMENT, 0, LocalDateTime.of(2024, 12, 15, 19, 0), LocalDateTime.of(2024, 12, 15, 22, 0), 50.0);
-            eventService.addEvent("1", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-15T19:00", "2024-12-15T22:00", 50.0);
+            eventService.addEvent("1", "Music Concert", "Concert Hall", "100", "ENTERTAINMENT", "0", "2024-12-18T19:00", "2024-12-22T22:00", 50.0);
 
             int numTickets = 2;
             double totalCost = numTickets * event.getPrice();
@@ -541,7 +490,7 @@ public class ApplicationTest {
 
         ActivitySchedule schedule1 = new ActivitySchedule(
                 yogaActivity,
-                LocalDate.of(2024, 12, 15),
+                LocalDate.of(2024, 12, 20),
                 LocalTime.of(10, 0),
                 LocalTime.of(11, 0),
                 20
@@ -550,7 +499,7 @@ public class ApplicationTest {
 
         ActivitySchedule schedule2 = new ActivitySchedule(
                 cookingActivity,
-                LocalDate.of(2024, 12, 16),
+                LocalDate.of(2024, 12, 20),
                 LocalTime.of(14, 0),
                 LocalTime.of(16, 0),
                 15
