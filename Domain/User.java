@@ -4,14 +4,11 @@ import Repository.EntityParser;
 import Repository.Identifiable;
 import Exception.*;
 
-
 /**
  * Represents a user within the system.
  * Implements {@link Identifiable} for unique identification and {@link EntityParser} for CSV serialization/deserialization.
  */
-public class User implements Identifiable {
-    private int id;
-    private String username;
+public class User extends Person implements Identifiable {
     private String password;
     private Role role;
     private double balance;
@@ -26,9 +23,7 @@ public class User implements Identifiable {
      * @throws ValidationException if any parameter is invalid
      */
     public User(int id, String username, String password, Role role) {
-        if (username == null || username.trim().isEmpty()) {
-            throw new ValidationException("Username cannot be null or empty.");
-        }
+        super(id, username); // Preia id și username din clasa Person
         if (password == null || password.trim().isEmpty()) {
             throw new ValidationException("Password cannot be null or empty.");
         }
@@ -36,58 +31,11 @@ public class User implements Identifiable {
             throw new ValidationException("Role cannot be null.");
         }
 
-        this.id = id;
-        this.username = username;
         this.password = password;
         this.role = role;
         this.balance = 0;
     }
 
-    /**
-     * Default constructor for creating an empty {@code User} object.
-     */
-    public User() {
-    }
-
-    /**
-     * Gets the unique identifier of the user.
-     *
-     * @return the user ID.
-     */
-    public int getId() {
-        return id;
-    }
-
-    /**
-     * Sets the unique identifier of the user.
-     *
-     * @param id the user ID.
-     */
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    /**
-     * Gets the username of the user.
-     *
-     * @return the username.
-     */
-    public String getUsername() {
-        return username;
-    }
-
-    /**
-     * Sets the username of the user.
-     *
-     * @param username the username.
-     * @throws ValidationException if the username is null or empty
-     */
-    public void setUsername(String username) {
-        if (username == null || username.trim().isEmpty()) {
-            throw new ValidationException("Username cannot be null or empty.");
-        }
-        this.username = username;
-    }
 
     /**
      * Gets the password of the user.
@@ -175,8 +123,8 @@ public class User implements Identifiable {
                         "- ID: %d\n" +
                         "- Username: %s\n" +
                         "- Balance: %.2f\n",
-                id,
-                username != null ? username : "No username",
+                getId(), // Folosește metoda din clasa Person
+                getUsername(), // Folosește metoda din clasa Person
                 balance
         );
     }
