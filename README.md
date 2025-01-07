@@ -1,5 +1,5 @@
 # Eventure
-![image](https://github.com/user-attachments/assets/1c402f74-b50b-4cfe-a5f3-a67312629c0b)
+![UML Eventure ](https://github.com/user-attachments/assets/ffe4da02-88f0-4f17-8140-e9ea51df09f1)
 
 
 Eventure ist ein Projekt, das darauf abzielt, Nutzer mit lokalen Veranstaltungen in Cluj zu verbinden und eine vielfältige Auswahl an Aktivitäten anzubieten, von Konzerten und Escape Rooms bis hin zu Ausstellungen und Gaming-Abenden. Ziel der Anwendung ist es, einfachen Zugang zu relevanten Veranstaltungen zu bieten und die Interaktion zwischen Menschen mit gemeinsamen Interessen innerhalb der Gemeinschaft von Cluj zu erleichtern.
